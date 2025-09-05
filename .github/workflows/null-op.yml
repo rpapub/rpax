@@ -1,0 +1,13 @@
+# .github/workflows/null-op.yml
+name: Null-Op
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  noop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: No operation
+        run: echo "Null-Op workflow ran successfully."
