@@ -1,0 +1,192 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://rpapub.dev/rpax/config.schema.json",
+    "title": "rpax v0.0.1 Config",
+    "type": "object",
+    "additionalProperties": false,
+    "$defs": {
+        "ProjectTypeEnum": {
+            "type": "string",
+            "enum": [
+                "process",
+                "library"
+            ]
+        },
+        "OutputFormatEnum": {
+            "type": "string",
+            "enum": [
+                "json",
+                "mermaid",
+                "markdown",
+                "html"
+            ]
+        },
+        "ReportFormatEnum": {
+            "type": "string",
+            "enum": [
+                "json",
+                "markdown",
+                "html"
+            ]
+        },
+        "LogLevelEnum": {
+            "type": "string",
+            "enum": [
+                "error",
+                "warn",
+                "info",
+                "debug",
+                "trace"
+            ]
+        },
+        "PathGlob": {
+            "type": "string",
+            "minLength": 1
+        }
+    },
+    "properties": {
+        "project": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "root": {
+                    "type": "string",
+                    "default": "."
+                },
+                "type": {
+                    "$ref": "#/$defs/ProjectTypeEnum"
+                }
+            },
+            "required": [
+                "type"
+            ]
+        },
+        "scan": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "exclude": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/PathGlob"
+                    },
+                    "uniqueItems": true,
+                    "default": [
+                        ".local/**",
+                        ".settings/**",
+                        ".screenshots/**",
+                        "TestResults/**"
+                    ]
+                },
+                "followDynamic": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "maxDepth": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "default": 10
+                }
+            }
+        },
+        "output": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "dir": {
+                    "type": "string",
+                    "default": ".rpax-out"
+                },
+                "formats": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/OutputFormatEnum"
+                    },
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "default": [
+                        "json",
+                        "mermaid"
+                    ]
+                },
+                "summaries": {
+                    "type": "boolean",
+                    "default": true
+                }
+            }
+        },
+        "validation": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "failOnMissing": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "failOnCycles": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "warnOnDynamic": {
+                    "type": "boolean",
+                    "default": true
+                }
+            }
+        },
+        "diff": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "baselineDir": {
+                    "type": "string",
+                    "default": ".rpax-cache"
+                },
+                "reportFormat": {
+                    "$ref": "#/$defs/ReportFormatEnum",
+                    "default": "json"
+                }
+            }
+        },
+        "mcp": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "uriPrefix": {
+                    "type": "string",
+                    "default": "uipath://proj"
+                },
+                "private": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/PathGlob"
+                    },
+                    "uniqueItems": true,
+                    "default": [
+                        "runtime://**"
+                    ]
+                }
+            }
+        },
+        "logging": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "level": {
+                    "$ref": "#/$defs/LogLevelEnum",
+                    "default": "info"
+                }
+            }
+        }
+    },
+    "required": [
+        "project"
+    ]
+}

@@ -1,0 +1,89 @@
+# ADR-011: Access API (pre-MCP)
+
+**Status:** Proposed
+
+## Context
+
+CLI writes deterministic parser artifacts to disk; downstream consumers benefit from stable, queryable, read-only access without invoking the CLI.
+
+## Decision
+
+Provide a **read-only Access API** in front of on-disk artifacts. Files remain the source of truth. Multi-project capable, GET-only, with stable URLs suitable for CI/tools/docs. Bridges toward MCP by exposing URLs that MCP can later mirror.
+
+## Rationale
+
+* **CLI scope:** writes `manifest.json`, `workflows.index.json`, `invocations.jsonl`, `paths/*.paths.jsonl`, `activities.*/*`; single project per run; stdout + filesystem only; batch/ephemeral per commit; files are truth; no serving/filtering/auth/multi-project aggregation.
+* **Access API scope:** reads files only; provides slices/views (filtering, projection, pagination); multi-project capable; stable URLs (no “run CLI first” coupling); HTTP concerns handled (auth, caching, ETags, content-negotiation, range/streaming); exposes URIs that MCP can later mirror.
+
+## Contract (read-only, stateless)
+
+* **Methods:** GET (plus HEAD/OPTIONS).
+* **Determinism:** responses keyed by artifact content hashes (ETag).
+* **No side effects:** never writes/compacts artifacts.
+* **Eventual visibility:** new CLI runs appear when artifact dirs update.
+
+## Endpoints (high level)
+
+* **Project index**
+
+  * `GET /projects` → list projects (name, slug, lastModified, hash)
+  * `GET /projects/{p}` → project meta (`manifest.json`)
+* **Catalogs**
+
+  * `GET /projects/{p}/workflows` → list; query: `?folder=&q=&hasArgs=&limit=&cursor=`
+  * `GET /projects/{p}/workflows/{wfId}` → single record
+* **Graphs**
+
+  * `GET /projects/{p}/invocations` → stream `invocations.jsonl` (`Accept: application/x-ndjson`)
+  * `GET /projects/{p}/paths/{root}` → stream paths JSONL
+* **Activities**
+
+  * `GET /projects/{p}/activities/tree/{wfId}`
+  * `GET /projects/{p}/activities/cfg/{wfId}` (NDJSON)
+  * `GET /projects/{p}/activities/refs/{wfId}`
+  * `GET /projects/{p}/metrics/{wfId}`
+* **Search/views**
+
+  * `GET /projects/{p}/search/activities?q=Click&type=UiPath.Core.Activities.Click&folder=Framework`
+  * `GET /projects/{p}/graph/fanout/{wfId}` / `…/fanin/{wfId}`
+* **Raw passthrough**
+
+  * `GET /projects/{p}/artifacts/{path…}` (exact bytes, correct `Content-Type`)
+* **Operational**
+
+  * `GET /health` (liveness)
+  * `GET /status` (readiness; version, projects, schema support)
+
+## Responses & media types
+
+* JSON for objects/arrays.
+* **NDJSON** (`application/x-ndjson`) for edges/paths/CFG.
+* **gzip** supported by default.
+* **ETag** = content hash; `If-None-Match` for caching.
+
+## Auth & tenancy
+
+* Auth via bearer/JWT or mTLS (infrastructure choice).
+* Tenancy by project scoping (`/projects/{p}`); optional org prefix (`/orgs/{o}/projects/{p}`).
+
+## Versioning
+
+* **API version in path**: `/v0/...` (aligned with artifact epoch).
+* **Schema passthrough**: expose artifact schema/version via headers (e.g., `X-RPAX-Schema: activities.tree@0`).
+
+## Guarantees vs CLI
+
+* **Access API:** consistent **reads** and discoverability (indexing, queries, pagination).
+* **CLI:** consistent **writes** and deterministic generation.
+* No fixing or inferring missing data; strictly reflects what CLI produced.
+
+## Non-goals
+
+* No validation, diagram rendering, or MCP transforms.
+* No write/patch/delete, rebuilds, or compaction.
+
+## Typical uses
+
+* CI/PR checks query only required slices (e.g., edges for touched workflows).
+* Docs sites fetch Mermaid-ready slices without invoking CLI.
+* MCP adapter consumes stable URLs and maps to resource URIs later.

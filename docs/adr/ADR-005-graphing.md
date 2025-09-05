@@ -1,0 +1,34 @@
+# ADR-005: Graph Visualization Options
+
+**Status:** Proposed
+
+## Context
+
+Visualization needed for workflow invocation graphs in docs and CI.
+
+## Options
+
+### Option A — Mermaid
+
+**Pros:** markdown-friendly; native support in GitHub/GitLab/MkDocs; easy to tweak.
+**Cons:** limited layouts; slow on very large graphs; best for HTML/MD.
+**Best for:** READMEs, docs, quick inspection.
+
+### Option B — Graphviz
+
+**Pros:** mature layouts (`dot`, `neato`, etc.); handles dense graphs; exports SVG/PNG/PDF.
+**Cons:** external dependency; `.dot` less human-friendly; extra export step.
+**Best for:** CI artifacts, large projects, publication-quality diagrams.
+
+## Decision
+
+* **Go:** Implement **both** options.
+* **Go:** Default = **Mermaid**; optional **Graphviz** export for large/CI diagrams.
+* **No-Go:** Additional graph libs (D3/Cytoscape/Vis.js) for this phase.
+
+## Consequences
+
+* Wider coverage: docs-friendly + scalable CI output.
+* Adds Graphviz runtime dependency (documented, optional).
+* Configuration surface: `output.formats` accepts `"mermaid"` and `"graphviz"`.
+* Styling conventions required (root highlighting, edge annotations, folder clustering).
