@@ -1,0 +1,253 @@
+{
+  "workflowId": "myWorkflowFooBar",
+  "contentHash": "",
+  "extractedAt": "",
+  "extractorVersion": "0.1.0-enhanced",
+  "variables": [],
+  "arguments": [],
+  "imports": [],
+  "rootNode": {
+    "nodeId": "Activity/Sequence_1",
+    "activityType": "Sequence",
+    "displayName": "myWorkflowFooBar",
+    "properties": {
+      "Annotation.AnnotationText": {
+        "value": "myWorkflowFooBar root annotation",
+        "isExpression": false
+      },
+      "DisplayName": {
+        "value": "myWorkflowFooBar",
+        "isExpression": false
+      },
+      "VirtualizedContainerService.HintSize": {
+        "value": "1442.4,807.64",
+        "isExpression": false
+      },
+      "WorkflowViewState.IdRef": {
+        "value": "Sequence_1",
+        "isExpression": false
+      }
+    },
+    "arguments": {},
+    "parentId": null,
+    "continueOnError": null,
+    "timeout": null,
+    "viewStateId": "Sequence_1",
+    "children": [
+      {
+        "nodeId": "Activity/Sequence/Sequence_2",
+        "activityType": "Sequence",
+        "displayName": "SequenceFirst",
+        "properties": {
+          "DisplayName": {
+            "value": "SequenceFirst",
+            "isExpression": false
+          },
+          "VirtualizedContainerService.HintSize": {
+            "value": "449.6,257.6",
+            "isExpression": false
+          },
+          "WorkflowViewState.IdRef": {
+            "value": "Sequence_2",
+            "isExpression": false
+          }
+        },
+        "arguments": {},
+        "parentId": "Activity/Sequence_1",
+        "continueOnError": null,
+        "timeout": null,
+        "viewStateId": "Sequence_2",
+        "children": [
+          {
+            "nodeId": "Activity/Sequence/Sequence/LogMessage_3",
+            "activityType": "LogMessage",
+            "displayName": "Log Message INFO SequenceFirst",
+            "properties": {
+              "DisplayName": {
+                "value": "Log Message INFO SequenceFirst",
+                "isExpression": false
+              },
+              "VirtualizedContainerService.HintSize": {
+                "value": "416,165.6",
+                "isExpression": false
+              },
+              "WorkflowViewState.IdRef": {
+                "value": "LogMessage_1",
+                "isExpression": false
+              },
+              "Level": {
+                "value": "Info",
+                "isExpression": false
+              },
+              "Message": {
+                "value": "[\"myLogMessage\"]",
+                "isExpression": true
+              }
+            },
+            "arguments": {},
+            "parentId": "Activity/Sequence/Sequence_2",
+            "continueOnError": null,
+            "timeout": null,
+            "viewStateId": "LogMessage_1",
+            "children": [],
+            "isVisual": true,
+            "lineNumber": null,
+            "invocationTarget": null,
+            "invocationKind": null
+          },
+          {
+            "nodeId": "Activity/Sequence/Sequence/LogMessage_3",
+            "activityType": "LogMessage",
+            "displayName": "Log Message TRACE SequenceSecond",
+            "properties": {
+              "DisplayName": {
+                "value": "Log Message TRACE SequenceSecond",
+                "isExpression": false
+              },
+              "VirtualizedContainerService.HintSize": {
+                "value": "416,165.6",
+                "isExpression": false
+              },
+              "WorkflowViewState.IdRef": {
+                "value": "LogMessage_2",
+                "isExpression": false
+              },
+              "Level": {
+                "value": "Trace",
+                "isExpression": false
+              },
+              "Message": {
+                "value": "[\"myLogMessage\"]",
+                "isExpression": true
+              }
+            },
+            "arguments": {},
+            "parentId": "Activity/Sequence/Sequence_2",
+            "continueOnError": null,
+            "timeout": null,
+            "viewStateId": "LogMessage_2",
+            "children": [],
+            "isVisual": true,
+            "lineNumber": null,
+            "invocationTarget": null,
+            "invocationKind": null
+          }
+        ],
+        "isVisual": true,
+        "lineNumber": null,
+        "invocationTarget": null,
+        "invocationKind": null
+      },
+      {
+        "nodeId": "Activity/Sequence/Sequence_2",
+        "activityType": "Sequence",
+        "displayName": "SequenceSecond",
+        "properties": {
+          "DisplayName": {
+            "value": "SequenceSecond",
+            "isExpression": false
+          },
+          "VirtualizedContainerService.HintSize": {
+            "value": "449.6,248.8",
+            "isExpression": false
+          },
+          "WorkflowViewState.IdRef": {
+            "value": "Sequence_3",
+            "isExpression": false
+          }
+        },
+        "arguments": {},
+        "parentId": "Activity/Sequence_1",
+        "continueOnError": null,
+        "timeout": null,
+        "viewStateId": "Sequence_3",
+        "children": [
+          {
+            "nodeId": "Activity/Sequence/Sequence/LogMessage_3",
+            "activityType": "LogMessage",
+            "displayName": "Log Message INFO SequenceFirst",
+            "properties": {
+              "DisplayName": {
+                "value": "Log Message INFO SequenceFirst",
+                "isExpression": false
+              },
+              "VirtualizedContainerService.HintSize": {
+                "value": "416,165.6",
+                "isExpression": false
+              },
+              "WorkflowViewState.IdRef": {
+                "value": "LogMessage_1",
+                "isExpression": false
+              },
+              "Level": {
+                "value": "Info",
+                "isExpression": false
+              },
+              "Message": {
+                "value": "[\"myLogMessage\"]",
+                "isExpression": true
+              }
+            },
+            "arguments": {},
+            "parentId": "Activity/Sequence/Sequence_2",
+            "continueOnError": null,
+            "timeout": null,
+            "viewStateId": "LogMessage_1",
+            "children": [],
+            "isVisual": true,
+            "lineNumber": null,
+            "invocationTarget": null,
+            "invocationKind": null
+          },
+          {
+            "nodeId": "Activity/Sequence/Sequence/LogMessage_3",
+            "activityType": "LogMessage",
+            "displayName": "Log Message TRACE SequenceSecond",
+            "properties": {
+              "DisplayName": {
+                "value": "Log Message TRACE SequenceSecond",
+                "isExpression": false
+              },
+              "VirtualizedContainerService.HintSize": {
+                "value": "416,165.6",
+                "isExpression": false
+              },
+              "WorkflowViewState.IdRef": {
+                "value": "LogMessage_2",
+                "isExpression": false
+              },
+              "Level": {
+                "value": "Trace",
+                "isExpression": false
+              },
+              "Message": {
+                "value": "[\"myLogMessage\"]",
+                "isExpression": true
+              }
+            },
+            "arguments": {},
+            "parentId": "Activity/Sequence/Sequence_2",
+            "continueOnError": null,
+            "timeout": null,
+            "viewStateId": "LogMessage_2",
+            "children": [],
+            "isVisual": true,
+            "lineNumber": null,
+            "invocationTarget": null,
+            "invocationKind": null
+          }
+        ],
+        "isVisual": true,
+        "lineNumber": null,
+        "invocationTarget": null,
+        "invocationKind": null
+      }
+    ],
+    "isVisual": true,
+    "lineNumber": null,
+    "invocationTarget": null,
+    "invocationKind": null
+  },
+  "totalVisualActivities": 5,
+  "parseMethod": "enhanced-visual-detection"
+}

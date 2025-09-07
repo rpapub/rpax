@@ -1,0 +1,58 @@
+{
+  "command_tree": {
+    "subcommands": [
+      {
+        "name": "parse",
+        "params": []
+      },
+      {
+        "name": "list",
+        "params": []
+      },
+      {
+        "name": "validate",
+        "params": []
+      },
+      {
+        "name": "graph",
+        "params": []
+      },
+      {
+        "name": "explain",
+        "params": []
+      },
+      {
+        "name": "schema",
+        "params": []
+      },
+      {
+        "name": "help",
+        "params": []
+      },
+      {
+        "name": "activities",
+        "params": []
+      },
+      {
+        "name": "projects",
+        "params": []
+      },
+      {
+        "name": "clear",
+        "params": []
+      },
+      {
+        "name": "pseudocode",
+        "params": []
+      },
+      {
+        "name": "api",
+        "params": []
+      },
+      {
+        "name": "health",
+        "params": []
+      }
+    ]
+  }
+}

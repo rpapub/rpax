@@ -1,0 +1,778 @@
+{
+  "workflowId": "InitAllSettings",
+  "contentHash": "",
+  "extractedAt": "",
+  "extractorVersion": "0.1.0-enhanced",
+  "variables": [
+    {
+      "name": "dt_SettingsAndConstants",
+      "type": "",
+      "default": "",
+      "scope": "Workflow"
+    },
+    {
+      "name": "dt_Assets",
+      "type": "",
+      "default": "",
+      "scope": "Workflow"
+    },
+    {
+      "name": "AssetValue",
+      "type": "",
+      "default": "",
+      "scope": "Workflow"
+    }
+  ],
+  "arguments": [],
+  "imports": [],
+  "rootNode": {
+    "nodeId": "Activity/Sequence_1",
+    "activityType": "Sequence",
+    "displayName": "Initialize All Settings",
+    "properties": {
+      "Annotation.AnnotationText": {
+        "value": "Initialize, populate and output a configuration Dictionary to be used throughout the project. \nSettings and constants are read from the local configuration file, and assets are fetched from Orchestrator. \nAsset values overwrite settings and constant values if they are defined with the same name.",
+        "isExpression": false
+      },
+      "DisplayName": {
+        "value": "Initialize All Settings",
+        "isExpression": false
+      },
+      "VirtualizedContainerService.HintSize": {
+        "value": "660,2648.6666666666665",
+        "isExpression": false
+      },
+      "WorkflowViewState.IdRef": {
+        "value": "Sequence_2",
+        "isExpression": false
+      }
+    },
+    "arguments": {},
+    "parentId": null,
+    "continueOnError": null,
+    "timeout": null,
+    "viewStateId": "Sequence_2",
+    "children": [
+      {
+        "nodeId": "Activity/Sequence/LogMessage_2",
+        "activityType": "LogMessage",
+        "displayName": "Log Message (Initialize All Settings)",
+        "properties": {
+          "DisplayName": {
+            "value": "Log Message (Initialize All Settings)",
+            "isExpression": false
+          },
+          "VirtualizedContainerService.HintSize": {
+            "value": "598,176.66666666666666",
+            "isExpression": false
+          },
+          "WorkflowViewState.IdRef": {
+            "value": "LogMessage_5",
+            "isExpression": false
+          },
+          "Level": {
+            "value": "Trace",
+            "isExpression": false
+          },
+          "Message": {
+            "value": "[\"Initializing settings...\"]",
+            "isExpression": true
+          }
+        },
+        "arguments": {},
+        "parentId": "Activity/Sequence_1",
+        "continueOnError": null,
+        "timeout": null,
+        "viewStateId": "LogMessage_5",
+        "children": [],
+        "isVisual": true,
+        "lineNumber": null,
+        "invocationTarget": null,
+        "invocationKind": null
+      },
+      {
+        "nodeId": "Activity/Sequence/Assign_2",
+        "activityType": "Assign",
+        "displayName": "Assing out_Config (initialization)",
+        "properties": {
+          "DisplayName": {
+            "value": "Assing out_Config (initialization)",
+            "isExpression": false
+          },
+          "VirtualizedContainerService.HintSize": {
+            "value": "598,117.33333333333333",
+            "isExpression": false
+          },
+          "WorkflowViewState.IdRef": {
+            "value": "Assign_1",
+            "isExpression": false
+          }
+        },
+        "arguments": {},
+        "parentId": "Activity/Sequence_1",
+        "continueOnError": null,
+        "timeout": null,
+        "viewStateId": "Assign_1",
+        "children": [],
+        "isVisual": true,
+        "lineNumber": null,
+        "invocationTarget": null,
+        "invocationKind": null
+      },
+      {
+        "nodeId": "Activity/Sequence/ForEach_2",
+        "activityType": "ForEach",
+        "displayName": "For each configuration sheet",
+        "properties": {
+          "TypeArguments": {
+            "value": "x:String",
+            "isExpression": false
+          },
+          "CurrentIndex": {
+            "value": "{x:Null}",
+            "isExpression": false
+          },
+          "DisplayName": {
+            "value": "For each configuration sheet",
+            "isExpression": false
+          },
+          "VirtualizedContainerService.HintSize": {
+            "value": "598,982",
+            "isExpression": false
+          },
+          "WorkflowViewState.IdRef": {
+            "value": "ForEach`1_3",
+            "isExpression": false
+          },
+          "Values": {
+            "value": "[in_ConfigSheets]",
+            "isExpression": true
+          }
+        },
+        "arguments": {},
+        "parentId": "Activity/Sequence_1",
+        "continueOnError": null,
+        "timeout": null,
+        "viewStateId": "ForEach`1_3",
+        "children": [
+          {
+            "nodeId": "Activity/Sequence/ForEach/ForEach.Body/ActivityAction/Sequence_5",
+            "activityType": "Sequence",
+            "displayName": "Get local settings and constants",
+            "properties": {
+              "Annotation.AnnotationText": {
+                "value": "Read settings and constants from the configuration file and add them to the Config dictionary.",
+                "isExpression": false
+              },
+              "DisplayName": {
+                "value": "Get local settings and constants",
+                "isExpression": false
+              },
+              "VirtualizedContainerService.HintSize": {
+                "value": "564,834",
+                "isExpression": false
+              },
+              "WorkflowViewState.IdRef": {
+                "value": "Sequence_5",
+                "isExpression": false
+              }
+            },
+            "arguments": {},
+            "parentId": "Activity/Sequence/ForEach_2",
+            "continueOnError": null,
+            "timeout": null,
+            "viewStateId": "Sequence_5",
+            "children": [
+              {
+                "nodeId": "Activity/Sequence/ForEach/ForEach.Body/ActivityAction/Sequence/ReadRange_6",
+                "activityType": "ReadRange",
+                "displayName": "Read range (Settings and Constants sheets)",
+                "properties": {
+                  "Range": {
+                    "value": "{x:Null}",
+                    "isExpression": false
+                  },
+                  "AddHeaders": {
+                    "value": "True",
+                    "isExpression": false
+                  },
+                  "DataTable": {
+                    "value": "[Dt_SettingsAndConstants]",
+                    "isExpression": true
+                  },
+                  "DisplayName": {
+                    "value": "Read range (Settings and Constants sheets)",
+                    "isExpression": false
+                  },
+                  "VirtualizedContainerService.HintSize": {
+                    "value": "502,120",
+                    "isExpression": false
+                  },
+                  "WorkflowViewState.IdRef": {
+                    "value": "ReadRange_2",
+                    "isExpression": false
+                  },
+                  "SheetName": {
+                    "value": "[Sheet]",
+                    "isExpression": true
+                  },
+                  "WorkbookPath": {
+                    "value": "[in_ConfigFile]",
+                    "isExpression": true
+                  }
+                },
+                "arguments": {},
+                "parentId": "Activity/Sequence/ForEach/ForEach.Body/ActivityAction/Sequence_5",
+                "continueOnError": null,
+                "timeout": null,
+                "viewStateId": "ReadRange_2",
+                "children": [],
+                "isVisual": true,
+                "lineNumber": null,
+                "invocationTarget": null,
+                "invocationKind": null
+              },
+              {
+                "nodeId": "Activity/Sequence/ForEach/ForEach.Body/ActivityAction/Sequence/ForEachRow_6",
+                "activityType": "ForEachRow",
+                "displayName": "For each configuration row",
+                "properties": {
+                  "ColumnNames": {
+                    "value": "{x:Null}",
+                    "isExpression": false
+                  },
+                  "CurrentIndex": {
+                    "value": "{x:Null}",
+                    "isExpression": false
+                  },
+                  "DataTable": {
+                    "value": "[Dt_SettingsAndConstants]",
+                    "isExpression": true
+                  },
+                  "DisplayName": {
+                    "value": "For each configuration row",
+                    "isExpression": false
+                  },
+                  "VirtualizedContainerService.HintSize": {
+                    "value": "502,595.3333333333334",
+                    "isExpression": false
+                  },
+                  "WorkflowViewState.IdRef": {
+                    "value": "ForEachRow_2",
+                    "isExpression": false
+                  }
+                },
+                "arguments": {},
+                "parentId": "Activity/Sequence/ForEach/ForEach.Body/ActivityAction/Sequence_5",
+                "continueOnError": null,
+                "timeout": null,
+                "viewStateId": "ForEachRow_2",
+                "children": [
+                  {
+                    "nodeId": "Activity/Sequence/ForEach/ForEach.Body/ActivityAction/Sequence/ForEachRow/ForEachRow.Body/ActivityAction/If_9",
+                    "activityType": "If",
+                    "displayName": "If configuration row is not empty",
+                    "properties": {
+                      "Annotation.AnnotationText": {
+                        "value": "Read non-empty rows in the sheet.",
+                        "isExpression": false
+                      },
+                      "Condition": {
+                        "value": "[Not String.IsNullOrWhiteSpace(row(\"Name\").ToString.Trim)]",
+                        "isExpression": true
+                      },
+                      "DisplayName": {
+                        "value": "If configuration row is not empty",
+                        "isExpression": false
+                      },
+                      "VirtualizedContainerService.HintSize": {
+                        "value": "468,382.6666666666667",
+                        "isExpression": false
+                      },
+                      "WorkflowViewState.IdRef": {
+                        "value": "If_1",
+                        "isExpression": false
+                      }
+                    },
+                    "arguments": {},
+                    "parentId": "Activity/Sequence/ForEach/ForEach.Body/ActivityAction/Sequence/ForEachRow_6",
+                    "continueOnError": null,
+                    "timeout": null,
+                    "viewStateId": "If_1",
+                    "children": [
+                      {
+                        "nodeId": "Activity/Sequence/ForEach/ForEach.Body/ActivityAction/Sequence/ForEachRow/ForEachRow.Body/ActivityAction/If/If.Then/Assign_11",
+                        "activityType": "Assign",
+                        "displayName": "Add Config key/value pair",
+                        "properties": {
+                          "DisplayName": {
+                            "value": "Add Config key/value pair",
+                            "isExpression": false
+                          },
+                          "VirtualizedContainerService.HintSize": {
+                            "value": "434,85.33333333333333",
+                            "isExpression": false
+                          },
+                          "WorkflowViewState.IdRef": {
+                            "value": "Assign_15",
+                            "isExpression": false
+                          }
+                        },
+                        "arguments": {},
+                        "parentId": "Activity/Sequence/ForEach/ForEach.Body/ActivityAction/Sequence/ForEachRow/ForEachRow.Body/ActivityAction/If_9",
+                        "continueOnError": null,
+                        "timeout": null,
+                        "viewStateId": "Assign_15",
+                        "children": [],
+                        "isVisual": true,
+                        "lineNumber": null,
+                        "invocationTarget": null,
+                        "invocationKind": null
+                      },
+                      {
+                        "nodeId": "Activity/Sequence/ForEach/ForEach.Body/ActivityAction/Sequence/ForEachRow/ForEachRow.Body/ActivityAction/If/If.Else/Sequence_11",
+                        "activityType": "Sequence",
+                        "displayName": "Else",
+                        "properties": {
+                          "DisplayName": {
+                            "value": "Else",
+                            "isExpression": false
+                          },
+                          "VirtualizedContainerService.HintSize": {
+                            "value": "416,104.66666666666667",
+                            "isExpression": false
+                          },
+                          "WorkflowViewState.IdRef": {
+                            "value": "Sequence_12",
+                            "isExpression": false
+                          }
+                        },
+                        "arguments": {},
+                        "parentId": "Activity/Sequence/ForEach/ForEach.Body/ActivityAction/Sequence/ForEachRow/ForEachRow.Body/ActivityAction/If_9",
+                        "continueOnError": null,
+                        "timeout": null,
+                        "viewStateId": "Sequence_12",
+                        "children": [],
+                        "isVisual": true,
+                        "lineNumber": null,
+                        "invocationTarget": null,
+                        "invocationKind": null
+                      }
+                    ],
+                    "isVisual": true,
+                    "lineNumber": null,
+                    "invocationTarget": null,
+                    "invocationKind": null
+                  }
+                ],
+                "isVisual": true,
+                "lineNumber": null,
+                "invocationTarget": null,
+                "invocationKind": null
+              }
+            ],
+            "isVisual": true,
+            "lineNumber": null,
+            "invocationTarget": null,
+            "invocationKind": null
+          }
+        ],
+        "isVisual": true,
+        "lineNumber": null,
+        "invocationTarget": null,
+        "invocationKind": null
+      },
+      {
+        "nodeId": "Activity/Sequence/TryCatch_2",
+        "activityType": "TryCatch",
+        "displayName": "Try initializing assets",
+        "properties": {
+          "DisplayName": {
+            "value": "Try initializing assets",
+            "isExpression": false
+          },
+          "VirtualizedContainerService.HintSize": {
+            "value": "550.4,1222.4",
+            "isExpression": false
+          },
+          "WorkflowViewState.IdRef": {
+            "value": "TryCatch_2",
+            "isExpression": false
+          }
+        },
+        "arguments": {},
+        "parentId": "Activity/Sequence_1",
+        "continueOnError": null,
+        "timeout": null,
+        "viewStateId": "TryCatch_2",
+        "children": [
+          {
+            "nodeId": "Activity/Sequence/TryCatch/TryCatch.Try/Sequence_4",
+            "activityType": "Sequence",
+            "displayName": "Get Orchestrator assets",
+            "properties": {
+              "Annotation.AnnotationText": {
+                "value": "Get from Orchestrator the values of assets listed in the Assets sheet.",
+                "isExpression": false
+              },
+              "DisplayName": {
+                "value": "Get Orchestrator assets",
+                "isExpression": false
+              },
+              "VirtualizedContainerService.HintSize": {
+                "value": "513.6,981.6",
+                "isExpression": false
+              },
+              "WorkflowViewState.IdRef": {
+                "value": "Sequence_6",
+                "isExpression": false
+              }
+            },
+            "arguments": {},
+            "parentId": "Activity/Sequence/TryCatch_2",
+            "continueOnError": null,
+            "timeout": null,
+            "viewStateId": "Sequence_6",
+            "children": [
+              {
+                "nodeId": "Activity/Sequence/TryCatch/TryCatch.Try/Sequence/ReadRange_5",
+                "activityType": "ReadRange",
+                "displayName": "Read range (Assets sheet)",
+                "properties": {
+                  "Range": {
+                    "value": "{x:Null}",
+                    "isExpression": false
+                  },
+                  "AddHeaders": {
+                    "value": "True",
+                    "isExpression": false
+                  },
+                  "DataTable": {
+                    "value": "[dt_Assets]",
+                    "isExpression": true
+                  },
+                  "DisplayName": {
+                    "value": "Read range (Assets sheet)",
+                    "isExpression": false
+                  },
+                  "VirtualizedContainerService.HintSize": {
+                    "value": "470.4,97.6",
+                    "isExpression": false
+                  },
+                  "WorkflowViewState.IdRef": {
+                    "value": "ReadRange_3",
+                    "isExpression": false
+                  },
+                  "SheetName": {
+                    "value": "Assets",
+                    "isExpression": false
+                  },
+                  "WorkbookPath": {
+                    "value": "[in_ConfigFile]",
+                    "isExpression": true
+                  }
+                },
+                "arguments": {},
+                "parentId": "Activity/Sequence/TryCatch/TryCatch.Try/Sequence_4",
+                "continueOnError": null,
+                "timeout": null,
+                "viewStateId": "ReadRange_3",
+                "children": [],
+                "isVisual": true,
+                "lineNumber": null,
+                "invocationTarget": null,
+                "invocationKind": null
+              },
+              {
+                "nodeId": "Activity/Sequence/TryCatch/TryCatch.Try/Sequence/ForEachRow_5",
+                "activityType": "ForEachRow",
+                "displayName": "For each asset row",
+                "properties": {
+                  "ColumnNames": {
+                    "value": "{x:Null}",
+                    "isExpression": false
+                  },
+                  "CurrentIndex": {
+                    "value": "{x:Null}",
+                    "isExpression": false
+                  },
+                  "DataTable": {
+                    "value": "[dt_Assets]",
+                    "isExpression": true
+                  },
+                  "DisplayName": {
+                    "value": "For each asset row",
+                    "isExpression": false
+                  },
+                  "VirtualizedContainerService.HintSize": {
+                    "value": "470.4,752.8",
+                    "isExpression": false
+                  },
+                  "WorkflowViewState.IdRef": {
+                    "value": "ForEachRow_3",
+                    "isExpression": false
+                  }
+                },
+                "arguments": {},
+                "parentId": "Activity/Sequence/TryCatch/TryCatch.Try/Sequence_4",
+                "continueOnError": null,
+                "timeout": null,
+                "viewStateId": "ForEachRow_3",
+                "children": [
+                  {
+                    "nodeId": "Activity/Sequence/TryCatch/TryCatch.Try/Sequence/ForEachRow/ForEachRow.Body/ActivityAction/TryCatch_8",
+                    "activityType": "TryCatch",
+                    "displayName": "Try retrieving asset from Orchestrator",
+                    "properties": {
+                      "DisplayName": {
+                        "value": "Try retrieving asset from Orchestrator",
+                        "isExpression": false
+                      },
+                      "VirtualizedContainerService.HintSize": {
+                        "value": "436.8,627.2",
+                        "isExpression": false
+                      },
+                      "WorkflowViewState.IdRef": {
+                        "value": "TryCatch_3",
+                        "isExpression": false
+                      }
+                    },
+                    "arguments": {},
+                    "parentId": "Activity/Sequence/TryCatch/TryCatch.Try/Sequence/ForEachRow_5",
+                    "continueOnError": null,
+                    "timeout": null,
+                    "viewStateId": "TryCatch_3",
+                    "children": [
+                      {
+                        "nodeId": "Activity/Sequence/TryCatch/TryCatch.Try/Sequence/ForEachRow/ForEachRow.Body/ActivityAction/TryCatch/TryCatch.Try/Sequence_10",
+                        "activityType": "Sequence",
+                        "displayName": "Get asset from Orchestrator",
+                        "properties": {
+                          "DisplayName": {
+                            "value": "Get asset from Orchestrator",
+                            "isExpression": false
+                          },
+                          "VirtualizedContainerService.HintSize": {
+                            "value": "400,386.4",
+                            "isExpression": false
+                          },
+                          "WorkflowViewState.IdRef": {
+                            "value": "Sequence_11",
+                            "isExpression": false
+                          }
+                        },
+                        "arguments": {},
+                        "parentId": "Activity/Sequence/TryCatch/TryCatch.Try/Sequence/ForEachRow/ForEachRow.Body/ActivityAction/TryCatch_8",
+                        "continueOnError": null,
+                        "timeout": null,
+                        "viewStateId": "Sequence_11",
+                        "children": [
+                          {
+                            "nodeId": "Activity/Sequence/TryCatch/TryCatch.Try/Sequence/ForEachRow/ForEachRow.Body/ActivityAction/TryCatch/TryCatch.Try/Sequence/GetRobotAsset_11",
+                            "activityType": "GetRobotAsset",
+                            "displayName": "Get Orchestrator asset",
+                            "properties": {
+                              "AssetName": {
+                                "value": "[row(\"Asset\").ToString]",
+                                "isExpression": true
+                              },
+                              "CacheStrategy": {
+                                "value": "None",
+                                "isExpression": false
+                              },
+                              "DisplayName": {
+                                "value": "Get Orchestrator asset",
+                                "isExpression": false
+                              },
+                              "FolderPath": {
+                                "value": "[row(\"OrchestratorAssetFolder\").ToString]",
+                                "isExpression": true
+                              },
+                              "VirtualizedContainerService.HintSize": {
+                                "value": "356.8,185.6",
+                                "isExpression": false
+                              },
+                              "WorkflowViewState.IdRef": {
+                                "value": "GetRobotAsset_5",
+                                "isExpression": false
+                              }
+                            },
+                            "arguments": {},
+                            "parentId": "Activity/Sequence/TryCatch/TryCatch.Try/Sequence/ForEachRow/ForEachRow.Body/ActivityAction/TryCatch/TryCatch.Try/Sequence_10",
+                            "continueOnError": null,
+                            "timeout": null,
+                            "viewStateId": "GetRobotAsset_5",
+                            "children": [],
+                            "isVisual": true,
+                            "lineNumber": null,
+                            "invocationTarget": null,
+                            "invocationKind": null
+                          },
+                          {
+                            "nodeId": "Activity/Sequence/TryCatch/TryCatch.Try/Sequence/ForEachRow/ForEachRow.Body/ActivityAction/TryCatch/TryCatch.Try/Sequence/Assign_11",
+                            "activityType": "Assign",
+                            "displayName": "Assign asset value in Config",
+                            "properties": {
+                              "DisplayName": {
+                                "value": "Assign asset value in Config",
+                                "isExpression": false
+                              },
+                              "VirtualizedContainerService.HintSize": {
+                                "value": "356.8,69.6",
+                                "isExpression": false
+                              },
+                              "WorkflowViewState.IdRef": {
+                                "value": "Assign_23",
+                                "isExpression": false
+                              }
+                            },
+                            "arguments": {},
+                            "parentId": "Activity/Sequence/TryCatch/TryCatch.Try/Sequence/ForEachRow/ForEachRow.Body/ActivityAction/TryCatch/TryCatch.Try/Sequence_10",
+                            "continueOnError": null,
+                            "timeout": null,
+                            "viewStateId": "Assign_23",
+                            "children": [],
+                            "isVisual": true,
+                            "lineNumber": null,
+                            "invocationTarget": null,
+                            "invocationKind": null
+                          }
+                        ],
+                        "isVisual": true,
+                        "lineNumber": null,
+                        "invocationTarget": null,
+                        "invocationKind": null
+                      },
+                      {
+                        "nodeId": "Activity/Sequence/TryCatch/TryCatch.Try/Sequence/ForEachRow/ForEachRow.Body/ActivityAction/TryCatch/TryCatch.Catches/Catch/ActivityAction/If_12",
+                        "activityType": "If",
+                        "displayName": "If asset name is specified, but it cannot be retrieved",
+                        "properties": {
+                          "Annotation.AnnotationText": {
+                            "value": "Logs a message and throw exception in case the asset is specified in the Config file, but it could not be loaded from Orchestrator.",
+                            "isExpression": false
+                          },
+                          "Condition": {
+                            "value": "[Not String.IsNullOrWhiteSpace(Row(\"Name\").ToString.Trim)]",
+                            "isExpression": true
+                          },
+                          "DisplayName": {
+                            "value": "If asset name is specified, but it cannot be retrieved",
+                            "isExpression": false
+                          },
+                          "VirtualizedContainerService.HintSize": {
+                            "value": "416,409.6",
+                            "isExpression": false
+                          },
+                          "WorkflowViewState.IdRef": {
+                            "value": "If_5",
+                            "isExpression": false
+                          }
+                        },
+                        "arguments": {},
+                        "parentId": "Activity/Sequence/TryCatch/TryCatch.Try/Sequence/ForEachRow/ForEachRow.Body/ActivityAction/TryCatch_8",
+                        "continueOnError": null,
+                        "timeout": null,
+                        "viewStateId": "If_5",
+                        "children": [
+                          {
+                            "nodeId": "Activity/Sequence/TryCatch/TryCatch.Try/Sequence/ForEachRow/ForEachRow.Body/ActivityAction/TryCatch/TryCatch.Catches/Catch/ActivityAction/If/If.Then/Throw_14",
+                            "activityType": "Throw",
+                            "displayName": "Throw AssetFailedToLoad Exception",
+                            "properties": {
+                              "DisplayName": {
+                                "value": "Throw AssetFailedToLoad Exception",
+                                "isExpression": false
+                              },
+                              "Exception": {
+                                "value": "[new Exception(\"Loading asset \" + Row(\"Asset\").ToString + \" failed: \" + Exception.Message)]",
+                                "isExpression": true
+                              },
+                              "VirtualizedContainerService.HintSize": {
+                                "value": "334.4,98.4",
+                                "isExpression": false
+                              },
+                              "WorkflowViewState.IdRef": {
+                                "value": "Throw_1",
+                                "isExpression": false
+                              }
+                            },
+                            "arguments": {},
+                            "parentId": "Activity/Sequence/TryCatch/TryCatch.Try/Sequence/ForEachRow/ForEachRow.Body/ActivityAction/TryCatch/TryCatch.Catches/Catch/ActivityAction/If_12",
+                            "continueOnError": null,
+                            "timeout": null,
+                            "viewStateId": "Throw_1",
+                            "children": [],
+                            "isVisual": true,
+                            "lineNumber": null,
+                            "invocationTarget": null,
+                            "invocationKind": null
+                          }
+                        ],
+                        "isVisual": true,
+                        "lineNumber": null,
+                        "invocationTarget": null,
+                        "invocationKind": null
+                      }
+                    ],
+                    "isVisual": true,
+                    "lineNumber": null,
+                    "invocationTarget": null,
+                    "invocationKind": null
+                  }
+                ],
+                "isVisual": true,
+                "lineNumber": null,
+                "invocationTarget": null,
+                "invocationKind": null
+              }
+            ],
+            "isVisual": true,
+            "lineNumber": null,
+            "invocationTarget": null,
+            "invocationKind": null
+          },
+          {
+            "nodeId": "Activity/Sequence/TryCatch/TryCatch.Catches/Catch/ActivityAction/Rethrow_6",
+            "activityType": "Rethrow",
+            "displayName": "Rethrow loading asset exception",
+            "properties": {
+              "DisplayName": {
+                "value": "Rethrow loading asset exception",
+                "isExpression": false
+              },
+              "VirtualizedContainerService.HintSize": {
+                "value": "334.4,32",
+                "isExpression": false
+              },
+              "WorkflowViewState.IdRef": {
+                "value": "Rethrow_1",
+                "isExpression": false
+              }
+            },
+            "arguments": {},
+            "parentId": "Activity/Sequence/TryCatch_2",
+            "continueOnError": null,
+            "timeout": null,
+            "viewStateId": "Rethrow_1",
+            "children": [],
+            "isVisual": true,
+            "lineNumber": null,
+            "invocationTarget": null,
+            "invocationKind": null
+          }
+        ],
+        "isVisual": true,
+        "lineNumber": null,
+        "invocationTarget": null,
+        "invocationKind": null
+      }
+    ],
+    "isVisual": true,
+    "lineNumber": null,
+    "invocationTarget": null,
+    "invocationKind": null
+  },
+  "totalVisualActivities": 21,
+  "parseMethod": "enhanced-visual-detection"
+}

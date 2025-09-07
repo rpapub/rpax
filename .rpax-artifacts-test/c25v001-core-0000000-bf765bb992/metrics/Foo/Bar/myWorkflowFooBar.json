@@ -1,0 +1,13 @@
+{
+  "workflowId": "Foo/Bar/myWorkflowFooBar",
+  "totalNodes": 7,
+  "maxDepth": 3,
+  "loopCount": 0,
+  "invokeCount": 0,
+  "logCount": 0,
+  "tryCatchCount": 0,
+  "selectorCount": 0,
+  "activityTypes": {
+    "Unknown": 7
+  }
+}

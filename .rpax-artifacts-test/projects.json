@@ -1,0 +1,14 @@
+{
+  "rpaxSchemaVersion": "1.0",
+  "projects": [
+    {
+      "slug": "c25v001-core-0000000-bf765bb992",
+      "name": "c25v001_CORE_00000001",
+      "projectId": "8551bedf-7817-4961-9b1f-c844467566a9",
+      "projectType": "process",
+      "path": "D:\\github.com\\rpapub\\rpax-corpuses\\c25v001_CORE_00000001",
+      "lastParsed": "2025-09-06T21:05:04.725750+00:00",
+      "artifactsPath": ".rpax-artifacts-test\\c25v001-core-0000000-bf765bb992"
+    }
+  ]
+}

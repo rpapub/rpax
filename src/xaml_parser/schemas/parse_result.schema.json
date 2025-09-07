@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/rpapub/rpax/schemas/xaml_parser/parse_result.json",
+  "title": "XAML Parse Result",
+  "description": "Complete parsing result with diagnostics and validation",
+  "type": "object",
+  "properties": {
+    "content": {
+      "oneOf": [
+        {"$ref": "workflow_content.schema.json"},
+        {"type": "null"}
+      ],
+      "description": "Parsed workflow content or null if failed"
+    },
+    "success": {
+      "type": "boolean",
+      "description": "Whether parsing succeeded"
+    },
+    "errors": {
+      "type": "array",
+      "description": "Parsing error messages",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "warnings": {
+      "type": "array", 
+      "description": "Parsing warning messages",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "parse_time_ms": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Total parsing time in milliseconds"
+    },
+    "file_path": {
+      "type": ["string", "null"],
+      "description": "Source file path"
+    },
+    "diagnostics": {
+      "oneOf": [
+        {"$ref": "#/$defs/parseDiagnostics"},
+        {"type": "null"}
+      ],
+      "description": "Detailed diagnostic information"
+    },
+    "config_used": {
+      "type": "object",
+      "description": "Parser configuration used",
+      "properties": {
+        "extract_arguments": {"type": "boolean"},
+        "extract_variables": {"type": "boolean"}, 
+        "extract_activities": {"type": "boolean"},
+        "extract_expressions": {"type": "boolean"},
+        "extract_viewstate": {"type": "boolean"},
+        "extract_namespaces": {"type": "boolean"},
+        "extract_assembly_references": {"type": "boolean"},
+        "preserve_raw_metadata": {"type": "boolean"},
+        "strict_mode": {"type": "boolean"},
+        "max_depth": {"type": "integer", "minimum": 1},
+        "expression_language": {
+          "type": "string",
+          "enum": ["VisualBasic", "CSharp"]
+        }
+      },
+      "required": [
+        "extract_arguments", "extract_variables", "extract_activities",
+        "strict_mode", "max_depth", "expression_language"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "success", "errors", "warnings", "parse_time_ms",
+    "file_path", "config_used"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "parseDiagnostics": {
+      "type": "object",
+      "description": "Detailed parsing diagnostics",
+      "properties": {
+        "total_elements_processed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total XML elements processed"
+        },
+        "activities_found": {
+          "type": "integer", 
+          "minimum": 0,
+          "description": "Number of activities discovered"
+        },
+        "arguments_found": {
+          "type": "integer",
+          "minimum": 0, 
+          "description": "Number of arguments discovered"
+        },
+        "variables_found": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of variables discovered"
+        },
+        "annotations_found": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of annotations discovered"
+        },
+        "expressions_found": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of expressions discovered"
+        },
+        "namespaces_detected": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of XML namespaces detected"
+        },
+        "skipped_elements": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of elements skipped"
+        },
+        "xml_depth": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Maximum XML nesting depth"
+        },
+        "file_size_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Source file size in bytes"
+        },
+        "encoding_detected": {
+          "type": ["string", "null"],
+          "description": "Text encoding detected"
+        },
+        "root_element_tag": {
+          "type": ["string", "null"],
+          "description": "Root XML element tag name"
+        },
+        "processing_steps": {
+          "type": "array",
+          "description": "Sequential processing steps",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "performance_metrics": {
+          "type": "object",
+          "description": "Performance timing metrics",
+          "patternProperties": {
+            ".*_ms$": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "total_elements_processed", "activities_found", "arguments_found",
+        "variables_found", "annotations_found", "expressions_found", 
+        "namespaces_detected", "skipped_elements", "xml_depth",
+        "file_size_bytes", "processing_steps", "performance_metrics"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/rpapub/rpax/schemas/invocation.v1.schema.json",
+  "title": "rpax-invocation-v1",
+  "description": "JSON Schema for rpax invocation JSONL records",
+  "type": "object",
+  "required": [
+    "kind",
+    "from",
+    "to"
+  ],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": [
+        "invoke",
+        "invoke-missing",
+        "invoke-dynamic",
+        "invoke-coded"
+      ],
+      "description": "Type of workflow invocation"
+    },
+    "from": {
+      "type": "string",
+      "description": "Source workflow ID (composite format)"
+    },
+    "to": {
+      "type": "string",
+      "description": "Target workflow ID or reference"
+    },
+    "arguments": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Arguments passed to the workflow"
+    },
+    "activityName": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Display name of the invoking activity"
+    },
+    "targetPath": {
+      "type": "string",
+      "description": "Original target path from XAML"
+    },
+    "lineNumber": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "Line number in source XAML (if available)"
+    }
+  },
+  "additionalProperties": false
+}

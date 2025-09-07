@@ -26,9 +26,20 @@ Visualization needed for workflow invocation graphs in docs and CI.
 * **Go:** Default = **Mermaid**; optional **Graphviz** export for large/CI diagrams.
 * **No-Go:** Additional graph libs (D3/Cytoscape/Vis.js) for this phase.
 
+## Roadmap Phase
+
+* **v0.1:** Mermaid support for GitHub/docs integration
+* **v0.2:** Optional Graphviz support for large/CI diagrams
+
 ## Consequences
 
 * Wider coverage: docs-friendly + scalable CI output.
 * Adds Graphviz runtime dependency (documented, optional).
 * Configuration surface: `output.formats` accepts `"mermaid"` and `"graphviz"`.
 * Styling conventions required (root highlighting, edge annotations, folder clustering).
+
+## Related ADRs
+
+* ADR-003: Graph rendering accessed via `graph` command
+* ADR-013: Diagram element standardization across both renderers
+* ADR-015: Implementation defers Graphviz to v0.2+ (emit .dot files only initially)

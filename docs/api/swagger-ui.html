@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>rpax API Documentation</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.10.3/swagger-ui.css" />
+    <style>
+        html {
+            box-sizing: border-box;
+            overflow: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+        }
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+        body {
+            margin: 0;
+            background: #fafafa;
+        }
+    </style>
+</head>
+<body>
+    <div id="swagger-ui"></div>
+    
+    <script src="https://unpkg.com/swagger-ui-dist@5.10.3/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.10.3/swagger-ui-standalone-preset.js"></script>
+    <script>
+        window.onload = function() {
+            // Detect available spec files
+            const specFiles = [
+                { version: 'v0', path: './v0/openapi.json', name: 'v0 (Current)' }
+                // Add more versions as they become available:
+                // { version: 'v1', path: './v1/openapi.yaml', name: 'v1 (Beta)' }
+            ];
+            
+            // Get version from URL parameter or default to v0
+            const urlParams = new URLSearchParams(window.location.search);
+            const selectedVersion = urlParams.get('version') || 'v0';
+            const currentSpec = specFiles.find(spec => spec.version === selectedVersion) || specFiles[0];
+            
+            // Initialize Swagger UI
+            const ui = SwaggerUIBundle({
+                url: currentSpec.path,
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                // Custom configuration
+                docExpansion: "list",
+                filter: true,
+                showRequestHeaders: true,
+                tryItOutEnabled: true
+            });
+            
+            // Add version selector if multiple versions exist
+            if (specFiles.length > 1) {
+                setTimeout(() => {
+                    const topbar = document.querySelector('.swagger-ui .topbar');
+                    if (topbar) {
+                        const versionSelector = document.createElement('div');
+                        versionSelector.style.marginRight = '20px';
+                        versionSelector.innerHTML = `
+                            <label style="margin-right: 8px; color: white;">Version:</label>
+                            <select id="version-selector" style="padding: 4px 8px; border-radius: 4px;">
+                                ${specFiles.map(spec => 
+                                    `<option value="${spec.version}" ${spec.version === selectedVersion ? 'selected' : ''}>
+                                        ${spec.name}
+                                    </option>`
+                                ).join('')}
+                            </select>
+                        `;
+                        
+                        // Add event listener for version switching
+                        const selector = versionSelector.querySelector('#version-selector');
+                        selector.addEventListener('change', (e) => {
+                            const newVersion = e.target.value;
+                            const url = new URL(window.location);
+                            url.searchParams.set('version', newVersion);
+                            window.location.href = url.toString();
+                        });
+                        
+                        topbar.appendChild(versionSelector);
+                    }
+                }, 1000);
+            }
+        };
+    </script>
+</body>
+</html>

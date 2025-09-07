@@ -1,0 +1,110 @@
+{
+  "description": "JSON Schema for rpax individual workflow objects",
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "projectSlug": {
+      "title": "Projectslug",
+      "type": "string"
+    },
+    "workflowId": {
+      "title": "Workflowid",
+      "type": "string"
+    },
+    "contentHash": {
+      "title": "Contenthash",
+      "type": "string"
+    },
+    "filePath": {
+      "title": "Filepath",
+      "type": "string"
+    },
+    "fileName": {
+      "title": "Filename",
+      "type": "string"
+    },
+    "relativePath": {
+      "title": "Relativepath",
+      "type": "string"
+    },
+    "originalPath": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Originalpath"
+    },
+    "displayName": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Displayname"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Description"
+    },
+    "discoveredAt": {
+      "title": "Discoveredat",
+      "type": "string"
+    },
+    "fileSize": {
+      "title": "Filesize",
+      "type": "integer"
+    },
+    "lastModified": {
+      "title": "Lastmodified",
+      "type": "string"
+    },
+    "parseSuccessful": {
+      "default": true,
+      "title": "Parsesuccessful",
+      "type": "boolean"
+    },
+    "parseErrors": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Parseerrors",
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "projectSlug",
+    "workflowId",
+    "contentHash",
+    "filePath",
+    "fileName",
+    "relativePath",
+    "discoveredAt",
+    "fileSize",
+    "lastModified"
+  ],
+  "title": "rpax-workflow-v1",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/rpapub/rpax/schemas/workflow.v1.schema.json",
+  "version": "1.0"
+}

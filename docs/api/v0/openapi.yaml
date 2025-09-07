@@ -1,0 +1,438 @@
+openapi: 3.0.0
+info:
+  title: rpax API
+  description: UiPath project analysis API - generated from CLI blueprint
+  version: 0.1.0
+  contact:
+    name: rpax
+    url: https://github.com/rpapub/rpax
+  license:
+    name: MIT
+    url: https://github.com/rpapub/rpax/blob/main/LICENSE
+servers:
+- url: http://127.0.0.1:8623/api/v0
+  description: Local development server (versioned endpoints) - 127.0.0.1
+- url: http://localhost:8623/api/v0
+  description: Local development server (versioned endpoints) - localhost
+- url: http://127.0.0.1:8623
+  description: Local development server (unversioned endpoints) - 127.0.0.1
+- url: http://localhost:8623
+  description: Local development server (unversioned endpoints) - localhost
+paths:
+  /projects/{project}/workflows:
+    get:
+      summary: List workflows, roots, orphans, or activities in a project
+      description: List workflows, roots, orphans, or activities in a project
+      tags:
+      - workflows
+      parameters:
+      - name: project
+        in: path
+        required: true
+        description: Project identifier
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                  status:
+                    type: string
+                    example: success
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /projects/{project}/validation:
+    get:
+      summary: Run validation rules on parser artifacts
+      description: Run validation rules on parser artifacts
+      tags:
+      - validation
+      parameters:
+      - name: project
+        in: path
+        required: true
+        description: Project identifier
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                  status:
+                    type: string
+                    example: success
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /projects/{project}/graphs/{graph_type}:
+    get:
+      summary: Generate workflow call graphs and diagrams
+      description: Generate workflow call graphs and diagrams
+      tags:
+      - graphs
+      parameters:
+      - name: project
+        in: path
+        required: true
+        description: Project identifier
+        schema:
+          type: string
+      - name: graph_type
+        in: path
+        required: true
+        description: Graph_Type identifier
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                  status:
+                    type: string
+                    example: success
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /projects/{project}/workflows/{workflow}:
+    get:
+      summary: Show detailed information about a specific workflow
+      description: Show detailed information about a specific workflow
+      tags:
+      - workflows
+      parameters:
+      - name: project
+        in: path
+        required: true
+        description: Project identifier
+        schema:
+          type: string
+      - name: workflow
+        in: path
+        required: true
+        description: Workflow identifier
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                  status:
+                    type: string
+                    example: success
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /schemas/{action}:
+    get:
+      summary: Generate JSON schemas or validate artifacts against schemas
+      description: Generate JSON schemas or validate artifacts against schemas
+      tags: &id001
+      - schemas
+      parameters:
+      - name: action
+        in: path
+        required: true
+        description: Action identifier
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                  status:
+                    type: string
+                    example: success
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    ' "post':
+      summary: Generate JSON schemas or validate artifacts against schemas
+      description: Generate JSON schemas or validate artifacts against schemas
+      tags: *id001
+      parameters:
+      - name: action
+        in: path
+        required: true
+        description: Action identifier
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                  status:
+                    type: string
+                    example: success
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /projects/{project}/workflows/{workflow}/activities/{action}:
+    get:
+      summary: Access workflow activity trees, control flow, and resource references
+      description: Access workflow activity trees, control flow, and resource references
+      tags:
+      - activities
+      parameters:
+      - name: project
+        in: path
+        required: true
+        description: Project identifier
+        schema:
+          type: string
+      - name: workflow
+        in: path
+        required: true
+        description: Workflow identifier
+        schema:
+          type: string
+      - name: action
+        in: path
+        required: true
+        description: Action identifier
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                  status:
+                    type: string
+                    example: success
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /projects:
+    get:
+      summary: List all projects in the rpax lake
+      description: List all projects in the rpax lake
+      tags:
+      - projects
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                  status:
+                    type: string
+                    example: success
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /projects/{project}/workflows/{workflow}/pseudocode:
+    get:
+      summary: Show pseudocode representation of workflow activities
+      description: Show pseudocode representation of workflow activities
+      tags:
+      - analysis
+      parameters:
+      - name: project
+        in: path
+        required: true
+        description: Project identifier
+        schema:
+          type: string
+      - name: workflow
+        in: path
+        required: true
+        description: Workflow identifier
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                  status:
+                    type: string
+                    example: success
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /health:
+    get:
+      summary: Check API server health status
+      description: Check API server health status
+      tags:
+      - system
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                  status:
+                    type: string
+                    example: success
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      servers:
+      - url: http://127.0.0.1:8623
+        description: Unversioned endpoint - 127.0.0.1
+      - url: http://localhost:8623
+        description: Unversioned endpoint - localhost
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        status:
+          type: string
+          example: error
+      required:
+      - error
+      - message
+      - status

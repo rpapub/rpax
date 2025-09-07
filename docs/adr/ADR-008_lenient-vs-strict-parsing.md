@@ -88,8 +88,20 @@ Multiple runs append; each record carries `timestamp` and `runId` in `extras`.
 * Introduce schema-backed canonical artifacts and validation (per ADR7).
 * Provide compactor to normalize/merge when schemas mature.
 
+## Roadmap Phase
+
+* **v0.0.1:** Primary implementation strategy for initial parser
+* **v0.2:** Deprecated in favor of strict schemas (ADR-009)
+
 ## Open Questions
 
 * Minimal guaranteed fields per record type beyond `type` (e.g., always include `timestamp`, `runId`?).
 * Partitioning by date vs project\_slug for large corpora.
 * Retention policy and compaction triggers.
+
+## Related ADRs
+
+* ADR-001: Lenient approach aligns with pattern-matching XAML parsing
+* ADR-007: Phase 0 implementation strategy  
+* ADR-009: Evolution path to strict canonical artifacts
+* ADR-014: Lake storage model and identity scheme

@@ -1,0 +1,172 @@
+{
+  "$defs": {
+    "Workflow": {
+      "description": "Individual XAML workflow model.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "projectSlug": {
+          "title": "Projectslug",
+          "type": "string"
+        },
+        "workflowId": {
+          "title": "Workflowid",
+          "type": "string"
+        },
+        "contentHash": {
+          "title": "Contenthash",
+          "type": "string"
+        },
+        "filePath": {
+          "title": "Filepath",
+          "type": "string"
+        },
+        "fileName": {
+          "title": "Filename",
+          "type": "string"
+        },
+        "relativePath": {
+          "title": "Relativepath",
+          "type": "string"
+        },
+        "originalPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Originalpath"
+        },
+        "displayName": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Displayname"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "discoveredAt": {
+          "title": "Discoveredat",
+          "type": "string"
+        },
+        "fileSize": {
+          "title": "Filesize",
+          "type": "integer"
+        },
+        "lastModified": {
+          "title": "Lastmodified",
+          "type": "string"
+        },
+        "parseSuccessful": {
+          "default": true,
+          "title": "Parsesuccessful",
+          "type": "boolean"
+        },
+        "parseErrors": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Parseerrors",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "projectSlug",
+        "workflowId",
+        "contentHash",
+        "filePath",
+        "fileName",
+        "relativePath",
+        "discoveredAt",
+        "fileSize",
+        "lastModified"
+      ],
+      "title": "Workflow",
+      "type": "object"
+    }
+  },
+  "description": "JSON Schema for rpax workflows.index.json artifacts",
+  "properties": {
+    "projectName": {
+      "title": "Projectname",
+      "type": "string"
+    },
+    "projectRoot": {
+      "title": "Projectroot",
+      "type": "string"
+    },
+    "scanTimestamp": {
+      "title": "Scantimestamp",
+      "type": "string"
+    },
+    "totalWorkflows": {
+      "title": "Totalworkflows",
+      "type": "integer"
+    },
+    "successfulParses": {
+      "title": "Successfulparses",
+      "type": "integer"
+    },
+    "failedParses": {
+      "title": "Failedparses",
+      "type": "integer"
+    },
+    "workflows": {
+      "items": {
+        "$ref": "#/$defs/Workflow"
+      },
+      "title": "Workflows",
+      "type": "array"
+    },
+    "excludedPatterns": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Excludedpatterns",
+      "type": "array"
+    },
+    "excludedFiles": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Excludedfiles",
+      "type": "array"
+    }
+  },
+  "required": [
+    "projectName",
+    "projectRoot",
+    "scanTimestamp",
+    "totalWorkflows",
+    "successfulParses",
+    "failedParses"
+  ],
+  "title": "rpax-workflow-index-v1",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/rpapub/rpax/schemas/workflow-index.v1.schema.json",
+  "version": "1.0"
+}

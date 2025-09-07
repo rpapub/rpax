@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Activity xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <x:Members>
+    <x:Property Name="TestArg" Type="InArgument(x:String)" />
+    <!-- Missing closing tag for x:Property -->
+  </x:Members>
+  <Sequence DisplayName="Malformed Workflow">
+    <LogMessage Message="This workflow has malformed XML" />
+    <!-- Missing closing tag for Sequence -->
+<!-- Missing closing tag for Activity -->

@@ -1,0 +1,138 @@
+{
+  "workflowId": "myEntrypointTwo",
+  "contentHash": "",
+  "extractedAt": "",
+  "extractorVersion": "0.1.0-enhanced",
+  "variables": [
+    {
+      "name": "Config",
+      "type": "",
+      "default": "",
+      "scope": "Workflow"
+    }
+  ],
+  "arguments": [],
+  "imports": [],
+  "rootNode": {
+    "nodeId": "Activity/Sequence_1",
+    "activityType": "Sequence",
+    "displayName": "Performer",
+    "properties": {
+      "DisplayName": {
+        "value": "Performer",
+        "isExpression": false
+      },
+      "VirtualizedContainerService.HintSize": {
+        "value": "1442.4,807.64",
+        "isExpression": false
+      },
+      "WorkflowViewState.IdRef": {
+        "value": "Sequence_1",
+        "isExpression": false
+      }
+    },
+    "arguments": {},
+    "parentId": null,
+    "continueOnError": null,
+    "timeout": null,
+    "viewStateId": "Sequence_1",
+    "children": [
+      {
+        "nodeId": "Activity/Sequence/InvokeWorkflowFile_2",
+        "activityType": "InvokeWorkflowFile",
+        "displayName": "InitAllSettings - Invoke Workflow File (Framework\\InitAllSettings.xaml)",
+        "properties": {
+          "ArgumentsVariable": {
+            "value": "{x:Null}",
+            "isExpression": false
+          },
+          "ContinueOnError": {
+            "value": "{x:Null}",
+            "isExpression": false
+          },
+          "DisplayName": {
+            "value": "InitAllSettings - Invoke Workflow File (Framework\\InitAllSettings.xaml)",
+            "isExpression": false
+          },
+          "VirtualizedContainerService.HintSize": {
+            "value": "416,176",
+            "isExpression": false
+          },
+          "WorkflowViewState.IdRef": {
+            "value": "InvokeWorkflowFile_1",
+            "isExpression": false
+          },
+          "UnSafe": {
+            "value": "False",
+            "isExpression": false
+          },
+          "WorkflowFileName": {
+            "value": "Framework\\InitAllSettings.xaml",
+            "isExpression": false
+          }
+        },
+        "arguments": {},
+        "parentId": "Activity/Sequence_1",
+        "continueOnError": null,
+        "timeout": null,
+        "viewStateId": "InvokeWorkflowFile_1",
+        "children": [],
+        "isVisual": true,
+        "lineNumber": null,
+        "invocationTarget": "Framework\\InitAllSettings.xaml",
+        "invocationKind": "invoke"
+      },
+      {
+        "nodeId": "Activity/Sequence/InvokeWorkflowFile_2",
+        "activityType": "InvokeWorkflowFile",
+        "displayName": "myWorkflowFooBar - Invoke Workflow File (Foo\\Bar\\myWorkflowFooBar.xaml)",
+        "properties": {
+          "ArgumentsVariable": {
+            "value": "{x:Null}",
+            "isExpression": false
+          },
+          "ContinueOnError": {
+            "value": "{x:Null}",
+            "isExpression": false
+          },
+          "DisplayName": {
+            "value": "myWorkflowFooBar - Invoke Workflow File (Foo\\Bar\\myWorkflowFooBar.xaml)",
+            "isExpression": false
+          },
+          "VirtualizedContainerService.HintSize": {
+            "value": "416,167.2",
+            "isExpression": false
+          },
+          "WorkflowViewState.IdRef": {
+            "value": "InvokeWorkflowFile_2",
+            "isExpression": false
+          },
+          "UnSafe": {
+            "value": "False",
+            "isExpression": false
+          },
+          "WorkflowFileName": {
+            "value": "Foo\\Bar\\myWorkflowFooBar.xaml",
+            "isExpression": false
+          }
+        },
+        "arguments": {},
+        "parentId": "Activity/Sequence_1",
+        "continueOnError": null,
+        "timeout": null,
+        "viewStateId": "InvokeWorkflowFile_2",
+        "children": [],
+        "isVisual": true,
+        "lineNumber": null,
+        "invocationTarget": "Foo\\Bar\\myWorkflowFooBar.xaml",
+        "invocationKind": "invoke"
+      }
+    ],
+    "isVisual": true,
+    "lineNumber": null,
+    "invocationTarget": null,
+    "invocationKind": null
+  },
+  "totalVisualActivities": 3,
+  "parseMethod": "enhanced-visual-detection"
+}

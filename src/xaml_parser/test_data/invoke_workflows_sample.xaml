@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Activity x:Class="InvokeWorkflowsSample" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Core" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Core" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <TextExpression.NamespacesForImplementation>
+    <scg:List x:TypeArguments="x:String" Capacity="32">
+      <x:String>System.Activities</x:String>
+      <x:String>System.ComponentModel</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Data</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>System.Text</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+    </scg:List>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <sco:Collection x:TypeArguments="AssemblyReference">
+      <AssemblyReference>System.Core</AssemblyReference>
+      <AssemblyReference>System.Data</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+    </sco:Collection>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence DisplayName="Workflow Invocation Demo" sap:VirtualizedContainerService.HintSize="500,400" sap2010:Annotation.AnnotationText="Demonstrates various workflow invocation patterns">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="x:String" Name="result1" />
+      <Variable x:TypeArguments="x:Int32" Name="result2" />
+      <Variable x:TypeArguments="x:Boolean" Name="success" />
+    </Sequence.Variables>
+    <sap:WorkflowViewStateService.ViewState>
+      <scg:Dictionary x:TypeArguments="x:String, x:Object">
+        <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+      </scg:Dictionary>
+    </sap:WorkflowViewStateService.ViewState>
+    <ui:InvokeWorkflowFile DisplayName="Call Validation Workflow" sap:VirtualizedContainerService.HintSize="468,112" WorkflowFileName="Framework\ValidateInput.xaml">
+      <ui:InvokeWorkflowFile.Arguments>
+        <InArgument x:Key="inputData" x:TypeArguments="x:String">"test@example.com"</InArgument>
+        <OutArgument x:Key="isValid" x:TypeArguments="x:Boolean">[success]</OutArgument>
+        <OutArgument x:Key="validationMessage" x:TypeArguments="x:String">[result1]</OutArgument>
+      </ui:InvokeWorkflowFile.Arguments>
+    </ui:InvokeWorkflowFile>
+    <If DisplayName="Check Validation Result" sap:VirtualizedContainerService.HintSize="468,246">
+      <If.Condition>
+        <InArgument x:TypeArguments="x:Boolean">[success]</InArgument>
+      </If.Condition>
+      <If.Then>
+        <Sequence DisplayName="Success Path" sap:VirtualizedContainerService.HintSize="400,200">
+          <sap:WorkflowViewStateService.ViewState>
+            <scg:Dictionary x:TypeArguments="x:String, x:Object">
+              <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+            </scg:Dictionary>
+          </sap:WorkflowViewStateService.ViewState>
+          <ui:LogMessage DisplayName="Log Success" Level="Info" Message="[&quot;Validation passed: &quot; + result1]" sap:VirtualizedContainerService.HintSize="368,91" />
+          <ui:InvokeWorkflowFile DisplayName="Call Processing Workflow" sap:VirtualizedContainerService.HintSize="368,112" WorkflowFileName="Process\ProcessData.xaml">
+            <ui:InvokeWorkflowFile.Arguments>
+              <InArgument x:Key="validatedData" x:TypeArguments="x:String">[result1]</InArgument>
+              <OutArgument x:Key="processedCount" x:TypeArguments="x:Int32">[result2]</OutArgument>
+            </ui:InvokeWorkflowFile.Arguments>
+          </ui:InvokeWorkflowFile>
+        </Sequence>
+      </If.Then>
+      <If.Else>
+        <Sequence DisplayName="Failure Path" sap:VirtualizedContainerService.HintSize="400,200">
+          <sap:WorkflowViewStateService.ViewState>
+            <scg:Dictionary x:TypeArguments="x:String, x:Object">
+              <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+            </scg:Dictionary>
+          </sap:WorkflowViewStateService.ViewState>
+          <ui:LogMessage DisplayName="Log Failure" Level="Warn" Message="[&quot;Validation failed: &quot; + result1]" sap:VirtualizedContainerService.HintSize="368,91" />
+          <ui:InvokeWorkflowFile DisplayName="Call Error Handler" sap:VirtualizedContainerService.HintSize="368,112" WorkflowFileName="Framework\HandleError.xaml">
+            <ui:InvokeWorkflowFile.Arguments>
+              <InArgument x:Key="errorMessage" x:TypeArguments="x:String">[result1]</InArgument>
+              <InArgument x:Key="severity" x:TypeArguments="x:String">"ValidationError"</InArgument>
+            </ui:InvokeWorkflowFile.Arguments>
+          </ui:InvokeWorkflowFile>
+        </Sequence>
+      </If.Else>
+    </If>
+    <ui:LogMessage DisplayName="Final Status" Level="Info" Message="[&quot;Workflow completed. Items processed: &quot; + result2.ToString()]" sap:VirtualizedContainerService.HintSize="468,91" />
+  </Sequence>
+</Activity>

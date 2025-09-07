@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Activity x:Class="UIAutomationSample" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Core" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Core" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:uix="http://schemas.uipath.com/workflow/activities/uix" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <TextExpression.NamespacesForImplementation>
+    <scg:List x:TypeArguments="x:String" Capacity="32">
+      <x:String>System.Activities</x:String>
+      <x:String>System.ComponentModel</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Data</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>System.Text</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+    </scg:List>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <sco:Collection x:TypeArguments="AssemblyReference">
+      <AssemblyReference>System.Core</AssemblyReference>
+      <AssemblyReference>System.Data</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>UiPath.UiAutomation.Activities</AssemblyReference>
+    </sco:Collection>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence DisplayName="UI Automation Test" sap:VirtualizedContainerService.HintSize="500,600" sap2010:Annotation.AnnotationText="Test UI automation activities with selectors and properties">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="x:String" Name="inputText" Default="test@example.com" />
+      <Variable x:TypeArguments="x:Boolean" Name="elementExists" Default="False" />
+    </Sequence.Variables>
+    <sap:WorkflowViewStateService.ViewState>
+      <scg:Dictionary x:TypeArguments="x:String, x:Object">
+        <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+      </scg:Dictionary>
+    </sap:WorkflowViewStateService.ViewState>
+    <ui:Click ActivateBefore="True" ClickType="Single" DisplayName="Click Login Button" sap:VirtualizedContainerService.HintSize="334,106" TimeoutMS="30000">
+      <ui:Click.CursorPosition>
+        <ui:CursorPosition OffsetX="0" OffsetY="0" Position="Center" />
+      </ui:Click.CursorPosition>
+      <ui:Click.Target>
+        <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" InformativeScreenshot="abc123" Selector="&lt;webctrl id='login-button' tag='BUTTON' /&gt;" TimeoutMS="30000" WaitForReady="COMPLETE">
+          <ui:Target.SearchSteps>
+            <ui:SearchStep TargetType="Element">
+              <ui:SearchStep.SearchParams>
+                <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                  <x:String x:Key="tag">BUTTON</x:String>
+                  <x:String x:Key="id">login-button</x:String>
+                </scg:Dictionary>
+              </ui:SearchStep.SearchParams>
+            </ui:SearchStep>
+          </ui:Target.SearchSteps>
+        </ui:Target>
+      </ui:Click.Target>
+    </ui:Click>
+    <ui:TypeInto ActivateBefore="True" ClickBeforeTyping="True" DelayBefore="500" DelayBetweenKeys="10" DisplayName="Type Email" sap:VirtualizedContainerService.HintSize="334,134" SimulateType="False" Text="[inputText]">
+      <ui:TypeInto.Target>
+        <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Selector="&lt;webctrl id='email' tag='INPUT' type='email' /&gt;" TimeoutMS="30000" WaitForReady="COMPLETE">
+          <ui:Target.SearchSteps>
+            <ui:SearchStep TargetType="Element">
+              <ui:SearchStep.SearchParams>
+                <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                  <x:String x:Key="tag">INPUT</x:String>
+                  <x:String x:Key="type">email</x:String>
+                  <x:String x:Key="id">email</x:String>
+                </scg:Dictionary>
+              </ui:SearchStep.SearchParams>
+            </ui:SearchStep>
+          </ui:Target.SearchSteps>
+        </ui:Target>
+      </ui:TypeInto.Target>
+    </ui:TypeInto>
+    <ui:ElementExists DisplayName="Check Submit Button" sap:VirtualizedContainerService.HintSize="334,106" Exists="[elementExists]">
+      <ui:ElementExists.Target>
+        <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Selector="&lt;webctrl id='submit' tag='BUTTON' type='submit' /&gt;" TimeoutMS="10000" WaitForReady="COMPLETE" />
+      </ui:ElementExists.Target>
+    </ui:ElementExists>
+    <If DisplayName="Submit if Available" sap:VirtualizedContainerService.HintSize="334,246">
+      <If.Condition>
+        <InArgument x:TypeArguments="x:Boolean">[elementExists]</InArgument>
+      </If.Condition>
+      <If.Then>
+        <ui:Click DisplayName="Click Submit" sap:VirtualizedContainerService.HintSize="334,106" TimeoutMS="30000">
+          <ui:Click.CursorPosition>
+            <ui:CursorPosition OffsetX="0" OffsetY="0" Position="Center" />
+          </ui:Click.CursorPosition>
+          <ui:Click.Target>
+            <ui:Target ClippingRegion="{x:Null}" Element="{x:Null}" Selector="&lt;webctrl id='submit' tag='BUTTON' type='submit' /&gt;" TimeoutMS="30000" WaitForReady="COMPLETE" />
+          </ui:Click.Target>
+        </ui:Click>
+      </If.Then>
+      <If.Else>
+        <ui:LogMessage DisplayName="Submit not found" Level="Warn" Message="Submit button not found on page" sap:VirtualizedContainerService.HintSize="334,91" />
+      </If.Else>
+    </If>
+  </Sequence>
+</Activity>

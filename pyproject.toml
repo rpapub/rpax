@@ -1,0 +1,240 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "rpax"
+dynamic = ["version"]
+description = "Proof-of-concept CLI tool for parsing UiPath projects into structured JSON artifacts"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "rpapub", email = "contact@rpapub.dev"}
+]
+keywords = ["uipath", "rpa", "automation", "cli", "parsing", "documentation", "ci", "analysis"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console", 
+    "Intended Audience :: Developers",
+    "License :: Other/Proprietary License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Utilities"
+]
+requires-python = ">=3.11"
+dependencies = [
+    "typer>=0.9.0,<1.0.0",
+    "pydantic[email]>=2.0.0,<3.0.0",
+    "lxml>=4.9.0,<6.0.0",
+    "defusedxml>=0.7.1,<1.0.0",
+    "rich>=13.0.0,<14.0.0",
+    "pathlib>=1.0.1",
+    "jsonschema>=4.17.0,<5.0.0",
+    "psutil>=5.9.0,<6.0.0",
+    "pyyaml>=6.0.2",
+    "tomli-w>=1.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-xdist>=3.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.5.0",
+    "pre-commit>=3.0.0",
+    "types-lxml>=2023.0.0.0",
+    "build>=1.0.0",
+    "twine>=4.0.0"
+]
+test = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0", 
+    "pytest-xdist>=3.0.0",
+    "requests>=2.25.0"
+]
+api = [
+    "fastapi>=0.104.0,<1.0.0",
+    "uvicorn[standard]>=0.24.0,<1.0.0"
+]
+mcp = [
+    "mcp>=1.0.0,<2.0.0"
+]
+
+[project.scripts]
+rpax = "rpax.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/rpapub/rpax"
+Repository = "https://github.com/rpapub/rpax"
+Issues = "https://github.com/rpapub/rpax/issues"
+Documentation = "https://rpapub.dev/rpax"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src/rpax",
+    "/src/xaml_parser",
+    "/README.md",
+    "/LICENSE",
+    "/AUTHORS.md"
+]
+
+[tool.hatch.version]
+path = "src/rpax/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rpax", "src/xaml_parser"]
+
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # Exclude generated files and vendor directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings  
+    "F",   # pyflakes
+    "I",   # isort
+    "C",   # mccabe
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "N",   # pep8-naming
+    "S",   # flake8-bandit (security)
+    "T20", # flake8-print
+    "PT",  # flake8-pytest-style
+    "Q",   # flake8-quotes
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "S101",  # use of assert detected (pytest uses assert)
+    "S603",  # subprocess call: check for execution of untrusted input
+    "S607",  # starting a process with a partial executable path
+]
+exclude = [
+    ".bzr",
+    ".direnv", 
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+[tool.ruff.per-file-ignores]
+"tests/**/*" = ["S101", "PLR2004", "PLR0913", "PT023"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true  
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = [
+    "lxml.*",
+    "defusedxml.*"
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = [
+    "-ra",
+    "--strict-markers", 
+    "--strict-config",
+    "--cov=rpax",
+    "--cov-report=term-missing",
+    "--cov-report=html:htmlcov",
+    "--cov-fail-under=80"
+]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "performance: marks tests as performance benchmarks"
+]
+
+[tool.coverage.run]
+source = ["src/rpax"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError", 
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.rpax.api_generation]
+version = "v0"
+base_path = "/api"
+title = "rpax API"
+description = "UiPath project analysis API - generated from CLI blueprint"
+
+[dependency-groups]
+dev = [
+    "pluggy>=1.6.0",
+    "pytest>=8.4.2",
+    "pytest-cov>=6.2.1",
+    "pytest-xdist>=3.8.0",
+]

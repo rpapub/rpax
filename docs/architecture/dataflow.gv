@@ -1,0 +1,84 @@
+digraph rpax_flow {
+  rankdir=LR;
+  fontsize=12;
+  labelloc="t";
+  label="rpax architecture — dataflow (write vs read)";
+
+  node [fontsize=11];
+
+  // ===== Core storage (center) =====
+  Lake [label="rpax-lake\nlake/{projectSlug}/runs/{runId}\n(immutable artifacts)", shape=cylinder, style="filled", fillcolor="#f2f2f2"];
+
+  // Key artifacts (hang off the lake)
+  Manifest   [label="manifest.json", shape=note];
+  WfIndex    [label="workflows.index.json", shape=note];
+  Invokes    [label="invocations.jsonl", shape=note];
+  ActTree    [label="activities.tree/*", shape=note];
+  ActCfg     [label="activities.cfg/*", shape=note];
+  ActRefs    [label="activities.refs/*", shape=note];
+  Paths      [label="paths/*.paths.jsonl", shape=note];
+  Metrics    [label="metrics/*", shape=note];
+
+  { edge [style=dotted, arrowhead=none];
+    Lake -> Manifest;
+    Lake -> WfIndex;
+    Lake -> Invokes;
+    Lake -> ActTree;
+    Lake -> ActCfg;
+    Lake -> ActRefs;
+    Lake -> Paths;
+    Lake -> Metrics;
+  }
+
+  // ===== Producer (left) =====
+  Parser [label="Layer 1: Parser\n(CLI: rpax parse)\n• discover • normalize • extract", shape=box, style="rounded"];
+  { rank=same; Parser; Lake; }
+
+  // Write path (left -> center)
+  edge [color="#e67e22", penwidth=2];
+  Parser -> Lake [label="write artifacts"];
+
+  // Source at bottom feeding Parser
+  UiPath [label="UiPath Studio Projects\n(project.json + *.xaml)", shape=box, style="rounded,dashed"];
+  { rank=sink; UiPath; }
+  edge [color="black", penwidth=1];
+  UiPath -> Parser [label="files"];
+
+  // ===== Consumers (right) =====
+  Validation [label="Layer 2: Validation & CI\n(read-only gates)", shape=box, style="rounded"];
+  API        [label="Layer 3: Access API\n(read-only HTTP)\nETag, NDJSON", shape=box, style="rounded"];
+  MCP        [label="Layer 4: MCP / Integration\nuipath://{slug}/… (list/read)", shape=box, style="rounded"];
+
+  // Read paths (center -> right)
+  edge [style=dashed, color="#1f77b4", penwidth=2];
+  Lake -> Validation [label="read"];
+  Lake -> API        [label="read"];
+  Lake -> MCP        [label="read"];
+
+  // ===== Clients (top) =====
+  Dev [label="RPA Dev (PowerShell)\nuses rpax CLI", shape=box, style="rounded,filled", fillcolor="#eef7ff"];
+  CI  [label="CI / PR bots", shape=box, style="rounded,filled", fillcolor="#eef7ff"];
+  LLM [label="LLM / Tools\n(MCP client)", shape=box, style="rounded,filled", fillcolor="#eef7ff"];
+  { rank=source; Dev; CI; LLM; }
+
+  edge [color="black", style=solid, penwidth=1];
+  Dev -> Parser [label="rpax parse"];
+  CI  -> Validation [label="run gates"];
+  CI  -> API        [label="HTTP GET"];
+  LLM -> MCP        [label="list/read"];
+
+  // ===== Legend =====
+//  subgraph cluster_legend {
+//    label="Legend";
+//    fontsize=10;
+//    style="rounded,dashed";
+//    Lw [label="write", shape=plaintext];
+//    Lr [label="read", shape=plaintext];
+//    Lx [label="artifact (note)", shape=plaintext];
+//    Aw [label="", width=0, height=0, shape=point, color="#e67e22"];
+//    Ar [label="", width=0, height=0, shape=point, color="#1f77b4"];
+//    edge [penwidth=2];
+//    Aw -> Lw [color="#e67e22"];
+//    Ar -> Lr [style=dashed, color="#1f77b4"];
+  }
+}

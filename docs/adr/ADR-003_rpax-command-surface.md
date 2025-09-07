@@ -76,8 +76,22 @@ rpax
  └─ mcp-export [--out dir]         # Emit MCP resource templates
 ```
 
+## Roadmap Phases
+
+* **v0.0.1:** Core commands - `parse`, `help`, basic `list` workflows
+* **v0.1:** Add `graph` (Mermaid), `validate`, `explain`, enhanced `list`  
+* **v0.2:** Add `diff`, `summarize`, advanced graph options (Graphviz)
+* **v0.3+:** Add `mcp-export`, plugin support, advanced config management
+
 ## Consequences
 
 * Stable user-facing surface for docs/CI and integrations.
 * Requires command-level versioning and deprecation policy.
 * Leaves room for future plugin model without breaking surface.
+
+## Related ADRs
+
+* ADR-004: Configuration management via `config` command
+* ADR-005: Graph rendering via `graph` command (Mermaid/Graphviz)
+* ADR-010: Validation rules via `validate` command
+* ADR-015: CLI implementation using Typer framework

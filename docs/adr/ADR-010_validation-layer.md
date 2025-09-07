@@ -54,6 +54,16 @@ No XAML schema checks; no dynamic path evaluation; no vendor rule enforcement.
 
 Run immediately after Parser; fail fast only on **pipeline blockers**; emit concise warnings otherwise.
 
+## Roadmap Phase
+
+* **v0.1:** Lightweight validation for pipeline readiness
+
 ## Consequences
 
 Fast, deterministic guardrails; stable inputs for Access API/MCP; semantic depth deferred to vendor IDE.
+
+## Related ADRs
+
+* ADR-002: Layer 2 of the architectural stack
+* ADR-004: Configuration fields for validation behavior
+* ADR-009: Validates parser artifacts from this specification

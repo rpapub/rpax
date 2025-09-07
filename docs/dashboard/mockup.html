@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>rpax Diagnostics</title>
+
+<style>
+  /* =========================================================
+    rpax Diagnostics — Full CSS (Solarized + Brand Orange)
+    - Full reset, tokens, light/dark themes, components
+    - Brand orange ONLY on header; header pills auto-invert
+    - High-contrast, a11y-focused
+    ========================================================= */
+
+  /* 0) Reset / Sanitize */
+  *,*::before,*::after{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth}
+  body{margin:0}
+  h1,h2,h3,h4,h5,h6,p,figure,blockquote,dl,dd{margin:0}
+  ul[role='list'],ol[role='list']{list-style:none;padding:0;margin:0}
+  img,svg,video,canvas,audio,iframe,embed,object{display:block}
+  img,video{max-width:100%;height:auto}
+  button,input,select,textarea{font:inherit;color:inherit;margin:0}
+  button{background:none;border:0;padding:0;cursor:pointer}
+  table{border-collapse:collapse;border-spacing:0}
+  a{color:inherit;text-decoration:none}
+  pre,code,kbd,samp{font-family:ui-monospace,SFMono-Regular,Consolas,Monaco,monospace}
+  [hidden]{display:none!important}
+  @media (prefers-reduced-motion:reduce){
+    *,:before,:after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+  }
+
+  /* 1) Tokens */
+  :root{
+    /* Solarized base */
+    --base03:#002b36; --base02:#073642; --base01:#586e75; --base00:#657b83;
+    --base0:#839496;  --base1:#93a1a1;  --base2:#eee8d5;  --base3:#fdf6e3;
+    --yellow:#b58900; --orange:#cb4b16; --red:#dc322f; --magenta:#d33682;
+    --violet:#6c71c4; --blue:#268bd2;  --cyan:#2aa198;  --green:#859900;
+
+    /* Brand */
+    --brand: var(--orange);
+    --on-brand:#ffffff;
+    --on-brand-muted:rgba(255,255,255,.9);
+    --on-brand-faint:rgba(255,255,255,.24);
+    --on-brand-border:rgba(255,255,255,.40);
+
+    /* Secondary brand = Solarized green */
+    --brand-2: var(--green);
+    --on-brand-2:#ffffff;
+    --brand-2-border: color-mix(in oklab, var(--brand-2), #000 25%);
+
+    /* Sizes */
+    --gap-1:6px; --gap-2:12px; --gap-3:16px; --gap-4:24px;
+    --rad-1:6px; --rad-2:10px; --rad-3:14px;
+    --bw:1.25px;
+
+    /* Fonts */
+    --font-sans: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Noto Sans",sans-serif;
+    --font-mono: ui-monospace,SFMono-Regular,Consolas,Monaco,monospace;
+    --fs-12:12px; --fs-14:14px; --fs-16:16px; --fs-18:18px;
+
+    /* Elevation */
+    --shadow-1: 0 1px 2px rgba(0,0,0,.08),0 6px 18px rgba(0,0,0,.06);
+    --shadow-2: 0 8px 28px rgba(0,0,0,.16);
+
+    /* LIGHT (high-contrast) */
+    --bg:#f8f0d7;
+    --panel:#fff4cc;
+    --muted:#4a5961;
+    --txt:#243139;
+    --ok:#4a8b00;
+    --warn:#8a6a00;
+    --err:#b32626;
+    --pri:#1b5e93;     /* neutral button */
+    --bd:#c7b07c;
+    --focus:#0f6fb8;
+    --field:#fff0c2;
+    --chip:#fff1c6;
+    --header:var(--brand);
+    --nav:#efdeb5;
+    --toast:#fff3cf;
+  }
+
+  /* DARK */
+  :root[data-theme="dark"]{
+    --bg:#062731;
+    --panel:#0e3a45;
+    --muted:#c6d6da;
+    --txt:#e9f2f4;
+    --ok:#8fd05a;
+    --warn:#ffd166;
+    --err:#ff6b6b;
+    --pri:#4aa3e0;
+    --bd:#1e5c68;
+    --focus:#5db8ff;
+    --field:#0a2a33;
+    --chip:#0a3340;
+    --header:var(--brand);
+    --nav:#08252d;
+    --toast:#0f3640;
+  }
+
+  /* 2) Base / Typography */
+  body{background:var(--bg);color:var(--txt);font:var(--fs-14)/1.5 var(--font-sans)}
+  main{display:block}
+  h1{font-size:28px;line-height:1.2}
+  h2{font-size:22px;line-height:1.25}
+  h3{font-size:18px;line-height:1.3}
+  .k{color:var(--muted);font-size:var(--fs-12)}
+  :focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:4px}
+
+  /* 3) Layout */
+  header,footer{padding:12px 16px}
+  header{
+    background:var(--header);
+    color:var(--on-brand);
+    box-shadow:inset 0 -1px 0 rgba(0,0,0,.18);
+    padding-right: 140px;
+  }
+  footer{
+    border-top:var(--bw) solid var(--bd);
+    background:transparent;color:var(--muted);font-size:var(--fs-12)
+  }
+  .wrap{display:grid;grid-template-columns:240px 1fr;min-height:calc(100dvh - 84px)}
+  @media (max-width:900px){.wrap{grid-template-columns:1fr} nav{order:2}}
+
+  nav{
+    border-right:var(--bw) solid var(--bd);padding:12px;background:var(--nav)
+  }
+  nav button{
+    width:100%;text-align:left;background:transparent;border:var(--bw) solid transparent;
+    color:#38464d;padding:10px 12px;border-radius:10px
+  }
+  :root[data-theme="dark"] nav button{color:#e0edf0}
+  nav button[aria-current="page"]{
+    background:var(--chip);border-color:var(--bd);
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.03)
+  }
+  nav button:hover{border-color:color-mix(in oklab,var(--bd),#000 12%)}
+  main{padding:16px}
+
+  /* 4) Components */
+  .grid{display:grid;gap:var(--gap-2)}
+  .cards{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  .card{
+    background:var(--panel);border:var(--bw) solid var(--bd);border-radius:var(--rad-2);
+    padding:12px;box-shadow:var(--shadow-1)
+  }
+  .card .k{font-weight:600;color:var(--txt)} /* card titles more legible */
+
+  /* Badges / Pills */
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:6px 12px;border-radius:999px;border:var(--bw) solid var(--bd);
+    background:var(--chip);font-size:var(--fs-12);line-height:1
+  }
+  .badge code{font-family:var(--font-mono);font-size:11px}
+
+  /* Header-scoped pills (invert for contrast) */
+  header .badge{
+    background:var(--on-brand-faint);
+    color:var(--on-brand);
+    border-color:var(--on-brand-border);
+    font-weight:600;
+    box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 1px 6px rgba(0,0,0,.15);
+  }
+  header .badge .k{color:var(--on-brand-muted)}
+  header .badge > span[aria-hidden]{color:rgba(255,255,255,.95)}
+
+  /* Status helpers */
+  .ok{color:var(--ok);font-weight:600}
+  .warn{color:var(--warn);font-weight:600}
+  .err{color:var(--err);font-weight:600}
+
+  /* Rows */
+  .row{display:flex;gap:var(--gap-2);flex-wrap:wrap;align-items:center}
+
+  /* Forms */
+  .control{display:grid;gap:6px;min-width:220px}
+  label{display:block}
+  input[type="text"],select,textarea{
+    width:100%;background:var(--field);border:var(--bw) solid var(--bd);color:inherit;
+    padding:12px;border-radius:10px
+  }
+  input::placeholder,textarea::placeholder{color:color-mix(in oklab,var(--muted),transparent 20%)}
+  select{
+    appearance:none;background-image:
+    linear-gradient(45deg,transparent 50%,currentColor 50%),
+    linear-gradient(135deg,currentColor 50%,transparent 50%);
+    background-position:calc(100% - 18px) 55%,calc(100% - 12px) 55%;
+    background-size:6px 6px;background-repeat:no-repeat;padding-right:30px
+  }
+
+  /* Buttons */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    min-height:40px;min-width:40px;
+    background:var(--pri);color:#fff;border:0;border-radius:10px;
+    padding:9px 14px;box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 2px 6px rgba(0,0,0,.15)
+  }
+  .btn[disabled]{opacity:.55;cursor:not-allowed}
+  .btn.ghost{background:transparent;color:inherit;border:var(--bw) solid var(--bd);box-shadow:none}
+
+  /* Theme toggle */
+  .theme-toggle{
+    display:inline-flex;align-items:center;gap:8px;min-height:40px;min-width:40px;
+    background:var(--on-brand-faint);color:var(--on-brand);
+    border:1px solid var(--on-brand-border);border-radius:999px;padding:6px 12px
+  }
+  .theme-toggle[aria-pressed="true"]{outline:2px solid rgba(255,255,255,.6);outline-offset:2px}
+
+  /* Progress & Pre */
+  progress{width:100%;height:12px}
+  pre{
+    background:var(--panel);border:var(--bw) solid var(--bd);padding:12px;border-radius:10px;
+    overflow:auto;font-family:var(--font-mono);font-size:var(--fs-12);color:inherit
+  }
+
+  /* Toast */
+  .toast{
+    position:fixed;right:12px;bottom:12px;background:var(--toast);
+    border:var(--bw) solid var(--bd);color:inherit;padding:10px 12px;border-radius:12px;
+    box-shadow:var(--shadow-2);max-width:360px
+  }
+
+  /* 5) Utilities */
+  .u-center-between{display:flex;align-items:center;justify-content:space-between}
+  .u-full{width:100%}
+  .u-mt-1{margin-top:var(--gap-1)} .u-mt-2{margin-top:var(--gap-2)} .u-mt-3{margin-top:var(--gap-3)}
+  .u-mb-1{margin-bottom:var(--gap-1)} .u-mb-2{margin-bottom:var(--gap-2)} .u-mb-3{margin-bottom:var(--gap-3)}
+  .u-p-1{padding:var(--gap-1)} .u-p-2{padding:var(--gap-2)} .u-p-3{padding:var(--gap-3)}
+
+  /* 6) App IDs */
+  #content{outline:0}
+  #events,#services,#connectors,#config{white-space:pre-wrap;word-break:break-word}
+  #progressWrap[hidden],#downloadWrap[hidden]{display:none!important}
+
+  /* 7) Print */
+  @media print{
+    header,footer,.toast,nav{display:none!important}
+    body{background:#fff;color:#000}
+    .card{box-shadow:none;border-color:#bbb}
+  }
+@media (max-width:720px){
+  header{
+    padding-right:16px; /* back to normal */
+  }
+}
+</style>
+
+<style>
+.ribbon{
+  position:fixed; top:40px; right:-60px;
+  transform:rotate(45deg);
+  background:var(--brand-2);
+  color:var(--on-brand-2);
+  padding:8px 60px;
+  font:600 14px/1 system-ui,sans-serif;
+  text-align:center; text-decoration:none;
+  box-shadow:
+    0 0 0 1px var(--brand-2-border) inset,
+    0 4px 8px rgba(0,0,0,.25); /* drop shadow */
+  z-index:1000;
+}
+.ribbon:hover{ filter:brightness(1.1); }
+
+@media (max-width:720px){
+  .ribbon{
+    position:static; transform:none;
+    margin:8px 12px; padding:10px 12px;
+    border-radius:6px; box-shadow:none; z-index:auto;
+  }
+}
+</style>
+
+</head>
+<body>
+<a class="ribbon"
+   href="https://github.com/rpapub/rpax"
+   target="_blank"
+   rel="noopener noreferrer">
+  Fork me on GitHub
+</a>
+<header class="row" role="banner" aria-label="Header">
+  <strong>rpax Diagnostics</strong>
+  <span class="badge" title="Environment"><span aria-hidden>●</span><span id="env">—</span></span>
+  <span class="badge" title="Instance"><span class="k">Instance</span><code id="inst">—</code></span>
+
+  <div style="margin-left:auto" class="row">
+    <button id="quickGen" class="btn">Generate IssueSaniBundle</button>
+    <button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false" title="Toggle light/dark">
+      <span aria-hidden id="themeIcon">☀️</span><span class="k" id="themeLabel">Light</span>
+    </button>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav aria-label="Sections">
+    <button data-tab="overview" aria-current="page">Overview</button>
+    <button data-tab="generator">IssueSaniBundle Generator</button>
+    <button data-tab="details">Details</button>
+  </nav>
+
+  <main id="content" tabindex="-1">
+    <!-- Overview -->
+    <section data-panel="overview" class="grid">
+      <div class="grid cards">
+        <div class="card"><div class="k">Health</div><div id="healthStatus" class="warn">—</div></div>
+        <div class="card"><div class="k">Projects</div><div id="cpu">—</div></div>
+        <div class="card"><div class="k">Lake Size</div><div id="mem">—</div></div>
+        <div class="card"><div class="k">Last Parse</div><div id="queue">—</div></div>
+      </div>
+      <div class="card">
+        <div class="row" style="justify-content:space-between;align-items:center">
+          <strong>Recent parsing activity</strong>
+          <button id="refresh" class="ghost btn">Refresh</button>
+        </div>
+        <pre id="events" aria-live="polite">—</pre>
+      </div>
+    </section>
+
+    <!-- Generator -->
+    <section data-panel="generator" hidden class="grid">
+      <div class="card">
+        <h2 style="margin:0 0 8px">Generate IssueSaniBundle</h2>
+        <p class="k">Safe diagnostic package for GitHub issue reporting. Redaction preset defaults to <strong>Safe</strong> (file paths, project names, secrets removed).</p>
+        <form id="genForm" class="grid" onsubmit="return false;">
+          <div class="row">
+            <div class="control" style="min-width:220px">
+              <label for="scope">Scope</label>
+              <select id="scope">
+                <option value="minimal">Minimal (health + config summary)</option>
+                <option value="standard" selected>Standard (parsing logs, lake index, config redacted)</option>
+                <option value="extended">Extended (full artifacts, validation reports, detailed metrics)</option>
+              </select>
+            </div>
+            <div class="control" style="min-width:220px">
+              <label for="redact">Redaction preset</label>
+              <select id="redact">
+                <option value="safe" selected>Safe (recommended)</option>
+                <option value="strict">Strict (aggressive)</option>
+                <option value="custom">Custom (server-side profile)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <label><input id="inclLogs" type="checkbox" /> Include raw workflow files (may contain sensitive UiPath data)</label>
+          </div>
+
+          <div class="row" style="align-items:center;gap:8px">
+            <button id="genBtn" class="btn">Generate</button>
+            <span id="genHint" class="k">IssueSaniBundle is prepared entirely offline.</span>
+          </div>
+
+          <div id="progressWrap" hidden>
+            <label class="k" for="prog">Progress</label>
+            <progress id="prog" max="100" value="0"></progress>
+            <div class="k"><span id="progText">Starting…</span></div>
+          </div>
+
+          <div id="downloadWrap" hidden class="row" style="align-items:center">
+            <a id="dl" class="btn" download>Download IssueSaniBundle</a>
+            <button id="reset" class="ghost btn">New generation</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <strong>Preview (file list)</strong>
+        <pre id="preview">—</pre>
+      </div>
+    </section>
+
+    <!-- Details -->
+    <section data-panel="details" hidden class="grid">
+      <div class="card">
+        <strong>Projects</strong>
+        <pre id="services">—</pre>
+      </div>
+      <div class="card">
+        <strong>Validation Status</strong>
+        <pre id="connectors">—</pre>
+      </div>
+      <div class="card">
+        <strong>Config (redacted)</strong>
+        <pre id="config">—</pre>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer role="contentinfo">
+  <span id="build">—</span> •
+  <span id="ver">—</span> •
+  <span id="ts"></span>
+</footer>
+
+<div id="toast" class="toast" hidden role="status" aria-live="polite"></div>
+
+<script>
+/* --- theme --- */
+(function themeInit(){
+  const saved = localStorage.getItem('theme');           // 'light' | 'dark' | null
+  const preferred = saved || 'light';                     // default to light
+  document.documentElement.setAttribute('data-theme', preferred);
+  const btn = document.getElementById('themeToggle');
+  const icon = document.getElementById('themeIcon');
+  const label = document.getElementById('themeLabel');
+
+  function syncUI(mode){
+    btn.setAttribute('aria-pressed', mode==='dark' ? 'true' : 'false');
+    icon.textContent = mode==='dark' ? '🌙' : '☀️';
+    label.textContent = mode==='dark' ? 'Dark' : 'Light';
+  }
+  syncUI(preferred);
+
+  btn.addEventListener('click', ()=>{
+    const cur = document.documentElement.getAttribute('data-theme') || 'light';
+    const next = cur === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    syncUI(next);
+  });
+})();
+
+/* --- simple router --- */
+const tabs=[...document.querySelectorAll('nav button')];
+const panels=[...document.querySelectorAll('[data-panel]')];
+function show(tab){
+  tabs.forEach(b=>b.setAttribute('aria-current', b.dataset.tab===tab?'page':'false'));
+  panels.forEach(p=>p.hidden = p.dataset.panel!==tab);
+  document.getElementById('content').focus();
+}
+tabs.forEach(b=>b.addEventListener('click',()=>show(b.dataset.tab)));
+show('overview');
+
+/* --- helpers --- */
+const toastEl=document.getElementById('toast');
+function toast(msg,ms=3000){ toastEl.textContent=msg; toastEl.hidden=false; setTimeout(()=>toastEl.hidden=true,ms); }
+function qs(id){ return document.getElementById(id); }
+function now(){ qs('ts').textContent = new Date().toLocaleString(); } now();
+
+/* --- populate header from server (optional) --- */
+(async function bootstrap(){
+  try{
+    const r = await fetch('/api/diag/meta'); // { env, instance, build, version }
+    if(r.ok){
+      const m = await r.json();
+      qs('env').textContent = m.env||'—';
+      qs('inst').textContent = m.instance||'—';
+      qs('build').textContent = m.build||'—';
+      qs('ver').textContent = m.version||'—';
+    }
+  }catch{}
+})();
+
+/* --- overview refresh --- */
+async function refresh(){
+  // Try real health endpoint first, then fall back to mock diag endpoint
+  await refreshHealth();
+  await refreshDiagnostics();
+}
+
+async function refreshHealth(){
+  try{
+    // Real API call to rpax health endpoint (absolute URL to API server)
+    const healthResponse = await fetch('http://127.0.0.1:8623/health');
+    if(healthResponse.ok){
+      const health = await healthResponse.json();
+      const el = qs('healthStatus');
+      // health.status is 'ok' from our actual endpoint
+      const isHealthy = health.status === 'ok';
+      el.className = isHealthy ? 'ok' : 'err';
+      el.textContent = isHealthy ? 'OK' : 'ERROR';
+      el.title = `Last check: ${health.timestamp}`;
+      return true; // Success
+    }
+  }catch(e){
+    // Graceful fallback - health check failed
+    const el = qs('healthStatus');
+    el.className = 'warn';
+    el.textContent = 'API OFFLINE';
+    el.title = 'Cannot reach rpax API server (127.0.0.1:8623)';
+  }
+  return false; // Failed
+}
+
+async function refreshDiagnostics(){
+  try{
+    // Mock diagnostic endpoint (future implementation)
+    const r = await fetch('/api/diag/overview');
+    if(!r.ok) throw 0;
+    const d = await r.json();
+    qs('cpu').textContent = d.projects||'—';
+    qs('mem').textContent = d.lakeSize||'—'; 
+    qs('queue').textContent = d.lastParse||'—';
+    qs('events').textContent = (d.events&&d.events.length)? d.events.map(e=>`• ${e}`).join('\n') : '—';
+  }catch{
+    // Graceful fallback for diagnostics
+    qs('cpu').textContent = '—';
+    qs('mem').textContent = '—';
+    qs('queue').textContent = '—';
+    qs('events').textContent = '—';
+  }
+}
+qs('refresh').addEventListener('click', refresh);
+refresh();
+
+/* --- generator --- */
+const genBtn=qs('genBtn'), quickGen=qs('quickGen');
+const progWrap=qs('progressWrap'), prog=qs('prog'), progText=qs('progText');
+const dlWrap=qs('downloadWrap'), dl=qs('dl'), reset=qs('reset'), preview=qs('preview');
+async function startGen(){
+  const payload = {
+    scope: qs('scope').value,
+    redaction: qs('redact').value,
+    includeVerboseLogs: qs('inclLogs').checked
+  };
+  genBtn.disabled = true; quickGen.disabled = true;
+  progWrap.hidden=false; prog.value=5; progText.textContent='Requested…';
+
+  try{
+    const r = await fetch('/api/diag/generate', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(!r.ok) throw new Error('start failed');
+    const { jobId } = await r.json();
+
+    // poll
+    let pct=10, info=null;
+    while(true){
+      await new Promise(res=>setTimeout(res,600));
+      const s = await fetch(`/api/diag/status/${encodeURIComponent(jobId)}`);
+      if(!s.ok) throw new Error('status failed');
+      const j = await s.json(); // { progress, state, preview:[...], downloadPath }
+      pct = j.progress ?? pct;
+      prog.value = Math.max(10, pct);
+      progText.textContent = (j.state||'working') + '… ' + prog.value + '%';
+      if(j.preview) { info = j.preview; preview.textContent = info.join('\n'); }
+      if(j.state==='ready' && j.downloadPath){
+        dl.href = j.downloadPath; dlWrap.hidden=false; toast('IssueSaniBundle ready');
+        break;
+      }
+      if(j.state==='error'){ throw new Error(j.error||'generation error'); }
+    }
+  }catch(e){
+    toast('Generation failed'); progText.textContent='Failed'; prog.classList.add('err');
+  }finally{
+    genBtn.disabled = false; quickGen.disabled = false;
+  }
+}
+genBtn.addEventListener('click', startGen);
+quickGen.addEventListener('click', ()=>{ show('generator'); startGen(); });
+reset.addEventListener('click', ()=>{
+  progWrap.hidden=true; dlWrap.hidden=true; preview.textContent='—'; prog.value=0; progText.textContent='Starting…';
+});
+
+/* --- details --- */
+(async function details(){
+  try{
+    const r = await fetch('/api/diag/details'); // { services, connectors, config }
+    if(!r.ok) return;
+    const d = await r.json();
+    qs('services').textContent = d.services||'—';
+    qs('connectors').textContent = d.connectors||'—';
+    qs('config').textContent = d.config||'—';
+  }catch{}
+})();
+</script>
+</body>
+</html>

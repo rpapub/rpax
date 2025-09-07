@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Activity mc:Ignorable="sap sap2010" x:Class="Main" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <x:Members>
+    <x:Property Name="in_ConfigFile" Type="InArgument(x:String)" sap2010:Annotation.AnnotationText="Path to configuration file" />
+    <x:Property Name="out_ProcessedItems" Type="OutArgument(x:Int32)" sap2010:Annotation.AnnotationText="Number of items processed" />
+  </x:Members>
+  <sap:VirtualizedContainerService.HintSize>400,600</sap:VirtualizedContainerService.HintSize>
+  <sap2010:WorkflowViewState.IdRef>ActivityBuilder_1</sap2010:WorkflowViewState.IdRef>
+  <TextExpression.NamespacesForImplementation>
+    <scg:List x:TypeArguments="x:String" Capacity="26">
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
+      <x:String>System</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Data</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+    </scg:List>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <scg:List x:TypeArguments="AssemblyReference" Capacity="16">
+      <AssemblyReference>System.Activities</AssemblyReference>
+      <AssemblyReference>Microsoft.VisualBasic</AssemblyReference>
+      <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>System.Data</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+    </scg:List>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence DisplayName="Simple Main Process" sap2010:Annotation.AnnotationText="Main workflow that demonstrates basic argument and activity structure for testing" sap:VirtualizedContainerService.HintSize="380,560" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="x:String" Name="ConfigData" sap2010:Annotation.AnnotationText="Configuration data loaded from file" />
+      <Variable x:TypeArguments="x:Int32" Default="0" Name="Counter" />
+    </Sequence.Variables>
+    <sap:WorkflowViewStateService.ViewState>
+      <scg:Dictionary x:TypeArguments="x:String, x:Object">
+        <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+        <x:Boolean x:Key="IsAnnotationDocked">True</x:Boolean>
+      </scg:Dictionary>
+    </sap:WorkflowViewStateService.ViewState>
+    <LogMessage DisplayName="Log Start" sap:VirtualizedContainerService.HintSize="338,93" sap2010:WorkflowViewState.IdRef="LogMessage_1" Level="Info" Message="[&quot;Starting simple test workflow with config: &quot; + in_ConfigFile]" />
+    <InvokeWorkflowFile ArgumentsVariable="{x:Null}" ContinueOnError="{x:Null}" DisplayName="Get Configuration" sap:VirtualizedContainerService.HintSize="338,112" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_1" UnSafe="False" WorkflowFileName="workflows\GetConfig.xaml">
+      <InvokeWorkflowFile.Arguments>
+        <InArgument x:TypeArguments="x:String" x:Key="in_ConfigPath">[in_ConfigFile]</InArgument>
+        <OutArgument x:TypeArguments="x:String" x:Key="out_ConfigData">[ConfigData]</OutArgument>
+      </InvokeWorkflowFile.Arguments>
+    </InvokeWorkflowFile>
+    <If Condition="[Not String.IsNullOrEmpty(ConfigData)]" DisplayName="Check Configuration Loaded" sap:VirtualizedContainerService.HintSize="338,208" sap2010:WorkflowViewState.IdRef="If_1">
+      <If.Then>
+        <InvokeWorkflowFile ArgumentsVariable="{x:Null}" ContinueOnError="{x:Null}" DisplayName="Process Data" sap:VirtualizedContainerService.HintSize="200,112" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_2" UnSafe="False" WorkflowFileName="workflows\ProcessData.xaml">
+          <InvokeWorkflowFile.Arguments>
+            <InArgument x:TypeArguments="x:String" x:Key="in_Data">[ConfigData]</InArgument>
+            <OutArgument x:TypeArguments="x:Int32" x:Key="out_ItemCount">[Counter]</OutArgument>
+          </InvokeWorkflowFile.Arguments>
+        </InvokeWorkflowFile>
+      </If.Then>
+      <If.Else>
+        <LogMessage DisplayName="Log Configuration Error" sap:VirtualizedContainerService.HintSize="200,93" sap2010:WorkflowViewState.IdRef="LogMessage_2" Level="Error" Message="Failed to load configuration from file" />
+      </If.Else>
+    </If>
+    <Assign DisplayName="Set Output" sap:VirtualizedContainerService.HintSize="338,82" sap2010:WorkflowViewState.IdRef="Assign_1">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:Int32">[out_ProcessedItems]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:Int32">[Counter]</InArgument>
+      </Assign.Value>
+    </Assign>
+    <LogMessage DisplayName="Log Completion" sap:VirtualizedContainerService.HintSize="338,93" sap2010:WorkflowViewState.IdRef="LogMessage_3" Level="Info" Message="[&quot;Workflow completed. Processed &quot; + out_ProcessedItems.ToString + &quot; items&quot;]" />
+  </Sequence>
+</Activity>

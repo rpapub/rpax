@@ -1,0 +1,214 @@
+{
+  "$defs": {
+    "Argument": {
+      "description": "UiPath workflow argument model.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "required": {
+          "default": false,
+          "title": "Required",
+          "type": "boolean"
+        },
+        "hasDefault": {
+          "default": false,
+          "title": "Hasdefault",
+          "type": "boolean"
+        },
+        "defaultValue": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Defaultvalue"
+        }
+      },
+      "required": [
+        "name",
+        "type"
+      ],
+      "title": "Argument",
+      "type": "object"
+    },
+    "EntryPoint": {
+      "description": "UiPath project entry point model.",
+      "properties": {
+        "filePath": {
+          "title": "Filepath",
+          "type": "string"
+        },
+        "uniqueId": {
+          "title": "Uniqueid",
+          "type": "string"
+        },
+        "input": {
+          "items": {
+            "$ref": "#/$defs/Argument"
+          },
+          "title": "Input",
+          "type": "array"
+        },
+        "output": {
+          "items": {
+            "$ref": "#/$defs/Argument"
+          },
+          "title": "Output",
+          "type": "array"
+        }
+      },
+      "required": [
+        "filePath",
+        "uniqueId"
+      ],
+      "title": "EntryPoint",
+      "type": "object"
+    }
+  },
+  "description": "JSON Schema for rpax manifest.json artifacts",
+  "properties": {
+    "projectName": {
+      "title": "Projectname",
+      "type": "string"
+    },
+    "projectId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Projectid"
+    },
+    "projectType": {
+      "title": "Projecttype",
+      "type": "string"
+    },
+    "projectRoot": {
+      "title": "Projectroot",
+      "type": "string"
+    },
+    "rpaxVersion": {
+      "title": "Rpaxversion",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "default": "1.0",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "generatedAt": {
+      "title": "Generatedat",
+      "type": "string"
+    },
+    "mainWorkflow": {
+      "title": "Mainworkflow",
+      "type": "string"
+    },
+    "studioVersion": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Studioversion"
+    },
+    "targetFramework": {
+      "default": "Windows",
+      "title": "Targetframework",
+      "type": "string"
+    },
+    "expressionLanguage": {
+      "default": "VisualBasic",
+      "title": "Expressionlanguage",
+      "type": "string"
+    },
+    "entryPoints": {
+      "items": {
+        "$ref": "#/$defs/EntryPoint"
+      },
+      "title": "Entrypoints",
+      "type": "array"
+    },
+    "dependencies": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Dependencies",
+      "type": "object"
+    },
+    "totalWorkflows": {
+      "title": "Totalworkflows",
+      "type": "integer"
+    },
+    "totalInvocations": {
+      "default": 0,
+      "title": "Totalinvocations",
+      "type": "integer"
+    },
+    "parseErrors": {
+      "default": 0,
+      "title": "Parseerrors",
+      "type": "integer"
+    },
+    "scanConfig": {
+      "additionalProperties": true,
+      "title": "Scanconfig",
+      "type": "object"
+    },
+    "validationConfig": {
+      "additionalProperties": true,
+      "title": "Validationconfig",
+      "type": "object"
+    },
+    "workflowIndexFile": {
+      "default": "workflows.index.json",
+      "title": "Workflowindexfile",
+      "type": "string"
+    },
+    "invocationsFile": {
+      "default": "invocations.jsonl",
+      "title": "Invocationsfile",
+      "type": "string"
+    },
+    "activitiesDir": {
+      "default": "activities.json",
+      "title": "Activitiesdir",
+      "type": "string"
+    },
+    "pathsDir": {
+      "default": "paths/",
+      "title": "Pathsdir",
+      "type": "string"
+    }
+  },
+  "required": [
+    "projectName",
+    "projectType",
+    "projectRoot",
+    "rpaxVersion",
+    "generatedAt",
+    "mainWorkflow",
+    "totalWorkflows"
+  ],
+  "title": "rpax-manifest-v1",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/rpapub/rpax/schemas/manifest.v1.schema.json",
+  "version": "1.0"
+}

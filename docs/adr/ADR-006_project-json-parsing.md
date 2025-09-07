@@ -57,8 +57,18 @@ UiPath `project.json` defines roots/metadata needed for analysis, docs, CI.
 * **Docs:** surface metadata/deps; link diagrams to declared roots.
 * **Diff/CI:** stable identifiers enable change detection; show dependency drift.
 
+## Roadmap Phase
+
+* **v0.0.1:** Core project.json parsing for metadata and root discovery
+
 ## Open Questions
 
 1. Treat test entries as roots by default or behind a flag?
 2. Required vs optional handling of `.entryPoints[*].input/output`?
 3. Enum sets for `expressionLanguage` / `targetFramework` scope?
+
+## Related ADRs
+
+* ADR-007: Parser layer uses this as primary input source
+* ADR-009: Generates manifest.json artifact from this data
+* ADR-014: projectSlug generation from project.json metadata

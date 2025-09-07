@@ -1,0 +1,57 @@
+{
+  "workflow_id": "myEmptyWOrkflow",
+  "project_id": "unknown",
+  "project_slug": "unknown",
+  "schema_version": "1.0.0",
+  "generated_at": "2025-09-06T21:05:04.805462+00:00",
+  "rpax_version": "0.0.1",
+  "activities": [
+    {
+      "indent": 0,
+      "displayName": "myEmptyWOrkflow",
+      "tag": "Sequence",
+      "path": "Activity/Sequence",
+      "formattedLine": "- [myEmptyWOrkflow] Sequence (Path: Activity/Sequence)",
+      "nodeId": "Activity/Sequence_1",
+      "depth": 1,
+      "isVisual": true,
+      "children": []
+    }
+  ],
+  "activity_count": 1,
+  "format_version": "gist-style",
+  "total_lines": 1,
+  "total_activities": 1,
+  "entries": [
+    {
+      "indent": 0,
+      "displayName": "myEmptyWOrkflow",
+      "tag": "Sequence",
+      "path": "Activity/Sequence",
+      "formattedLine": "- [myEmptyWOrkflow] Sequence (Path: Activity/Sequence)",
+      "nodeId": "Activity/Sequence_1",
+      "depth": 1,
+      "isVisual": true,
+      "children": []
+    }
+  ],
+  "metadata": {
+    "source_file": "D:\\github.com\\rpapub\\rpax-corpuses\\c25v001_CORE_00000001\\Foo\\myEmptyWOrkflow.xaml",
+    "generation_method": "enhanced-visual-detection",
+    "parser_metadata": {
+      "workflow_id": "myEmptyWOrkflow",
+      "variables": [],
+      "arguments": [],
+      "imports": [],
+      "namespace_map": {
+        "{http://schemas.openxmlformats.org/markup-compatibility/2006}Ignorable": "sap sap2010",
+        "{http://schemas.microsoft.com/winfx/2006/xaml}Class": "myEmptyWOrkflow",
+        "VisualBasic.Settings": "{x:Null}",
+        "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "myEmptyWOrkflow_1"
+      }
+    }
+  },
+  "expanded_pseudocode": [],
+  "expansion_config": {},
+  "generation_config": {}
+}

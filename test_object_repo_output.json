@@ -1,0 +1,357 @@
+{
+  "repository_summary": {
+    "library_id": "VghXUu22RkytYUIM7zleTQ",
+    "library_type": "Library",
+    "apps_count": 1,
+    "total_targets": 7
+  },
+  "mcp_resources": [
+    {
+      "uri": "rpax://luckylawrencium-test/object-repository",
+      "name": "Object Repository Library (luckylawrencium-test)",
+      "description": "UiPath Object Repository with 1 applications and UI targets",
+      "mimeType": "application/json",
+      "content": {
+        "type": "object_repository_library",
+        "library_id": "VghXUu22RkytYUIM7zleTQ",
+        "library_type": "Library",
+        "apps_count": 1,
+        "created": "2024-01-08T13:24:10.8889094Z",
+        "updated": "2024-01-08T13:24:10.8889094Z",
+        "apps": [
+          {
+            "app_id": "lZCiVWJtT0WIT4f9IOkz1w",
+            "name": "Calculator",
+            "description": "Windows Calculator: A simple yet powerful calculator that ships with Windows.\r\n\r\nhttps://github.com/microsoft/calculator",
+            "targets_count": 7
+          }
+        ]
+      }
+    },
+    {
+      "uri": "rpax://luckylawrencium-test/object-repository/apps/lZCiVWJtT0WIT4f9IOkz1w",
+      "name": "Object Repository App: Calculator",
+      "description": "UI automation targets for Calculator (7 targets)",
+      "mimeType": "application/json",
+      "content": {
+        "type": "object_repository_app",
+        "app_id": "lZCiVWJtT0WIT4f9IOkz1w",
+        "name": "Calculator",
+        "description": "Windows Calculator: A simple yet powerful calculator that ships with Windows.\r\n\r\nhttps://github.com/microsoft/calculator",
+        "reference": "VghXUu22RkytYUIM7zleTQ/lZCiVWJtT0WIT4f9IOkz1w",
+        "created": "2024-01-08T13:24:10.9317403Z",
+        "updated": "2024-01-08T16:20:59.4401348Z",
+        "targets": [
+          {
+            "target_id": "44e6b48d-e570-4831-80f6-22a30b532301",
+            "friendly_name": "'Standard'",
+            "element_type": "Text",
+            "activity_type": "None",
+            "selectors": [
+              {
+                "type": "full",
+                "value": "<uia automationid='NavView' /><uia automationid='Header' cls='TextBlock' name='*Standard*' />",
+                "properties": {
+                  "automationid": "NavView",
+                  "cls": "TextBlock",
+                  "name": "*Standard*"
+                }
+              },
+              {
+                "type": "fuzzy",
+                "value": "<uia automationid='NavView' /><uia automationid='Header' cls='TextBlock' name='*Standard*' role='text' check:fulltext='Standard' />",
+                "properties": {
+                  "automationid": "NavView",
+                  "cls": "TextBlock",
+                  "name": "*Standard*",
+                  "role": "text"
+                }
+              },
+              {
+                "type": "scope",
+                "value": "<wnd app='applicationframehost.exe' appid='Microsoft.WindowsCalculator_8wekyb3d8bbwe!App' />",
+                "properties": {
+                  "app": "applicationframehost.exe",
+                  "appid": "Microsoft.WindowsCalculator_8wekyb3d8bbwe!App"
+                }
+              }
+            ],
+            "design_properties": {
+              "CvTextArea": "54, 46, 83, 19",
+              "CvTextArgument": "Standard",
+              "CvType": "Text",
+              "DesignTimeRectangle": "56, 42, 82, 27",
+              "DesignTimeScaleFactor": "1",
+              "SearchSteps": "Selector",
+              "Version": "V2",
+              "Visibility": "Interactive"
+            },
+            "content_hash": "iBSq7HLoUUSTlitwpEIoSA"
+          },
+          {
+            "target_id": "be93b8c0-8423-40d3-a161-caf1f702a95c",
+            "friendly_name": "'0'",
+            "element_type": "Text",
+            "activity_type": "None",
+            "selectors": [
+              {
+                "type": "full",
+                "value": "<uia cls='LandmarkTarget' /><uia automationid='CalculatorResults' />",
+                "properties": {
+                  "automationid": "CalculatorResults",
+                  "cls": "LandmarkTarget"
+                }
+              },
+              {
+                "type": "fuzzy",
+                "value": "<uia cls='LandmarkTarget' /><uia automationid='CalculatorResults' role='text' check:fulltext='0' />",
+                "properties": {
+                  "automationid": "CalculatorResults",
+                  "cls": "LandmarkTarget",
+                  "role": "text"
+                }
+              },
+              {
+                "type": "scope",
+                "value": "<wnd app='applicationframehost.exe' appid='Microsoft.WindowsCalculator_8wekyb3d8bbwe!App' title='Calculator' />",
+                "properties": {
+                  "app": "applicationframehost.exe",
+                  "appid": "Microsoft.WindowsCalculator_8wekyb3d8bbwe!App"
+                }
+              }
+            ],
+            "design_properties": {
+              "CvTextArea": "289, 119, 26, 37",
+              "CvTextArgument": "0",
+              "CvType": "Text",
+              "DesignTimeRectangle": "8, 104, 343, 75",
+              "DesignTimeScaleFactor": "1",
+              "SearchSteps": "Selector",
+              "Version": "V2",
+              "Visibility": "Interactive"
+            },
+            "content_hash": "B6_PCBJLxkaWw_SXWxiauA"
+          },
+          {
+            "target_id": "36967884-70ae-4f54-8b7f-b9901c381636",
+            "friendly_name": "'0'",
+            "element_type": "Text",
+            "activity_type": "None",
+            "selectors": [
+              {
+                "type": "full",
+                "value": "<uia cls='LandmarkTarget' /><uia automationid='CalculatorResults' />",
+                "properties": {
+                  "automationid": "CalculatorResults",
+                  "cls": "LandmarkTarget"
+                }
+              },
+              {
+                "type": "fuzzy",
+                "value": "<uia cls='LandmarkTarget' /><uia automationid='CalculatorResults' role='text' check:fulltext='0' />",
+                "properties": {
+                  "automationid": "CalculatorResults",
+                  "cls": "LandmarkTarget",
+                  "role": "text"
+                }
+              },
+              {
+                "type": "scope",
+                "value": "<wnd app='applicationframehost.exe' appid='Microsoft.WindowsCalculator_8wekyb3d8bbwe!App' />",
+                "properties": {
+                  "app": "applicationframehost.exe",
+                  "appid": "Microsoft.WindowsCalculator_8wekyb3d8bbwe!App"
+                }
+              }
+            ],
+            "design_properties": {
+              "CvTextArea": "289, 118, 27, 39",
+              "CvTextArgument": "2",
+              "CvType": "Text",
+              "DesignTimeRectangle": "8, 104, 343, 75",
+              "DesignTimeScaleFactor": "1",
+              "SearchSteps": "Selector",
+              "Version": "V2",
+              "Visibility": "Interactive"
+            },
+            "content_hash": "bGFaPk2jAU28QYLl6tqI0w"
+          },
+          {
+            "target_id": "44e6b48d-e570-4831-80f6-22a30b532301",
+            "friendly_name": "'Standard'",
+            "element_type": "Text",
+            "activity_type": "None",
+            "selectors": [
+              {
+                "type": "full",
+                "value": "<uia automationid='NavView' /><uia automationid='Header' cls='TextBlock' />",
+                "properties": {
+                  "automationid": "NavView",
+                  "cls": "TextBlock"
+                }
+              },
+              {
+                "type": "fuzzy",
+                "value": "<uia automationid='NavView' /><uia automationid='Header' cls='TextBlock' role='text' check:fulltext='Standard' />",
+                "properties": {
+                  "automationid": "NavView",
+                  "cls": "TextBlock",
+                  "role": "text"
+                }
+              },
+              {
+                "type": "scope",
+                "value": "<wnd app='applicationframehost.exe' appid='Microsoft.WindowsCalculator_8wekyb3d8bbwe!App' />",
+                "properties": {
+                  "app": "applicationframehost.exe",
+                  "appid": "Microsoft.WindowsCalculator_8wekyb3d8bbwe!App"
+                }
+              }
+            ],
+            "design_properties": {
+              "CvTextArea": "54, 46, 83, 19",
+              "CvTextArgument": "Standard",
+              "CvType": "Text",
+              "DesignTimeRectangle": "56, 42, 82, 27",
+              "DesignTimeScaleFactor": "1",
+              "SearchSteps": "Selector",
+              "Version": "V2",
+              "Visibility": "Interactive"
+            },
+            "content_hash": "mJks0igfhk6FeI37g95QJg"
+          },
+          {
+            "target_id": "3b5744b2-f18f-4560-8e89-973c8d4daf30",
+            "friendly_name": "'\ue94a \ue947 \ue949 \ue948 \ue94e'",
+            "element_type": "Button",
+            "activity_type": "None",
+            "selectors": [
+              {
+                "type": "full",
+                "value": "<uia cls='LandmarkTarget' /><uia automationid='StandardOperators' cls='NamedContainerAutomationPeer' />",
+                "properties": {
+                  "automationid": "StandardOperators",
+                  "cls": "LandmarkTarget"
+                }
+              },
+              {
+                "type": "fuzzy",
+                "value": "<uia cls='LandmarkTarget' /><uia automationid='StandardOperators' cls='NamedContainerAutomationPeer' role='group' check:fulltext='\ue94a&#x9;&#xA;\ue947&#x9;&#xA;\ue949&#x9;&#xA;\ue948&#x9;&#xA;\ue94e' />",
+                "properties": {
+                  "automationid": "StandardOperators",
+                  "cls": "LandmarkTarget",
+                  "role": "group"
+                }
+              },
+              {
+                "type": "scope",
+                "value": "<wnd app='applicationframehost.exe' appid='Microsoft.WindowsCalculator_8wekyb3d8bbwe!App' />",
+                "properties": {
+                  "app": "applicationframehost.exe",
+                  "appid": "Microsoft.WindowsCalculator_8wekyb3d8bbwe!App"
+                }
+              }
+            ],
+            "design_properties": {
+              "CvTextArea": "277, 283, 17, 15",
+              "CvTextArgument": "+",
+              "CvType": "Button",
+              "DesignTimeRectangle": "265, 266, 82, 263",
+              "DesignTimeScaleFactor": "1",
+              "SearchSteps": "Selector",
+              "Version": "V2",
+              "Visibility": "Interactive"
+            },
+            "content_hash": "wzDSL9dTU0q795eDAWar1g"
+          },
+          {
+            "target_id": "34eebd3a-e332-4566-835f-fb3990192076",
+            "friendly_name": "'0 1 2 3 4 5 6 7 8 9 ,'",
+            "element_type": "Button",
+            "activity_type": "None",
+            "selectors": [
+              {
+                "type": "full",
+                "value": "<uia cls='LandmarkTarget' /><uia automationid='NumberPad' cls='NamedContainerAutomationPeer' />",
+                "properties": {
+                  "automationid": "NumberPad",
+                  "cls": "LandmarkTarget"
+                }
+              },
+              {
+                "type": "fuzzy",
+                "value": "<uia cls='LandmarkTarget' /><uia automationid='NumberPad' cls='NamedContainerAutomationPeer' role='group' check:fulltext='0&#x9;&#xA;1&#x9;&#xA;2&#x9;&#xA;3&#x9;&#xA;4&#x9;&#xA;5&#x9;&#xA;6&#x9;&#xA;7&#x9;&#xA;8&#x9;&#xA;9&#x9;&#xA;,' />",
+                "properties": {
+                  "automationid": "NumberPad",
+                  "cls": "LandmarkTarget",
+                  "role": "group"
+                }
+              },
+              {
+                "type": "scope",
+                "value": "<wnd app='applicationframehost.exe' appid='Microsoft.WindowsCalculator_8wekyb3d8bbwe!App' />",
+                "properties": {
+                  "app": "applicationframehost.exe",
+                  "appid": "Microsoft.WindowsCalculator_8wekyb3d8bbwe!App"
+                }
+              }
+            ],
+            "design_properties": {
+              "CvTextArea": "45, 337, 11, 16",
+              "CvTextArgument": "7",
+              "CvType": "Button",
+              "DesignTimeRectangle": "12, 319, 251, 210",
+              "DesignTimeScaleFactor": "1",
+              "SearchSteps": "Selector",
+              "Version": "V2",
+              "Visibility": "Interactive"
+            },
+            "content_hash": "4wlTK4LGG0iq_5LuzbMfEg"
+          },
+          {
+            "target_id": "0f1ccc1d-29f1-44b6-a692-348cd82843e0",
+            "friendly_name": "'\ue94c CE C \ue94f'",
+            "element_type": "Button",
+            "activity_type": "None",
+            "selectors": [
+              {
+                "type": "full",
+                "value": "<uia cls='LandmarkTarget' /><uia automationid='DisplayControls' cls='NamedContainerAutomationPeer' />",
+                "properties": {
+                  "automationid": "DisplayControls",
+                  "cls": "LandmarkTarget"
+                }
+              },
+              {
+                "type": "fuzzy",
+                "value": "<uia cls='LandmarkTarget' /><uia automationid='DisplayControls' cls='NamedContainerAutomationPeer' role='group' check:fulltext='\ue94c&#x9;&#xA;CE&#x9;&#xA;C&#x9;&#xA;\ue94f' />",
+                "properties": {
+                  "automationid": "DisplayControls",
+                  "cls": "LandmarkTarget",
+                  "role": "group"
+                }
+              },
+              {
+                "type": "scope",
+                "value": "<wnd app='applicationframehost.exe' appid='Microsoft.WindowsCalculator_8wekyb3d8bbwe!App' />",
+                "properties": {
+                  "app": "applicationframehost.exe",
+                  "appid": "Microsoft.WindowsCalculator_8wekyb3d8bbwe!App"
+                }
+              }
+            ],
+            "design_properties": {
+              "CvType": "Button",
+              "DesignTimeRectangle": "12, 213, 335, 51",
+              "DesignTimeScaleFactor": "1",
+              "SearchSteps": "Selector",
+              "Version": "V2",
+              "Visibility": "Interactive"
+            },
+            "content_hash": "uZwxyv1QW0mgdyIyz7Q_sQ"
+          }
+        ]
+      }
+    }
+  ]
+}

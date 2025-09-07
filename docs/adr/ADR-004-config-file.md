@@ -65,7 +65,17 @@ Stable, validated configuration is required for CLI behavior across parsing, val
 * Clear evolution path via versioned files; deprecation notices in docs.
 * Slight maintenance overhead (mirror generation, tests).
 
+## Roadmap Phase
+
+* **v0.0.1:** Core configuration schema with validation; CLI `config` commands (ADR-003)
+
 ## Go / No-Go
 
 * **Go:** Land `config.v1.schema.json` at the stated path; wire CI validation; add `$schema` to `.rpax.json`.
 * **No-Go:** Do not mutate `v1`; any breaking change requires `v2` with migration notes.
+
+## Related ADRs
+
+* ADR-003: Configuration accessed via `config` command in CLI surface
+* ADR-010: Validation layer uses `validation.*` config fields
+* ADR-015: Pydantic used for schema validation and JSON Schema generation

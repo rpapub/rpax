@@ -59,6 +59,10 @@ Implement a **read-only MCP server** that surfaces parser artifacts as MCP resou
 * Large resource sets require careful streaming/pagination.
 * Artifact evolution may outpace MCP contract if not versioned tightly.
 
+## Roadmap Phase
+
+* **v0.3+:** MCP server for ecosystem integration
+
 ## Open Questions
 
 1. Exact resource naming and namespace hierarchy.
@@ -66,3 +70,10 @@ Implement a **read-only MCP server** that surfaces parser artifacts as MCP resou
 3. Pagination and filtering semantics for streams.
 4. Multi-tenant isolation and authorization model.
 5. Error mapping (file missing vs. resource not found).
+
+## Related ADRs
+
+* ADR-002: Layer 4 of the architectural stack
+* ADR-009: Exposes parser artifacts as MCP resources
+* ADR-011: Migration path from Access API with compatible contracts
+* ADR-014: URI scheme using projectSlug and wfId

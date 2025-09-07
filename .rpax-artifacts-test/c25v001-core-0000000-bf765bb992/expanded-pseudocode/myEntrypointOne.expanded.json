@@ -1,0 +1,83 @@
+{
+  "workflow_id": "myEntrypointOne",
+  "project_id": "unknown",
+  "project_slug": "unknown",
+  "schema_version": "1.1.0",
+  "generated_at": "2025-09-06T21:05:04.803207+00:00",
+  "rpax_version": "0.0.1",
+  "activities": [
+    {
+      "indent": 0,
+      "displayName": "Main Sequence",
+      "tag": "Sequence",
+      "path": "Activity/Sequence",
+      "formattedLine": "- [Main Sequence] Sequence (Path: Activity/Sequence)",
+      "nodeId": "Activity/Sequence_1",
+      "depth": 1,
+      "isVisual": true,
+      "children": [
+        {
+          "indent": 1,
+          "displayName": "InitAllSettings - Invoke Workflow File (Framework\\InitAllSettings.xaml)",
+          "tag": "InvokeWorkflowFile",
+          "path": "Activity/Sequence/InvokeWorkflowFile",
+          "formattedLine": "  - [InitAllSettings - Invoke Workflow File (Framework\\InitAllSettings.xaml)] InvokeWorkflowFile (Path: Activity/Sequence/InvokeWorkflowFile)",
+          "nodeId": "Activity/Sequence/InvokeWorkflowFile_2",
+          "depth": 2,
+          "isVisual": true,
+          "children": []
+        },
+        {
+          "indent": 1,
+          "displayName": "myEmptyWOrkflow - Invoke Workflow File (Foo\\myEmptyWOrkflow.xaml)",
+          "tag": "InvokeWorkflowFile",
+          "path": "Activity/Sequence/InvokeWorkflowFile",
+          "formattedLine": "  - [myEmptyWOrkflow - Invoke Workflow File (Foo\\myEmptyWOrkflow.xaml)] InvokeWorkflowFile (Path: Activity/Sequence/InvokeWorkflowFile)",
+          "nodeId": "Activity/Sequence/InvokeWorkflowFile_2",
+          "depth": 2,
+          "isVisual": true,
+          "children": []
+        }
+      ]
+    },
+    {
+      "indent": 1,
+      "displayName": "InitAllSettings - Invoke Workflow File (Framework\\InitAllSettings.xaml)",
+      "tag": "InvokeWorkflowFile",
+      "path": "Activity/Sequence/InvokeWorkflowFile",
+      "formattedLine": "  - [InitAllSettings - Invoke Workflow File (Framework\\InitAllSettings.xaml)] InvokeWorkflowFile (Path: Activity/Sequence/InvokeWorkflowFile)",
+      "nodeId": "Activity/Sequence/InvokeWorkflowFile_2",
+      "depth": 2,
+      "isVisual": true,
+      "children": []
+    },
+    {
+      "indent": 1,
+      "displayName": "myEmptyWOrkflow - Invoke Workflow File (Foo\\myEmptyWOrkflow.xaml)",
+      "tag": "InvokeWorkflowFile",
+      "path": "Activity/Sequence/InvokeWorkflowFile",
+      "formattedLine": "  - [myEmptyWOrkflow - Invoke Workflow File (Foo\\myEmptyWOrkflow.xaml)] InvokeWorkflowFile (Path: Activity/Sequence/InvokeWorkflowFile)",
+      "nodeId": "Activity/Sequence/InvokeWorkflowFile_2",
+      "depth": 2,
+      "isVisual": true,
+      "children": []
+    }
+  ],
+  "activity_count": 3,
+  "format_version": "gist-style",
+  "total_lines": 0,
+  "total_activities": 0,
+  "entries": [],
+  "metadata": {},
+  "expanded_pseudocode": [
+    "- [Main Sequence]  (Path: Activity/Sequence)",
+    "- [InitAllSettings - Invoke Workflow File (Framework\\InitAllSettings.xaml)]  (Path: Activity/Sequence/InvokeWorkflowFile)",
+    "- [myEmptyWOrkflow - Invoke Workflow File (Foo\\myEmptyWOrkflow.xaml)]  (Path: Activity/Sequence/InvokeWorkflowFile)"
+  ],
+  "expansion_config": {
+    "max_depth": 3,
+    "cycle_handling": "detect_and_mark",
+    "generated_recursive": true
+  },
+  "generation_config": {}
+}

@@ -1,0 +1,2070 @@
+{
+  "schemaVersion": "1.0.0",
+  "workflowId": "Main",
+  "projectId": "PurposefulPromethium",
+  "totalActivities": 73,
+  "activityTypes": {
+    "StateMachine": 1,
+    "State": 4,
+    "Sequence": 9,
+    "ShouldStop": 1,
+    "If": 3,
+    "LogMessage": 8,
+    "Assign": 10,
+    "TryCatch": 5,
+    "Switch": 2,
+    "InvokeWorkflowFile": 10,
+    "InvokeWorkflowFile.Arguments": 10,
+    "Transition": 7,
+    "AddLogFields": 1,
+    "AddLogFields.Fields": 1,
+    "Comment": 1
+  },
+  "activities": [
+    {
+      "activity_id": "PurposefulPromethium#Main#Activity_1#406beda3",
+      "workflow_id": "Main",
+      "activity_type": "StateMachine",
+      "display_name": "General Business Process",
+      "node_id": "Activity_1",
+      "parent_activity_id": null,
+      "depth": 0,
+      "arguments": {
+        "InitialState": "{x:Reference __ReferenceID3}",
+        "Annotation.AnnotationText": "[PurposefulPromethium]\nThe email have a new subject and this process must parse the email different\nAuthor: Christian Prior-Mamulyan\nLicense: Creative Commons Attribution 4.0 International License (CC-BY)",
+        "DisplayName": "General Business Process"
+      },
+      "configuration": {
+        "WorkflowViewStateService.ViewState": {
+          "children": {
+            "Dictionary": {
+              "attributes": {
+                "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+              },
+              "children": {
+                "Boolean": {
+                  "attributes": {
+                    "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsAnnotationDocked"
+                  },
+                  "text": "True"
+                },
+                "Point": {
+                  "attributes": {
+                    "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "ShapeLocation"
+                  },
+                  "text": "70,22.5"
+                },
+                "Double": {
+                  "attributes": {
+                    "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "StateContainerHeight"
+                  },
+                  "text": "708"
+                },
+                "PointCollection": {
+                  "attributes": {
+                    "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "ConnectorLocation"
+                  },
+                  "text": "120,47.5 150,47.5 150,67 274.5,67"
+                }
+              }
+            }
+          }
+        },
+        "State": {
+          "attributes": {
+            "{http://schemas.microsoft.com/winfx/2006/xaml}Name": "__ReferenceID0",
+            "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}Annotation.AnnotationText": "Get the next transaction to be processed.",
+            "DisplayName": "Get Transaction Data",
+            "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "229,107",
+            "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "State_4"
+          },
+          "children": {
+            "State.Entry": {
+              "children": {
+                "Sequence": {
+                  "attributes": {
+                    "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}Annotation.AnnotationText": "Retrieve a new transaction data to be processed.\nThe TransactionNumber variable holds the current transaction number, and incrementing this variable means retrieving will make the next transaction to be retrieved. If a robot is retrying a failed transaction, this variable is not incremented until the maximum number of retry attempts is reached.",
+                    "DisplayName": "Retrieve Data",
+                    "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "1110,736",
+                    "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Sequence_25"
+                  },
+                  "children": {
+                    "Sequence.Variables": {
+                      "children": {
+                        "Variable": {
+                          "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:Boolean",
+                          "Name": "ShouldStop"
+                        }
+                      }
+                    },
+                    "WorkflowViewStateService.ViewState": {
+                      "children": {
+                        "Dictionary": {
+                          "attributes": {
+                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                          },
+                          "children": {
+                            "Boolean": {
+                              "attributes": {
+                                "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsPinned"
+                              },
+                              "text": "False"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "ShouldStop": {
+                      "DisplayName": "Check Stop Signal",
+                      "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "1062,25",
+                      "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "ShouldStop_2",
+                      "Result": "[ShouldStop]"
+                    },
+                    "If": {
+                      "attributes": {
+                        "Condition": "[ShouldStop]",
+                        "DisplayName": "Should Stop or Get Next",
+                        "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "1062,528",
+                        "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "If_11"
+                      },
+                      "children": {
+                        "If.Then": {
+                          "children": {
+                            "Sequence": {
+                              "attributes": {
+                                "DisplayName": "Orchestrator stop requested",
+                                "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "482,300",
+                                "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Sequence_23"
+                              },
+                              "children": {
+                                "WorkflowViewStateService.ViewState": {
+                                  "children": {
+                                    "Dictionary": {
+                                      "attributes": {
+                                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                                      },
+                                      "children": {
+                                        "Boolean": {
+                                          "attributes": {
+                                            "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsPinned"
+                                          },
+                                          "text": "False"
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "LogMessage": {
+                                  "DisplayName": "Log message (Stop process requested)",
+                                  "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,92",
+                                  "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "LogMessage_27",
+                                  "Level": "Info",
+                                  "Message": "[\"Stop process requested\"]"
+                                },
+                                "Assign": {
+                                  "attributes": {
+                                    "DisplayName": "End Process (Stop process requested)",
+                                    "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,82",
+                                    "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Assign_22"
+                                  },
+                                  "children": {
+                                    "Assign.To": {
+                                      "children": {
+                                        "OutArgument": {
+                                          "attributes": {
+                                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                          },
+                                          "text": "[TransactionItem]"
+                                        }
+                                      }
+                                    },
+                                    "Assign.Value": {
+                                      "children": {
+                                        "InArgument": {
+                                          "attributes": {
+                                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                          },
+                                          "text": "[Nothing]"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "If.Else": {
+                          "children": {
+                            "TryCatch": {
+                              "attributes": {
+                                "DisplayName": "Try GetTransactionData",
+                                "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "535,368",
+                                "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "TryCatch_7"
+                              },
+                              "children": {
+                                "WorkflowViewStateService.ViewState": {
+                                  "children": {
+                                    "Dictionary": {
+                                      "attributes": {
+                                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                                      },
+                                      "children": {
+                                        "Boolean": {
+                                          "attributes": {
+                                            "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsPinned"
+                                          },
+                                          "text": "False"
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "TryCatch.Try": {
+                                  "children": {
+                                    "Switch": {
+                                      "attributes": {
+                                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String",
+                                        "DisplayName": "Switch QueueConsumptionStrategy GetTransactionData Dequeue",
+                                        "Expression": "[Config(\"QueueConsumptionStrategy\").ToString]",
+                                        "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "497,140",
+                                        "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Switch`1_2"
+                                      },
+                                      "children": {
+                                        "Switch.Default": {
+                                          "children": {
+                                            "InvokeWorkflowFile": {
+                                              "attributes": {
+                                                "ArgumentsVariable": "{x:Null}",
+                                                "ContinueOnError": "{x:Null}",
+                                                "DisplayName": "Invoke GetTransactionData workflow",
+                                                "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "334,113",
+                                                "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "InvokeWorkflowFile_20",
+                                                "UnSafe": "False",
+                                                "WorkflowFileName": "Framework\\GetTransactionData.xaml"
+                                              },
+                                              "children": {
+                                                "InvokeWorkflowFile.Arguments": {
+                                                  "children": {
+                                                    "InArgument": {
+                                                      "attributes": {
+                                                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "scg:Dictionary(x:String, x:Object)",
+                                                        "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "in_Config"
+                                                      },
+                                                      "text": "[Config]"
+                                                    },
+                                                    "OutArgument": {
+                                                      "attributes": {
+                                                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String",
+                                                        "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "out_TransactionID"
+                                                      },
+                                                      "text": "[TransactionID]"
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "If": {
+                                          "attributes": {
+                                            "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "InProcess",
+                                            "Condition": "[InProcessQueue.Count > 0]",
+                                            "DisplayName": "If still items in queue then dequeue else set to Nothing",
+                                            "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "913,241",
+                                            "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "If_13"
+                                          },
+                                          "children": {
+                                            "WorkflowViewStateService.ViewState": {
+                                              "children": {
+                                                "Dictionary": {
+                                                  "attributes": {
+                                                    "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                                                  },
+                                                  "children": {
+                                                    "Boolean": {
+                                                      "attributes": {
+                                                        "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsPinned"
+                                                      },
+                                                      "text": "False"
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "If.Then": {
+                                              "children": {
+                                                "Assign": {
+                                                  "attributes": {
+                                                    "DisplayName": "Assign TransactionItem Dequeue",
+                                                    "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,82",
+                                                    "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Assign_35"
+                                                  },
+                                                  "children": {
+                                                    "Assign.To": {
+                                                      "children": {
+                                                        "OutArgument": {
+                                                          "attributes": {
+                                                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                                          },
+                                                          "text": "[TransactionItem]"
+                                                        }
+                                                      }
+                                                    },
+                                                    "Assign.Value": {
+                                                      "children": {
+                                                        "InArgument": {
+                                                          "attributes": {
+                                                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                                          },
+                                                          "text": "[InProcessQueue.Dequeue]"
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "If.Else": {
+                                              "children": {
+                                                "Assign": {
+                                                  "attributes": {
+                                                    "DisplayName": "Assign TransactionItem Nothing",
+                                                    "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,82",
+                                                    "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Assign_30"
+                                                  },
+                                                  "children": {
+                                                    "Assign.To": {
+                                                      "children": {
+                                                        "OutArgument": {
+                                                          "attributes": {
+                                                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                                          },
+                                                          "text": "[TransactionItem]"
+                                                        }
+                                                      }
+                                                    },
+                                                    "Assign.Value": {
+                                                      "children": {
+                                                        "InArgument": {
+                                                          "attributes": {
+                                                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                                          },
+                                                          "text": "[Nothing]"
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "TryCatch.Catches": {
+                                  "children": {
+                                    "Catch": {
+                                      "attributes": {
+                                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "s:Exception",
+                                        "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "501,21",
+                                        "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Catch`1_8"
+                                      },
+                                      "children": {
+                                        "WorkflowViewStateService.ViewState": {
+                                          "children": {
+                                            "Dictionary": {
+                                              "attributes": {
+                                                "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                                              },
+                                              "children": {
+                                                "Boolean": {
+                                                  "attributes": {
+                                                    "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsPinned"
+                                                  },
+                                                  "text": "False"
+                                                }
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "ActivityAction": {
+                                          "attributes": {
+                                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "s:Exception"
+                                          },
+                                          "children": {
+                                            "ActivityAction.Argument": {
+                                              "children": {
+                                                "DelegateInArgument": {
+                                                  "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "s:Exception",
+                                                  "Name": "Exception"
+                                                }
+                                              }
+                                            },
+                                            "Sequence": {
+                                              "attributes": {
+                                                "DisplayName": "Log exception message and end process",
+                                                "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "482,300",
+                                                "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Sequence_24"
+                                              },
+                                              "children": {
+                                                "WorkflowViewStateService.ViewState": {
+                                                  "children": {
+                                                    "Dictionary": {
+                                                      "attributes": {
+                                                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                                                      },
+                                                      "children": {
+                                                        "Boolean": {
+                                                          "attributes": {
+                                                            "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsPinned"
+                                                          },
+                                                          "text": "False"
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                },
+                                                "LogMessage": {
+                                                  "DisplayName": "Log message  (Get transaction data error)",
+                                                  "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,92",
+                                                  "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "LogMessage_28",
+                                                  "Level": "Fatal",
+                                                  "Message": "[Config(\"LogMessage_GetTransactionDataError\").ToString+TransactionNumber.ToString+\". \"+Exception.Message+\" at Source: \"+Exception.Source]"
+                                                },
+                                                "Assign": {
+                                                  "attributes": {
+                                                    "DisplayName": "End Process (Could not get new transaction)",
+                                                    "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,82",
+                                                    "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Assign_23"
+                                                  },
+                                                  "children": {
+                                                    "Assign.To": {
+                                                      "children": {
+                                                        "OutArgument": {
+                                                          "attributes": {
+                                                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                                          },
+                                                          "text": "[TransactionItem]"
+                                                        }
+                                                      }
+                                                    },
+                                                    "Assign.Value": {
+                                                      "children": {
+                                                        "InArgument": {
+                                                          "attributes": {
+                                                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                                          },
+                                                          "text": "[Nothing]"
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "WorkflowViewStateService.ViewState": {
+              "children": {
+                "Dictionary": {
+                  "attributes": {
+                    "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                  },
+                  "children": {
+                    "Point": {
+                      "attributes": {
+                        "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "ShapeLocation"
+                      },
+                      "text": "274.5,214"
+                    },
+                    "Size": {
+                      "attributes": {
+                        "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "ShapeSize"
+                      },
+                      "text": "229,107"
+                    },
+                    "Boolean": {
+                      "attributes": {
+                        "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsAnnotationDocked"
+                      },
+                      "text": "True"
+                    },
+                    "Double": {
+                      "attributes": {
+                        "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "StateContainerHeight"
+                      },
+                      "text": "34"
+                    }
+                  }
+                }
+              }
+            },
+            "State.Transitions": {
+              "children": {
+                "Transition": {
+                  "attributes": {
+                    "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}Annotation.AnnotationText": "This is a simple mecanism to stop the process.\nIn reallife scenario you can stop the process when there is no more data to process or on a schedule.",
+                    "DisplayName": "No Data",
+                    "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "450,856",
+                    "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Transition_7"
+                  },
+                  "children": {
+                    "WorkflowViewStateService.ViewState": {
+                      "children": {
+                        "Dictionary": {
+                          "attributes": {
+                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                          },
+                          "children": {
+                            "PointCollection": {
+                              "attributes": {
+                                "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "ConnectorLocation"
+                              },
+                              "text": "389,321 389,351 148,351 148,325.5"
+                            },
+                            "Int32": {
+                              "attributes": {
+                                "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "DestConnectionPointIndex"
+                              },
+                              "text": "39"
+                            },
+                            "Boolean": {
+                              "attributes": {
+                                "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsExpanded"
+                              },
+                              "text": "True"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "Transition.To": {
+                      "children": {
+                        "Reference": "__ReferenceID1"
+                      }
+                    },
+                    "Transition.Action": {
+                      "children": {
+                        "LogMessage": {
+                          "DisplayName": "Log message (No more transations available)",
+                          "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "334,92",
+                          "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "LogMessage_30",
+                          "Level": "Info",
+                          "Message": "[\"Process finished due to no more transaction data\"]"
+                        }
+                      }
+                    },
+                    "Transition.Condition": {
+                      "children": {
+                        "VisualBasicValue": {
+                          "attributes": {
+                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:Boolean",
+                            "ExpressionText": "TransactionItem Is Nothing",
+                            "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "VisualBasicValue`1_2"
+                          },
+                          "children": {
+                            "VisualBasicValue.Result": {
+                              "children": {
+                                "OutArgument": {
+                                  "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:Boolean"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "Reference": "__ReferenceID3",
+        "StateMachine.Variables": {
+          "children": {
+            "Variable": {
+              "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "scg:Queue(ui:QueueItem)",
+              "Name": "InProcessQueue"
+            }
+          }
+        }
+      },
+      "properties": {
+        "DisplayName": "General Business Process"
+      },
+      "metadata": {
+        "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "368,654.04",
+        "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "StateMachine_1"
+      },
+      "expressions": [
+        "PurposefulPromethium"
+      ],
+      "variables_referenced": [
+        "PurposefulPromethium"
+      ],
+      "selectors": {},
+      "annotation": "[PurposefulPromethium]\nThe email have a new subject and this process must parse the email different\nAuthor: Christian Prior-Mamulyan\nLicense: Creative Commons Attribution 4.0 International License (CC-BY)",
+      "is_visible": true,
+      "container_type": null,
+      "visible_attributes": {
+        "DisplayName": "General Business Process"
+      },
+      "invisible_attributes": {
+        "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "368,654.04",
+        "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "StateMachine_1"
+      },
+      "variables": [],
+      "child_activities": [],
+      "expression_objects": [],
+      "xpath_location": "/StateMachine",
+      "source_line": null
+    },
+    {
+      "activity_id": "PurposefulPromethium#Main#Activity/State_1_2#e9866c5b",
+      "workflow_id": "Main",
+      "activity_type": "State",
+      "display_name": "Get Transaction Data",
+      "node_id": "Activity/State_1_2",
+      "parent_activity_id": "PurposefulPromethium#Main#Activity_1#406beda3",
+      "depth": 1,
+      "arguments": {
+        "Name": "__ReferenceID0",
+        "Annotation.AnnotationText": "Get the next transaction to be processed.",
+        "DisplayName": "Get Transaction Data"
+      },
+      "configuration": {
+        "State.Entry": {
+          "children": {
+            "Sequence": {
+              "attributes": {
+                "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}Annotation.AnnotationText": "Retrieve a new transaction data to be processed.\nThe TransactionNumber variable holds the current transaction number, and incrementing this variable means retrieving will make the next transaction to be retrieved. If a robot is retrying a failed transaction, this variable is not incremented until the maximum number of retry attempts is reached.",
+                "DisplayName": "Retrieve Data",
+                "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "1110,736",
+                "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Sequence_25"
+              },
+              "children": {
+                "Sequence.Variables": {
+                  "children": {
+                    "Variable": {
+                      "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:Boolean",
+                      "Name": "ShouldStop"
+                    }
+                  }
+                },
+                "WorkflowViewStateService.ViewState": {
+                  "children": {
+                    "Dictionary": {
+                      "attributes": {
+                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                      },
+                      "children": {
+                        "Boolean": {
+                          "attributes": {
+                            "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsPinned"
+                          },
+                          "text": "False"
+                        }
+                      }
+                    }
+                  }
+                },
+                "ShouldStop": {
+                  "DisplayName": "Check Stop Signal",
+                  "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "1062,25",
+                  "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "ShouldStop_2",
+                  "Result": "[ShouldStop]"
+                },
+                "If": {
+                  "attributes": {
+                    "Condition": "[ShouldStop]",
+                    "DisplayName": "Should Stop or Get Next",
+                    "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "1062,528",
+                    "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "If_11"
+                  },
+                  "children": {
+                    "If.Then": {
+                      "children": {
+                        "Sequence": {
+                          "attributes": {
+                            "DisplayName": "Orchestrator stop requested",
+                            "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "482,300",
+                            "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Sequence_23"
+                          },
+                          "children": {
+                            "WorkflowViewStateService.ViewState": {
+                              "children": {
+                                "Dictionary": {
+                                  "attributes": {
+                                    "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                                  },
+                                  "children": {
+                                    "Boolean": {
+                                      "attributes": {
+                                        "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsPinned"
+                                      },
+                                      "text": "False"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "LogMessage": {
+                              "DisplayName": "Log message (Stop process requested)",
+                              "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,92",
+                              "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "LogMessage_27",
+                              "Level": "Info",
+                              "Message": "[\"Stop process requested\"]"
+                            },
+                            "Assign": {
+                              "attributes": {
+                                "DisplayName": "End Process (Stop process requested)",
+                                "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,82",
+                                "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Assign_22"
+                              },
+                              "children": {
+                                "Assign.To": {
+                                  "children": {
+                                    "OutArgument": {
+                                      "attributes": {
+                                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                      },
+                                      "text": "[TransactionItem]"
+                                    }
+                                  }
+                                },
+                                "Assign.Value": {
+                                  "children": {
+                                    "InArgument": {
+                                      "attributes": {
+                                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                      },
+                                      "text": "[Nothing]"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "If.Else": {
+                      "children": {
+                        "TryCatch": {
+                          "attributes": {
+                            "DisplayName": "Try GetTransactionData",
+                            "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "535,368",
+                            "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "TryCatch_7"
+                          },
+                          "children": {
+                            "WorkflowViewStateService.ViewState": {
+                              "children": {
+                                "Dictionary": {
+                                  "attributes": {
+                                    "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                                  },
+                                  "children": {
+                                    "Boolean": {
+                                      "attributes": {
+                                        "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsPinned"
+                                      },
+                                      "text": "False"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "TryCatch.Try": {
+                              "children": {
+                                "Switch": {
+                                  "attributes": {
+                                    "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String",
+                                    "DisplayName": "Switch QueueConsumptionStrategy GetTransactionData Dequeue",
+                                    "Expression": "[Config(\"QueueConsumptionStrategy\").ToString]",
+                                    "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "497,140",
+                                    "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Switch`1_2"
+                                  },
+                                  "children": {
+                                    "Switch.Default": {
+                                      "children": {
+                                        "InvokeWorkflowFile": {
+                                          "attributes": {
+                                            "ArgumentsVariable": "{x:Null}",
+                                            "ContinueOnError": "{x:Null}",
+                                            "DisplayName": "Invoke GetTransactionData workflow",
+                                            "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "334,113",
+                                            "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "InvokeWorkflowFile_20",
+                                            "UnSafe": "False",
+                                            "WorkflowFileName": "Framework\\GetTransactionData.xaml"
+                                          },
+                                          "children": {
+                                            "InvokeWorkflowFile.Arguments": {
+                                              "children": {
+                                                "InArgument": {
+                                                  "attributes": {
+                                                    "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "scg:Dictionary(x:String, x:Object)",
+                                                    "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "in_Config"
+                                                  },
+                                                  "text": "[Config]"
+                                                },
+                                                "OutArgument": {
+                                                  "attributes": {
+                                                    "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String",
+                                                    "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "out_TransactionID"
+                                                  },
+                                                  "text": "[TransactionID]"
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "If": {
+                                      "attributes": {
+                                        "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "InProcess",
+                                        "Condition": "[InProcessQueue.Count > 0]",
+                                        "DisplayName": "If still items in queue then dequeue else set to Nothing",
+                                        "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "913,241",
+                                        "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "If_13"
+                                      },
+                                      "children": {
+                                        "WorkflowViewStateService.ViewState": {
+                                          "children": {
+                                            "Dictionary": {
+                                              "attributes": {
+                                                "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                                              },
+                                              "children": {
+                                                "Boolean": {
+                                                  "attributes": {
+                                                    "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsPinned"
+                                                  },
+                                                  "text": "False"
+                                                }
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "If.Then": {
+                                          "children": {
+                                            "Assign": {
+                                              "attributes": {
+                                                "DisplayName": "Assign TransactionItem Dequeue",
+                                                "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,82",
+                                                "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Assign_35"
+                                              },
+                                              "children": {
+                                                "Assign.To": {
+                                                  "children": {
+                                                    "OutArgument": {
+                                                      "attributes": {
+                                                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                                      },
+                                                      "text": "[TransactionItem]"
+                                                    }
+                                                  }
+                                                },
+                                                "Assign.Value": {
+                                                  "children": {
+                                                    "InArgument": {
+                                                      "attributes": {
+                                                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                                      },
+                                                      "text": "[InProcessQueue.Dequeue]"
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "If.Else": {
+                                          "children": {
+                                            "Assign": {
+                                              "attributes": {
+                                                "DisplayName": "Assign TransactionItem Nothing",
+                                                "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,82",
+                                                "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Assign_30"
+                                              },
+                                              "children": {
+                                                "Assign.To": {
+                                                  "children": {
+                                                    "OutArgument": {
+                                                      "attributes": {
+                                                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                                      },
+                                                      "text": "[TransactionItem]"
+                                                    }
+                                                  }
+                                                },
+                                                "Assign.Value": {
+                                                  "children": {
+                                                    "InArgument": {
+                                                      "attributes": {
+                                                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                                      },
+                                                      "text": "[Nothing]"
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "TryCatch.Catches": {
+                              "children": {
+                                "Catch": {
+                                  "attributes": {
+                                    "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "s:Exception",
+                                    "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "501,21",
+                                    "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Catch`1_8"
+                                  },
+                                  "children": {
+                                    "WorkflowViewStateService.ViewState": {
+                                      "children": {
+                                        "Dictionary": {
+                                          "attributes": {
+                                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                                          },
+                                          "children": {
+                                            "Boolean": {
+                                              "attributes": {
+                                                "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsPinned"
+                                              },
+                                              "text": "False"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "ActivityAction": {
+                                      "attributes": {
+                                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "s:Exception"
+                                      },
+                                      "children": {
+                                        "ActivityAction.Argument": {
+                                          "children": {
+                                            "DelegateInArgument": {
+                                              "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "s:Exception",
+                                              "Name": "Exception"
+                                            }
+                                          }
+                                        },
+                                        "Sequence": {
+                                          "attributes": {
+                                            "DisplayName": "Log exception message and end process",
+                                            "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "482,300",
+                                            "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Sequence_24"
+                                          },
+                                          "children": {
+                                            "WorkflowViewStateService.ViewState": {
+                                              "children": {
+                                                "Dictionary": {
+                                                  "attributes": {
+                                                    "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                                                  },
+                                                  "children": {
+                                                    "Boolean": {
+                                                      "attributes": {
+                                                        "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsPinned"
+                                                      },
+                                                      "text": "False"
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            },
+                                            "LogMessage": {
+                                              "DisplayName": "Log message  (Get transaction data error)",
+                                              "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,92",
+                                              "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "LogMessage_28",
+                                              "Level": "Fatal",
+                                              "Message": "[Config(\"LogMessage_GetTransactionDataError\").ToString+TransactionNumber.ToString+\". \"+Exception.Message+\" at Source: \"+Exception.Source]"
+                                            },
+                                            "Assign": {
+                                              "attributes": {
+                                                "DisplayName": "End Process (Could not get new transaction)",
+                                                "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,82",
+                                                "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Assign_23"
+                                              },
+                                              "children": {
+                                                "Assign.To": {
+                                                  "children": {
+                                                    "OutArgument": {
+                                                      "attributes": {
+                                                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                                      },
+                                                      "text": "[TransactionItem]"
+                                                    }
+                                                  }
+                                                },
+                                                "Assign.Value": {
+                                                  "children": {
+                                                    "InArgument": {
+                                                      "attributes": {
+                                                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                                      },
+                                                      "text": "[Nothing]"
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "WorkflowViewStateService.ViewState": {
+          "children": {
+            "Dictionary": {
+              "attributes": {
+                "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+              },
+              "children": {
+                "Point": {
+                  "attributes": {
+                    "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "ShapeLocation"
+                  },
+                  "text": "274.5,214"
+                },
+                "Size": {
+                  "attributes": {
+                    "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "ShapeSize"
+                  },
+                  "text": "229,107"
+                },
+                "Boolean": {
+                  "attributes": {
+                    "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsAnnotationDocked"
+                  },
+                  "text": "True"
+                },
+                "Double": {
+                  "attributes": {
+                    "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "StateContainerHeight"
+                  },
+                  "text": "34"
+                }
+              }
+            }
+          }
+        },
+        "State.Transitions": {
+          "children": {
+            "Transition": {
+              "attributes": {
+                "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}Annotation.AnnotationText": "This is a simple mecanism to stop the process.\nIn reallife scenario you can stop the process when there is no more data to process or on a schedule.",
+                "DisplayName": "No Data",
+                "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "450,856",
+                "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Transition_7"
+              },
+              "children": {
+                "WorkflowViewStateService.ViewState": {
+                  "children": {
+                    "Dictionary": {
+                      "attributes": {
+                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                      },
+                      "children": {
+                        "PointCollection": {
+                          "attributes": {
+                            "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "ConnectorLocation"
+                          },
+                          "text": "389,321 389,351 148,351 148,325.5"
+                        },
+                        "Int32": {
+                          "attributes": {
+                            "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "DestConnectionPointIndex"
+                          },
+                          "text": "39"
+                        },
+                        "Boolean": {
+                          "attributes": {
+                            "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsExpanded"
+                          },
+                          "text": "True"
+                        }
+                      }
+                    }
+                  }
+                },
+                "Transition.To": {
+                  "children": {
+                    "Reference": "__ReferenceID1"
+                  }
+                },
+                "Transition.Action": {
+                  "children": {
+                    "LogMessage": {
+                      "DisplayName": "Log message (No more transations available)",
+                      "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "334,92",
+                      "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "LogMessage_30",
+                      "Level": "Info",
+                      "Message": "[\"Process finished due to no more transaction data\"]"
+                    }
+                  }
+                },
+                "Transition.Condition": {
+                  "children": {
+                    "VisualBasicValue": {
+                      "attributes": {
+                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:Boolean",
+                        "ExpressionText": "TransactionItem Is Nothing",
+                        "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "VisualBasicValue`1_2"
+                      },
+                      "children": {
+                        "VisualBasicValue.Result": {
+                          "children": {
+                            "OutArgument": {
+                              "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:Boolean"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "properties": {
+        "DisplayName": "Get Transaction Data"
+      },
+      "metadata": {
+        "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "229,107",
+        "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "State_4"
+      },
+      "expressions": [],
+      "variables_referenced": [
+        "processed"
+      ],
+      "selectors": {},
+      "annotation": "Get the next transaction to be processed.",
+      "is_visible": true,
+      "container_type": null,
+      "visible_attributes": {
+        "DisplayName": "Get Transaction Data"
+      },
+      "invisible_attributes": {
+        "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "229,107",
+        "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "State_4"
+      },
+      "variables": [],
+      "child_activities": [],
+      "expression_objects": [],
+      "xpath_location": "/State",
+      "source_line": null
+    },
+    {
+      "activity_id": "PurposefulPromethium#Main#Activity/State_1/State.Entry_3#f50d1668",
+      "workflow_id": "Main",
+      "activity_type": "Sequence",
+      "display_name": "Retrieve Data",
+      "node_id": "Activity/State_1/State.Entry_3",
+      "parent_activity_id": "PurposefulPromethium#Main#Activity/State_1_2#e9866c5b",
+      "depth": 2,
+      "arguments": {
+        "Annotation.AnnotationText": "Retrieve a new transaction data to be processed.\nThe TransactionNumber variable holds the current transaction number, and incrementing this variable means retrieving will make the next transaction to be retrieved. If a robot is retrying a failed transaction, this variable is not incremented until the maximum number of retry attempts is reached.",
+        "DisplayName": "Retrieve Data"
+      },
+      "configuration": {
+        "Sequence.Variables": {
+          "children": {
+            "Variable": {
+              "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:Boolean",
+              "Name": "ShouldStop"
+            }
+          }
+        },
+        "WorkflowViewStateService.ViewState": {
+          "children": {
+            "Dictionary": {
+              "attributes": {
+                "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+              },
+              "children": {
+                "Boolean": {
+                  "attributes": {
+                    "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsPinned"
+                  },
+                  "text": "False"
+                }
+              }
+            }
+          }
+        },
+        "ShouldStop": {
+          "DisplayName": "Check Stop Signal",
+          "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "1062,25",
+          "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "ShouldStop_2",
+          "Result": "[ShouldStop]"
+        },
+        "If": {
+          "attributes": {
+            "Condition": "[ShouldStop]",
+            "DisplayName": "Should Stop or Get Next",
+            "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "1062,528",
+            "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "If_11"
+          },
+          "children": {
+            "If.Then": {
+              "children": {
+                "Sequence": {
+                  "attributes": {
+                    "DisplayName": "Orchestrator stop requested",
+                    "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "482,300",
+                    "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Sequence_23"
+                  },
+                  "children": {
+                    "WorkflowViewStateService.ViewState": {
+                      "children": {
+                        "Dictionary": {
+                          "attributes": {
+                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                          },
+                          "children": {
+                            "Boolean": {
+                              "attributes": {
+                                "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsPinned"
+                              },
+                              "text": "False"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "LogMessage": {
+                      "DisplayName": "Log message (Stop process requested)",
+                      "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,92",
+                      "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "LogMessage_27",
+                      "Level": "Info",
+                      "Message": "[\"Stop process requested\"]"
+                    },
+                    "Assign": {
+                      "attributes": {
+                        "DisplayName": "End Process (Stop process requested)",
+                        "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,82",
+                        "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Assign_22"
+                      },
+                      "children": {
+                        "Assign.To": {
+                          "children": {
+                            "OutArgument": {
+                              "attributes": {
+                                "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                              },
+                              "text": "[TransactionItem]"
+                            }
+                          }
+                        },
+                        "Assign.Value": {
+                          "children": {
+                            "InArgument": {
+                              "attributes": {
+                                "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                              },
+                              "text": "[Nothing]"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "If.Else": {
+              "children": {
+                "TryCatch": {
+                  "attributes": {
+                    "DisplayName": "Try GetTransactionData",
+                    "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "535,368",
+                    "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "TryCatch_7"
+                  },
+                  "children": {
+                    "WorkflowViewStateService.ViewState": {
+                      "children": {
+                        "Dictionary": {
+                          "attributes": {
+                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                          },
+                          "children": {
+                            "Boolean": {
+                              "attributes": {
+                                "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsPinned"
+                              },
+                              "text": "False"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "TryCatch.Try": {
+                      "children": {
+                        "Switch": {
+                          "attributes": {
+                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String",
+                            "DisplayName": "Switch QueueConsumptionStrategy GetTransactionData Dequeue",
+                            "Expression": "[Config(\"QueueConsumptionStrategy\").ToString]",
+                            "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "497,140",
+                            "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Switch`1_2"
+                          },
+                          "children": {
+                            "Switch.Default": {
+                              "children": {
+                                "InvokeWorkflowFile": {
+                                  "attributes": {
+                                    "ArgumentsVariable": "{x:Null}",
+                                    "ContinueOnError": "{x:Null}",
+                                    "DisplayName": "Invoke GetTransactionData workflow",
+                                    "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "334,113",
+                                    "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "InvokeWorkflowFile_20",
+                                    "UnSafe": "False",
+                                    "WorkflowFileName": "Framework\\GetTransactionData.xaml"
+                                  },
+                                  "children": {
+                                    "InvokeWorkflowFile.Arguments": {
+                                      "children": {
+                                        "InArgument": {
+                                          "attributes": {
+                                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "scg:Dictionary(x:String, x:Object)",
+                                            "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "in_Config"
+                                          },
+                                          "text": "[Config]"
+                                        },
+                                        "OutArgument": {
+                                          "attributes": {
+                                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String",
+                                            "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "out_TransactionID"
+                                          },
+                                          "text": "[TransactionID]"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "If": {
+                              "attributes": {
+                                "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "InProcess",
+                                "Condition": "[InProcessQueue.Count > 0]",
+                                "DisplayName": "If still items in queue then dequeue else set to Nothing",
+                                "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "913,241",
+                                "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "If_13"
+                              },
+                              "children": {
+                                "WorkflowViewStateService.ViewState": {
+                                  "children": {
+                                    "Dictionary": {
+                                      "attributes": {
+                                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                                      },
+                                      "children": {
+                                        "Boolean": {
+                                          "attributes": {
+                                            "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsPinned"
+                                          },
+                                          "text": "False"
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "If.Then": {
+                                  "children": {
+                                    "Assign": {
+                                      "attributes": {
+                                        "DisplayName": "Assign TransactionItem Dequeue",
+                                        "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,82",
+                                        "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Assign_35"
+                                      },
+                                      "children": {
+                                        "Assign.To": {
+                                          "children": {
+                                            "OutArgument": {
+                                              "attributes": {
+                                                "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                              },
+                                              "text": "[TransactionItem]"
+                                            }
+                                          }
+                                        },
+                                        "Assign.Value": {
+                                          "children": {
+                                            "InArgument": {
+                                              "attributes": {
+                                                "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                              },
+                                              "text": "[InProcessQueue.Dequeue]"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "If.Else": {
+                                  "children": {
+                                    "Assign": {
+                                      "attributes": {
+                                        "DisplayName": "Assign TransactionItem Nothing",
+                                        "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,82",
+                                        "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Assign_30"
+                                      },
+                                      "children": {
+                                        "Assign.To": {
+                                          "children": {
+                                            "OutArgument": {
+                                              "attributes": {
+                                                "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                              },
+                                              "text": "[TransactionItem]"
+                                            }
+                                          }
+                                        },
+                                        "Assign.Value": {
+                                          "children": {
+                                            "InArgument": {
+                                              "attributes": {
+                                                "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                              },
+                                              "text": "[Nothing]"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "TryCatch.Catches": {
+                      "children": {
+                        "Catch": {
+                          "attributes": {
+                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "s:Exception",
+                            "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "501,21",
+                            "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Catch`1_8"
+                          },
+                          "children": {
+                            "WorkflowViewStateService.ViewState": {
+                              "children": {
+                                "Dictionary": {
+                                  "attributes": {
+                                    "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                                  },
+                                  "children": {
+                                    "Boolean": {
+                                      "attributes": {
+                                        "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsPinned"
+                                      },
+                                      "text": "False"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "ActivityAction": {
+                              "attributes": {
+                                "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "s:Exception"
+                              },
+                              "children": {
+                                "ActivityAction.Argument": {
+                                  "children": {
+                                    "DelegateInArgument": {
+                                      "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "s:Exception",
+                                      "Name": "Exception"
+                                    }
+                                  }
+                                },
+                                "Sequence": {
+                                  "attributes": {
+                                    "DisplayName": "Log exception message and end process",
+                                    "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "482,300",
+                                    "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Sequence_24"
+                                  },
+                                  "children": {
+                                    "WorkflowViewStateService.ViewState": {
+                                      "children": {
+                                        "Dictionary": {
+                                          "attributes": {
+                                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                                          },
+                                          "children": {
+                                            "Boolean": {
+                                              "attributes": {
+                                                "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsPinned"
+                                              },
+                                              "text": "False"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "LogMessage": {
+                                      "DisplayName": "Log message  (Get transaction data error)",
+                                      "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,92",
+                                      "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "LogMessage_28",
+                                      "Level": "Fatal",
+                                      "Message": "[Config(\"LogMessage_GetTransactionDataError\").ToString+TransactionNumber.ToString+\". \"+Exception.Message+\" at Source: \"+Exception.Source]"
+                                    },
+                                    "Assign": {
+                                      "attributes": {
+                                        "DisplayName": "End Process (Could not get new transaction)",
+                                        "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,82",
+                                        "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Assign_23"
+                                      },
+                                      "children": {
+                                        "Assign.To": {
+                                          "children": {
+                                            "OutArgument": {
+                                              "attributes": {
+                                                "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                              },
+                                              "text": "[TransactionItem]"
+                                            }
+                                          }
+                                        },
+                                        "Assign.Value": {
+                                          "children": {
+                                            "InArgument": {
+                                              "attributes": {
+                                                "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                              },
+                                              "text": "[Nothing]"
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "properties": {
+        "DisplayName": "Retrieve Data"
+      },
+      "metadata": {
+        "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "1110,736",
+        "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Sequence_25"
+      },
+      "expressions": [],
+      "variables_referenced": [
+        "reached",
+        "processed",
+        "retrieved"
+      ],
+      "selectors": {},
+      "annotation": "Retrieve a new transaction data to be processed.\nThe TransactionNumber variable holds the current transaction number, and incrementing this variable means retrieving will make the next transaction to be retrieved. If a robot is retrying a failed transaction, this variable is not incremented until the maximum number of retry attempts is reached.",
+      "is_visible": true,
+      "container_type": null,
+      "visible_attributes": {
+        "DisplayName": "Retrieve Data"
+      },
+      "invisible_attributes": {
+        "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "1110,736",
+        "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Sequence_25"
+      },
+      "variables": [],
+      "child_activities": [],
+      "expression_objects": [],
+      "xpath_location": "/Sequence",
+      "source_line": null
+    },
+    {
+      "activity_id": "PurposefulPromethium#Main#Activity/State_1/State.Entry/ShouldStop_2_4#a5043299",
+      "workflow_id": "Main",
+      "activity_type": "ShouldStop",
+      "display_name": "Check Stop Signal",
+      "node_id": "Activity/State_1/State.Entry/ShouldStop_2_4",
+      "parent_activity_id": "PurposefulPromethium#Main#Activity/State_1/State.Entry_3#f50d1668",
+      "depth": 3,
+      "arguments": {
+        "DisplayName": "Check Stop Signal",
+        "Result": "[ShouldStop]"
+      },
+      "configuration": {},
+      "properties": {
+        "DisplayName": "Check Stop Signal",
+        "Result": "[ShouldStop]"
+      },
+      "metadata": {
+        "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "1062,25",
+        "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "ShouldStop_2"
+      },
+      "expressions": [
+        "ShouldStop"
+      ],
+      "variables_referenced": [
+        "ShouldStop"
+      ],
+      "selectors": {},
+      "annotation": null,
+      "is_visible": true,
+      "container_type": null,
+      "visible_attributes": {
+        "DisplayName": "Check Stop Signal",
+        "Result": "[ShouldStop]"
+      },
+      "invisible_attributes": {
+        "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "1062,25",
+        "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "ShouldStop_2"
+      },
+      "variables": [],
+      "child_activities": [],
+      "expression_objects": [],
+      "xpath_location": "/ShouldStop",
+      "source_line": null
+    },
+    {
+      "activity_id": "PurposefulPromethium#Main#Activity/State_1/State.Entry/If_3_5#9633125c",
+      "workflow_id": "Main",
+      "activity_type": "If",
+      "display_name": "Should Stop or Get Next",
+      "node_id": "Activity/State_1/State.Entry/If_3_5",
+      "parent_activity_id": "PurposefulPromethium#Main#Activity/State_1/State.Entry_3#f50d1668",
+      "depth": 3,
+      "arguments": {
+        "Condition": "[ShouldStop]",
+        "DisplayName": "Should Stop or Get Next"
+      },
+      "configuration": {
+        "If.Then": {
+          "children": {
+            "Sequence": {
+              "attributes": {
+                "DisplayName": "Orchestrator stop requested",
+                "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "482,300",
+                "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Sequence_23"
+              },
+              "children": {
+                "WorkflowViewStateService.ViewState": {
+                  "children": {
+                    "Dictionary": {
+                      "attributes": {
+                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                      },
+                      "children": {
+                        "Boolean": {
+                          "attributes": {
+                            "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsPinned"
+                          },
+                          "text": "False"
+                        }
+                      }
+                    }
+                  }
+                },
+                "LogMessage": {
+                  "DisplayName": "Log message (Stop process requested)",
+                  "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,92",
+                  "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "LogMessage_27",
+                  "Level": "Info",
+                  "Message": "[\"Stop process requested\"]"
+                },
+                "Assign": {
+                  "attributes": {
+                    "DisplayName": "End Process (Stop process requested)",
+                    "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,82",
+                    "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Assign_22"
+                  },
+                  "children": {
+                    "Assign.To": {
+                      "children": {
+                        "OutArgument": {
+                          "attributes": {
+                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                          },
+                          "text": "[TransactionItem]"
+                        }
+                      }
+                    },
+                    "Assign.Value": {
+                      "children": {
+                        "InArgument": {
+                          "attributes": {
+                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                          },
+                          "text": "[Nothing]"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "If.Else": {
+          "children": {
+            "TryCatch": {
+              "attributes": {
+                "DisplayName": "Try GetTransactionData",
+                "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "535,368",
+                "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "TryCatch_7"
+              },
+              "children": {
+                "WorkflowViewStateService.ViewState": {
+                  "children": {
+                    "Dictionary": {
+                      "attributes": {
+                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                      },
+                      "children": {
+                        "Boolean": {
+                          "attributes": {
+                            "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsPinned"
+                          },
+                          "text": "False"
+                        }
+                      }
+                    }
+                  }
+                },
+                "TryCatch.Try": {
+                  "children": {
+                    "Switch": {
+                      "attributes": {
+                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String",
+                        "DisplayName": "Switch QueueConsumptionStrategy GetTransactionData Dequeue",
+                        "Expression": "[Config(\"QueueConsumptionStrategy\").ToString]",
+                        "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "497,140",
+                        "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Switch`1_2"
+                      },
+                      "children": {
+                        "Switch.Default": {
+                          "children": {
+                            "InvokeWorkflowFile": {
+                              "attributes": {
+                                "ArgumentsVariable": "{x:Null}",
+                                "ContinueOnError": "{x:Null}",
+                                "DisplayName": "Invoke GetTransactionData workflow",
+                                "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "334,113",
+                                "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "InvokeWorkflowFile_20",
+                                "UnSafe": "False",
+                                "WorkflowFileName": "Framework\\GetTransactionData.xaml"
+                              },
+                              "children": {
+                                "InvokeWorkflowFile.Arguments": {
+                                  "children": {
+                                    "InArgument": {
+                                      "attributes": {
+                                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "scg:Dictionary(x:String, x:Object)",
+                                        "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "in_Config"
+                                      },
+                                      "text": "[Config]"
+                                    },
+                                    "OutArgument": {
+                                      "attributes": {
+                                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String",
+                                        "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "out_TransactionID"
+                                      },
+                                      "text": "[TransactionID]"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "If": {
+                          "attributes": {
+                            "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "InProcess",
+                            "Condition": "[InProcessQueue.Count > 0]",
+                            "DisplayName": "If still items in queue then dequeue else set to Nothing",
+                            "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "913,241",
+                            "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "If_13"
+                          },
+                          "children": {
+                            "WorkflowViewStateService.ViewState": {
+                              "children": {
+                                "Dictionary": {
+                                  "attributes": {
+                                    "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                                  },
+                                  "children": {
+                                    "Boolean": {
+                                      "attributes": {
+                                        "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsPinned"
+                                      },
+                                      "text": "False"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "If.Then": {
+                              "children": {
+                                "Assign": {
+                                  "attributes": {
+                                    "DisplayName": "Assign TransactionItem Dequeue",
+                                    "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,82",
+                                    "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Assign_35"
+                                  },
+                                  "children": {
+                                    "Assign.To": {
+                                      "children": {
+                                        "OutArgument": {
+                                          "attributes": {
+                                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                          },
+                                          "text": "[TransactionItem]"
+                                        }
+                                      }
+                                    },
+                                    "Assign.Value": {
+                                      "children": {
+                                        "InArgument": {
+                                          "attributes": {
+                                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                          },
+                                          "text": "[InProcessQueue.Dequeue]"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "If.Else": {
+                              "children": {
+                                "Assign": {
+                                  "attributes": {
+                                    "DisplayName": "Assign TransactionItem Nothing",
+                                    "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,82",
+                                    "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Assign_30"
+                                  },
+                                  "children": {
+                                    "Assign.To": {
+                                      "children": {
+                                        "OutArgument": {
+                                          "attributes": {
+                                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                          },
+                                          "text": "[TransactionItem]"
+                                        }
+                                      }
+                                    },
+                                    "Assign.Value": {
+                                      "children": {
+                                        "InArgument": {
+                                          "attributes": {
+                                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                          },
+                                          "text": "[Nothing]"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "TryCatch.Catches": {
+                  "children": {
+                    "Catch": {
+                      "attributes": {
+                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "s:Exception",
+                        "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "501,21",
+                        "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Catch`1_8"
+                      },
+                      "children": {
+                        "WorkflowViewStateService.ViewState": {
+                          "children": {
+                            "Dictionary": {
+                              "attributes": {
+                                "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                              },
+                              "children": {
+                                "Boolean": {
+                                  "attributes": {
+                                    "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsPinned"
+                                  },
+                                  "text": "False"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "ActivityAction": {
+                          "attributes": {
+                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "s:Exception"
+                          },
+                          "children": {
+                            "ActivityAction.Argument": {
+                              "children": {
+                                "DelegateInArgument": {
+                                  "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "s:Exception",
+                                  "Name": "Exception"
+                                }
+                              }
+                            },
+                            "Sequence": {
+                              "attributes": {
+                                "DisplayName": "Log exception message and end process",
+                                "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "482,300",
+                                "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Sequence_24"
+                              },
+                              "children": {
+                                "WorkflowViewStateService.ViewState": {
+                                  "children": {
+                                    "Dictionary": {
+                                      "attributes": {
+                                        "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "x:String, x:Object"
+                                      },
+                                      "children": {
+                                        "Boolean": {
+                                          "attributes": {
+                                            "{http://schemas.microsoft.com/winfx/2006/xaml}Key": "IsPinned"
+                                          },
+                                          "text": "False"
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "LogMessage": {
+                                  "DisplayName": "Log message  (Get transaction data error)",
+                                  "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,92",
+                                  "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "LogMessage_28",
+                                  "Level": "Fatal",
+                                  "Message": "[Config(\"LogMessage_GetTransactionDataError\").ToString+TransactionNumber.ToString+\". \"+Exception.Message+\" at Source: \"+Exception.Source]"
+                                },
+                                "Assign": {
+                                  "attributes": {
+                                    "DisplayName": "End Process (Could not get new transaction)",
+                                    "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "434,82",
+                                    "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "Assign_23"
+                                  },
+                                  "children": {
+                                    "Assign.To": {
+                                      "children": {
+                                        "OutArgument": {
+                                          "attributes": {
+                                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                          },
+                                          "text": "[TransactionItem]"
+                                        }
+                                      }
+                                    },
+                                    "Assign.Value": {
+                                      "children": {
+                                        "InArgument": {
+                                          "attributes": {
+                                            "{http://schemas.microsoft.com/winfx/2006/xaml}TypeArguments": "ui:QueueItem"
+                                          },
+                                          "text": "[Nothing]"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "properties": {
+        "Condition": "[ShouldStop]",
+        "DisplayName": "Should Stop or Get Next"
+      },
+      "metadata": {
+        "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "1062,528",
+        "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "If_11"
+      },
+      "expressions": [
+        "ShouldStop"
+      ],
+      "variables_referenced": [
+        "ShouldStop"
+      ],
+      "selectors": {},
+      "annotation": null,
+      "is_visible": true,
+      "container_type": null,
+      "visible_attributes": {
+        "Condition": "[ShouldStop]",
+        "DisplayName": "Should Stop or Get Next"
+      },
+      "invisible_attributes": {
+        "{http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation}VirtualizedContainerService.HintSize": "1062,528",
+        "{http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation}WorkflowViewState.IdRef": "If_11"
+      },
+      "variables": [],
+      "child_activities": [],
+      "expression_objects": [],
+      "xpath_location": "/If",
+      "source_line": null
+    }
+  ]
+}

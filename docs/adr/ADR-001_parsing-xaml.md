@@ -67,3 +67,19 @@ Analysis of Windows Workflow Foundation (WF) and UiPath XAML workflows is requir
 * **Go:** Proceed with **Option B (Pattern-Matching)** as baseline for analysis.
 * **No-Go:** Do not implement **Option A (Strict)** at this stage due to maintenance burden.
 * **No-Go (low priority):** Postpone **Option C (CLR Bridge)** unless access to full UiPath assemblies and a Windows/.NET runtime environment is guaranteed.
+
+## Roadmap Phase
+
+* **v0.0.1:** Core implementation with lxml + defusedxml (ADR-015)
+
+## Consequences
+
+* Enables resilient parsing across UiPath versions and namespace changes
+* Implemented by parser layer (ADR-007) using lenient capture (ADR-008)
+* Foundation for all downstream artifact generation (ADR-009)
+
+## Related ADRs
+
+* ADR-007: Parser requirements implementing this approach
+* ADR-008: Lenient parsing strategy aligns with pattern-matching tolerance
+* ADR-015: lxml chosen as implementation technology for pattern matching

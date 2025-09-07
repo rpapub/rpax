@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rpax.rpapub.dev/schemas/error@v0.json",
+  "title": "rpax Error Record",
+  "description": "Redaction-safe error record for MCP diagnostics and lake storage",
+  "type": "object",
+  "properties": {
+    "category": {
+      "type": "string",
+      "enum": ["parser", "env", "config", "api", "mcp", "access", "other"],
+      "description": "Error category for classification"
+    },
+    "code": {
+      "type": "string",
+      "pattern": "^[A-Z]+\\.[A-Z_]+\\.[A-Z_]+$",
+      "description": "Machine-readable error code (e.g., PARSER.XML.MALFORMED)"
+    },
+    "severity": {
+      "type": "string", 
+      "enum": ["fatal", "major", "minor", "info"],
+      "description": "Error severity level"
+    },
+    "artifact": {
+      "type": "string",
+      "enum": [
+        "manifest", 
+        "workflows.index", 
+        "invocations", 
+        "call_graph", 
+        "activity_tree", 
+        "control_flow", 
+        "resources", 
+        "metrics", 
+        "paths", 
+        "pseudocode"
+      ],
+      "description": "Target artifact where error occurred"
+    },
+    "runId": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z-[a-f0-9]{8}$",
+      "description": "Run identifier that produced this error"
+    },
+    "redactedMessage": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Safe, concise vendor-controlled error description"
+    },
+    "hint": {
+      "type": "string",
+      "maxLength": 300,
+      "description": "Optional remediation tip (vendor text only)"
+    },
+    "wfToken": {
+      "type": "string",
+      "pattern": "^WF\\d{3}$",
+      "description": "Redaction token for workflow (e.g., WF001)"
+    },
+    "nodeToken": {
+      "type": "string", 
+      "pattern": "^N\\d{2}[A-Z]$",
+      "description": "Redaction token for activity node (e.g., N01A)"
+    },
+    "extras": {
+      "type": "object",
+      "description": "Additional structured context (vendor-safe only)",
+      "additionalProperties": true
+    },
+    "errorType": {
+      "type": "string",
+      "enum": ["parse_error", "validation_warning", "missing_reference", "dynamic_invocation"],
+      "description": "Legacy error type (deprecated, use category instead)"
+    },
+    "message": {
+      "type": "string",
+      "description": "Raw error description (lake-only, contains user data)"
+    },
+    "sourceFile": {
+      "type": "string",
+      "description": "File path where error occurred (lake-only, contains user data)"
+    },
+    "lineNumber": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Line number if available (lake-only)"
+    },
+    "contextInfo": {
+      "type": "string", 
+      "description": "Free-text context (lake-only, contains user data)"
+    }
+  },
+  "required": ["category", "code", "severity", "runId", "redactedMessage"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "category": "parser",
+      "code": "PARSER.XML.MALFORMED", 
+      "severity": "major",
+      "artifact": "activities.tree",
+      "runId": "2025-09-06T07:40:12Z-7f0c2d26",
+      "wfToken": "WF003",
+      "nodeToken": "N01A",
+      "redactedMessage": "Malformed XAML near Sequence[0].",
+      "hint": "Open the workflow in Studio and re-save to normalize.",
+      "extras": {
+        "uipathSchemaVersion": "4.0"
+      }
+    },
+    {
+      "category": "env",
+      "code": "ENV.PYTHON.MISSING_DEP",
+      "severity": "fatal", 
+      "runId": "2025-09-06T07:40:12Z-7f0c2d26",
+      "redactedMessage": "Required dependency 'lxml' not found.",
+      "hint": "Install with: uv add lxml>=4.9.0"
+    }
+  ]
+}

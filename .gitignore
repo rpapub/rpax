@@ -49,8 +49,19 @@ Thumbs.db
 .mypy_cache/
 .pyre/
 .pytype/
-ruff_cache/
+.ruff_cache/
 
 # Generated data
 data/
 output/
+
+# rpax generated artifacts
+.rpax-lake/
+*.rpax-out/
+
+# Test directories and temporary files
+.test-*
+.temp-*
+
+# Test output directories (should not be committed)
+test-output/

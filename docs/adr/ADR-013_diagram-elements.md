@@ -60,7 +60,18 @@ Define renderer-agnostic diagram semantics now; support both Mermaid and Graphvi
 * Edge styles match kinds; roles consistently marked.
 * Clusters reflect folder structure deterministically.
 
+## Roadmap Phase
+
+* **v0.1:** Mermaid diagram element standards
+* **v0.2:** Extended support for Graphviz elements
+
 ## Open Points
 
 * Thresholds for switching to Graphviz on large graphs.
-* Exact visual for “entry point” and “test root” within Mermaid constraints.
+* Exact visual for "entry point" and "test root" within Mermaid constraints.
+
+## Related ADRs
+
+* ADR-003: Diagram generation via `graph` command
+* ADR-005: Implements standardized elements across Mermaid/Graphviz renderers
+* ADR-009: Uses activity data from parser artifacts for CFG views

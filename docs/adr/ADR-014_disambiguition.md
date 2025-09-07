@@ -50,7 +50,20 @@ Adopt **Composite ID** (Option C).
 * Hash algorithm policy (stay with SHA-256 or allow BLAKE3 under a `hashAlgo` field).
 * Retention of historical `wfId` aliases after moves (optional alias map).
 
+## Roadmap Phase
+
+* **v0.0.1:** Core identity model for multi-project artifact storage
+
 ## Go / No-Go
 
 * **Go:** Composite ID with SHA-256, POSIX `wfId`, normalized paths, explicit `projectSlug`.
 * **No-Go:** Path-only or content-only identifiers as the sole key in the lake.
+
+## Related ADRs
+
+* ADR-006: projectSlug generated from project.json metadata
+* ADR-007: wfId requirements and normalization rules  
+* ADR-008: Lake storage model for multi-project artifacts
+* ADR-009: Identity scheme used throughout canonical artifacts
+* ADR-011: projectSlug used in Access API URL structure
+* ADR-012: Identity model drives MCP URI scheme

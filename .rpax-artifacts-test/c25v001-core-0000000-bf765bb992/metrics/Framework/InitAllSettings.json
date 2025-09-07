@@ -1,0 +1,13 @@
+{
+  "workflowId": "Framework/InitAllSettings",
+  "totalNodes": 21,
+  "maxDepth": 7,
+  "loopCount": 0,
+  "invokeCount": 0,
+  "logCount": 0,
+  "tryCatchCount": 0,
+  "selectorCount": 0,
+  "activityTypes": {
+    "Unknown": 21
+  }
+}

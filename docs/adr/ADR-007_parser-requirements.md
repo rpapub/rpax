@@ -107,8 +107,22 @@ Validation, diagram/rendering, summaries, MCP export, heuristic/dynamic path res
 * Switch readiness: gates met; draft **schema v1** ready; migration notes prepared.
 * Phase 1: strict artifacts validate cleanly on corpus; CI uses schemas.
 
+## Roadmap Phase
+
+* **v0.0.1:** Phase 0 lenient JSONL implementation
+* **v0.1:** Phase 1 transition to strict canonical artifacts with schemas
+
 ## Open Questions
 
 * Treat test entries as roots by default or behind a flag.
 * Required vs optional capture of `.entryPoints[*].input/output`.
 * Enumerations for `expressionLanguage` and `targetFramework` scope and values.
+
+## Related ADRs
+
+* ADR-001: Implements pattern-matching approach for XAML parsing
+* ADR-006: Uses project.json as mandatory input
+* ADR-008: Phase 0 lenient capture strategy  
+* ADR-009: Target artifact specification
+* ADR-014: Identity model for wfId and content hashing
+* ADR-015: Python stack implementing these requirements

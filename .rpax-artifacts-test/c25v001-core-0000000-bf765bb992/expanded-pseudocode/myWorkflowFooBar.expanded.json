@@ -1,0 +1,267 @@
+{
+  "workflow_id": "myWorkflowFooBar",
+  "project_id": "unknown",
+  "project_slug": "unknown",
+  "schema_version": "1.1.0",
+  "generated_at": "2025-09-06T21:05:04.805462+00:00",
+  "rpax_version": "0.0.1",
+  "activities": [
+    {
+      "indent": 0,
+      "displayName": "myWorkflowFooBar",
+      "tag": "Sequence",
+      "path": "Activity/Sequence",
+      "formattedLine": "- [myWorkflowFooBar] Sequence (Path: Activity/Sequence)",
+      "nodeId": "Activity/Sequence_1",
+      "depth": 1,
+      "isVisual": true,
+      "children": [
+        {
+          "indent": 1,
+          "displayName": "SequenceFirst",
+          "tag": "Sequence",
+          "path": "Activity/Sequence/Sequence",
+          "formattedLine": "  - [SequenceFirst] Sequence (Path: Activity/Sequence/Sequence)",
+          "nodeId": "Activity/Sequence/Sequence_2",
+          "depth": 2,
+          "isVisual": true,
+          "children": [
+            {
+              "indent": 2,
+              "displayName": "Log Message INFO SequenceFirst",
+              "tag": "LogMessage",
+              "path": "Activity/Sequence/Sequence/LogMessage",
+              "formattedLine": "    - [Log Message INFO SequenceFirst] LogMessage (Path: Activity/Sequence/Sequence/LogMessage)",
+              "nodeId": "Activity/Sequence/Sequence/LogMessage_3",
+              "depth": 3,
+              "isVisual": true,
+              "children": []
+            },
+            {
+              "indent": 2,
+              "displayName": "Log Message TRACE SequenceSecond",
+              "tag": "LogMessage",
+              "path": "Activity/Sequence/Sequence/LogMessage",
+              "formattedLine": "    - [Log Message TRACE SequenceSecond] LogMessage (Path: Activity/Sequence/Sequence/LogMessage)",
+              "nodeId": "Activity/Sequence/Sequence/LogMessage_3",
+              "depth": 3,
+              "isVisual": true,
+              "children": []
+            }
+          ]
+        },
+        {
+          "indent": 2,
+          "displayName": "Log Message INFO SequenceFirst",
+          "tag": "LogMessage",
+          "path": "Activity/Sequence/Sequence/LogMessage",
+          "formattedLine": "    - [Log Message INFO SequenceFirst] LogMessage (Path: Activity/Sequence/Sequence/LogMessage)",
+          "nodeId": "Activity/Sequence/Sequence/LogMessage_3",
+          "depth": 3,
+          "isVisual": true,
+          "children": []
+        },
+        {
+          "indent": 2,
+          "displayName": "Log Message TRACE SequenceSecond",
+          "tag": "LogMessage",
+          "path": "Activity/Sequence/Sequence/LogMessage",
+          "formattedLine": "    - [Log Message TRACE SequenceSecond] LogMessage (Path: Activity/Sequence/Sequence/LogMessage)",
+          "nodeId": "Activity/Sequence/Sequence/LogMessage_3",
+          "depth": 3,
+          "isVisual": true,
+          "children": []
+        },
+        {
+          "indent": 1,
+          "displayName": "SequenceSecond",
+          "tag": "Sequence",
+          "path": "Activity/Sequence/Sequence",
+          "formattedLine": "  - [SequenceSecond] Sequence (Path: Activity/Sequence/Sequence)",
+          "nodeId": "Activity/Sequence/Sequence_2",
+          "depth": 2,
+          "isVisual": true,
+          "children": [
+            {
+              "indent": 2,
+              "displayName": "Log Message INFO SequenceFirst",
+              "tag": "LogMessage",
+              "path": "Activity/Sequence/Sequence/LogMessage",
+              "formattedLine": "    - [Log Message INFO SequenceFirst] LogMessage (Path: Activity/Sequence/Sequence/LogMessage)",
+              "nodeId": "Activity/Sequence/Sequence/LogMessage_3",
+              "depth": 3,
+              "isVisual": true,
+              "children": []
+            },
+            {
+              "indent": 2,
+              "displayName": "Log Message TRACE SequenceSecond",
+              "tag": "LogMessage",
+              "path": "Activity/Sequence/Sequence/LogMessage",
+              "formattedLine": "    - [Log Message TRACE SequenceSecond] LogMessage (Path: Activity/Sequence/Sequence/LogMessage)",
+              "nodeId": "Activity/Sequence/Sequence/LogMessage_3",
+              "depth": 3,
+              "isVisual": true,
+              "children": []
+            }
+          ]
+        },
+        {
+          "indent": 2,
+          "displayName": "Log Message INFO SequenceFirst",
+          "tag": "LogMessage",
+          "path": "Activity/Sequence/Sequence/LogMessage",
+          "formattedLine": "    - [Log Message INFO SequenceFirst] LogMessage (Path: Activity/Sequence/Sequence/LogMessage)",
+          "nodeId": "Activity/Sequence/Sequence/LogMessage_3",
+          "depth": 3,
+          "isVisual": true,
+          "children": []
+        },
+        {
+          "indent": 2,
+          "displayName": "Log Message TRACE SequenceSecond",
+          "tag": "LogMessage",
+          "path": "Activity/Sequence/Sequence/LogMessage",
+          "formattedLine": "    - [Log Message TRACE SequenceSecond] LogMessage (Path: Activity/Sequence/Sequence/LogMessage)",
+          "nodeId": "Activity/Sequence/Sequence/LogMessage_3",
+          "depth": 3,
+          "isVisual": true,
+          "children": []
+        }
+      ]
+    },
+    {
+      "indent": 1,
+      "displayName": "SequenceFirst",
+      "tag": "Sequence",
+      "path": "Activity/Sequence/Sequence",
+      "formattedLine": "  - [SequenceFirst] Sequence (Path: Activity/Sequence/Sequence)",
+      "nodeId": "Activity/Sequence/Sequence_2",
+      "depth": 2,
+      "isVisual": true,
+      "children": [
+        {
+          "indent": 2,
+          "displayName": "Log Message INFO SequenceFirst",
+          "tag": "LogMessage",
+          "path": "Activity/Sequence/Sequence/LogMessage",
+          "formattedLine": "    - [Log Message INFO SequenceFirst] LogMessage (Path: Activity/Sequence/Sequence/LogMessage)",
+          "nodeId": "Activity/Sequence/Sequence/LogMessage_3",
+          "depth": 3,
+          "isVisual": true,
+          "children": []
+        },
+        {
+          "indent": 2,
+          "displayName": "Log Message TRACE SequenceSecond",
+          "tag": "LogMessage",
+          "path": "Activity/Sequence/Sequence/LogMessage",
+          "formattedLine": "    - [Log Message TRACE SequenceSecond] LogMessage (Path: Activity/Sequence/Sequence/LogMessage)",
+          "nodeId": "Activity/Sequence/Sequence/LogMessage_3",
+          "depth": 3,
+          "isVisual": true,
+          "children": []
+        }
+      ]
+    },
+    {
+      "indent": 2,
+      "displayName": "Log Message INFO SequenceFirst",
+      "tag": "LogMessage",
+      "path": "Activity/Sequence/Sequence/LogMessage",
+      "formattedLine": "    - [Log Message INFO SequenceFirst] LogMessage (Path: Activity/Sequence/Sequence/LogMessage)",
+      "nodeId": "Activity/Sequence/Sequence/LogMessage_3",
+      "depth": 3,
+      "isVisual": true,
+      "children": []
+    },
+    {
+      "indent": 2,
+      "displayName": "Log Message TRACE SequenceSecond",
+      "tag": "LogMessage",
+      "path": "Activity/Sequence/Sequence/LogMessage",
+      "formattedLine": "    - [Log Message TRACE SequenceSecond] LogMessage (Path: Activity/Sequence/Sequence/LogMessage)",
+      "nodeId": "Activity/Sequence/Sequence/LogMessage_3",
+      "depth": 3,
+      "isVisual": true,
+      "children": []
+    },
+    {
+      "indent": 1,
+      "displayName": "SequenceSecond",
+      "tag": "Sequence",
+      "path": "Activity/Sequence/Sequence",
+      "formattedLine": "  - [SequenceSecond] Sequence (Path: Activity/Sequence/Sequence)",
+      "nodeId": "Activity/Sequence/Sequence_2",
+      "depth": 2,
+      "isVisual": true,
+      "children": [
+        {
+          "indent": 2,
+          "displayName": "Log Message INFO SequenceFirst",
+          "tag": "LogMessage",
+          "path": "Activity/Sequence/Sequence/LogMessage",
+          "formattedLine": "    - [Log Message INFO SequenceFirst] LogMessage (Path: Activity/Sequence/Sequence/LogMessage)",
+          "nodeId": "Activity/Sequence/Sequence/LogMessage_3",
+          "depth": 3,
+          "isVisual": true,
+          "children": []
+        },
+        {
+          "indent": 2,
+          "displayName": "Log Message TRACE SequenceSecond",
+          "tag": "LogMessage",
+          "path": "Activity/Sequence/Sequence/LogMessage",
+          "formattedLine": "    - [Log Message TRACE SequenceSecond] LogMessage (Path: Activity/Sequence/Sequence/LogMessage)",
+          "nodeId": "Activity/Sequence/Sequence/LogMessage_3",
+          "depth": 3,
+          "isVisual": true,
+          "children": []
+        }
+      ]
+    },
+    {
+      "indent": 2,
+      "displayName": "Log Message INFO SequenceFirst",
+      "tag": "LogMessage",
+      "path": "Activity/Sequence/Sequence/LogMessage",
+      "formattedLine": "    - [Log Message INFO SequenceFirst] LogMessage (Path: Activity/Sequence/Sequence/LogMessage)",
+      "nodeId": "Activity/Sequence/Sequence/LogMessage_3",
+      "depth": 3,
+      "isVisual": true,
+      "children": []
+    },
+    {
+      "indent": 2,
+      "displayName": "Log Message TRACE SequenceSecond",
+      "tag": "LogMessage",
+      "path": "Activity/Sequence/Sequence/LogMessage",
+      "formattedLine": "    - [Log Message TRACE SequenceSecond] LogMessage (Path: Activity/Sequence/Sequence/LogMessage)",
+      "nodeId": "Activity/Sequence/Sequence/LogMessage_3",
+      "depth": 3,
+      "isVisual": true,
+      "children": []
+    }
+  ],
+  "activity_count": 5,
+  "format_version": "gist-style",
+  "total_lines": 0,
+  "total_activities": 0,
+  "entries": [],
+  "metadata": {},
+  "expanded_pseudocode": [
+    "- [myWorkflowFooBar]  (Path: Activity/Sequence)",
+    "- [SequenceFirst]  (Path: Activity/Sequence/Sequence)",
+    "- [Log Message INFO SequenceFirst]  (Path: Activity/Sequence/Sequence/LogMessage)",
+    "- [Log Message TRACE SequenceSecond]  (Path: Activity/Sequence/Sequence/LogMessage)",
+    "- [SequenceSecond]  (Path: Activity/Sequence/Sequence)",
+    "- [Log Message INFO SequenceFirst]  (Path: Activity/Sequence/Sequence/LogMessage)",
+    "- [Log Message TRACE SequenceSecond]  (Path: Activity/Sequence/Sequence/LogMessage)"
+  ],
+  "expansion_config": {
+    "max_depth": 3,
+    "cycle_handling": "detect_and_mark",
+    "generated_recursive": true
+  },
+  "generation_config": {}
+}

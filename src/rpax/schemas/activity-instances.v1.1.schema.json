@@ -1,0 +1,313 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Activity Instances Artifact v1.1",
+  "description": "Enhanced activity configurations with performance and visibility improvements (ADR-009 Phase 2)",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.1.0",
+      "description": "Schema version for activity instances artifact"
+    },
+    "workflowId": {
+      "type": "string",
+      "description": "Workflow identifier in POSIX format"
+    },
+    "projectId": {
+      "type": "string",
+      "description": "Project identifier for activity ID generation"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO8601 timestamp when artifact was generated"
+    },
+    "generationTimeMs": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Time taken to generate this artifact in milliseconds"
+    },
+    "performanceMetrics": {
+      "type": "object",
+      "description": "Performance metrics for generation process",
+      "properties": {
+        "activitiesPerSecond": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Processing rate in activities per second"
+        },
+        "cacheHitRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Cache hit rate (0.0 to 1.0)"
+        },
+        "maxDepthReached": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Maximum nesting depth encountered"
+        }
+      },
+      "additionalProperties": false
+    },
+    "totalActivities": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total number of activity instances in this workflow"
+    },
+    "visibleActivities": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of activities visible in designer"
+    },
+    "activitiesWithSelectors": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of activities with UI selectors"
+    },
+    "activities": {
+      "type": "array",
+      "description": "Array of activity instances with complete business logic",
+      "items": {
+        "$ref": "#/definitions/ActivityInstance"
+      }
+    }
+  },
+  "required": ["schemaVersion", "workflowId", "projectId", "totalActivities", "activities"],
+  "additionalProperties": false,
+  "definitions": {
+    "ActivityInstance": {
+      "type": "object",
+      "description": "Complete activity instance with full business logic configuration",
+      "properties": {
+        "activity_id": {
+          "type": "string",
+          "description": "Unique activity identifier: {projectId}#{workflowId}#{nodeId}#{contentHash}",
+          "pattern": "^[^#]+#[^#]+#[^#]+#[a-f0-9]{8}$"
+        },
+        "workflow_id": {
+          "type": "string",
+          "description": "Parent workflow identifier"
+        },
+        "activity_type": {
+          "type": "string",
+          "description": "Activity type name (e.g., 'NClick', 'ForEach')"
+        },
+        "display_name": {
+          "type": ["string", "null"],
+          "description": "User-visible activity name from DisplayName attribute"
+        },
+        "node_id": {
+          "type": "string",
+          "description": "Hierarchical path identifier within workflow"
+        },
+        "parent_activity_id": {
+          "type": ["string", "null"],
+          "description": "Parent activity identifier in hierarchy"
+        },
+        "depth": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Nesting level within workflow hierarchy"
+        },
+        "arguments": {
+          "type": "object",
+          "description": "All activity arguments extracted from XAML attributes",
+          "additionalProperties": true
+        },
+        "configuration": {
+          "type": "object", 
+          "description": "Nested configuration objects (Target, selectors, etc.)",
+          "additionalProperties": true
+        },
+        "properties": {
+          "type": "object",
+          "description": "Visible business logic properties",
+          "additionalProperties": true
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Technical metadata (ViewState, IdRef, etc.)",
+          "additionalProperties": true
+        },
+        "expressions": {
+          "type": "array",
+          "description": "UiPath expressions found in activity",
+          "items": {
+            "type": "string"
+          }
+        },
+        "variables_referenced": {
+          "type": "array",
+          "description": "Variable names referenced in expressions",
+          "items": {
+            "type": "string"
+          }
+        },
+        "selectors": {
+          "type": "object",
+          "description": "UI selectors extracted from configuration",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "annotation": {
+          "type": ["string", "null"],
+          "description": "Activity annotation text"
+        },
+        "is_visible": {
+          "type": "boolean",
+          "description": "Whether activity appears in visual designer"
+        },
+        "container_type": {
+          "type": ["string", "null"],
+          "description": "Parent container activity type"
+        },
+        "business_logic_complexity": {
+          "type": "object",
+          "description": "Metrics for activity complexity analysis",
+          "properties": {
+            "expressionCount": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of expressions in activity"
+            },
+            "variableCount": {
+              "type": "integer", 
+              "minimum": 0,
+              "description": "Number of variables referenced"
+            },
+            "selectorCount": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of UI selectors"
+            },
+            "configurationDepth": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Depth of nested configuration"
+            }
+          },
+          "additionalProperties": false
+        },
+        "visible_attributes": {
+          "type": "object",
+          "description": "Legacy: user-visible configuration attributes",
+          "additionalProperties": true
+        },
+        "invisible_attributes": {
+          "type": "object",
+          "description": "Legacy: technical metadata attributes",
+          "additionalProperties": true
+        },
+        "variables": {
+          "type": "array",
+          "description": "Legacy: activity-scoped variables",
+          "items": {
+            "$ref": "#/definitions/WorkflowVariable"
+          }
+        },
+        "child_activities": {
+          "type": "array",
+          "description": "Legacy: child activity identifiers",
+          "items": {
+            "type": "string"
+          }
+        },
+        "expression_objects": {
+          "type": "array",
+          "description": "Legacy: detailed expression objects",
+          "items": {
+            "$ref": "#/definitions/Expression"
+          }
+        },
+        "xpath_location": {
+          "type": ["string", "null"],
+          "description": "XPath-like location for debugging"
+        },
+        "source_line": {
+          "type": ["integer", "null"],
+          "description": "Line number in XAML file"
+        }
+      },
+      "required": [
+        "activity_id", 
+        "workflow_id", 
+        "activity_type",
+        "node_id",
+        "depth",
+        "arguments",
+        "configuration", 
+        "properties",
+        "metadata",
+        "expressions",
+        "variables_referenced",
+        "selectors",
+        "is_visible"
+      ],
+      "additionalProperties": false
+    },
+    "WorkflowVariable": {
+      "type": "object",
+      "description": "Workflow variable definition",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Variable name"
+        },
+        "type": {
+          "type": "string", 
+          "description": "Variable type (.NET type signature)"
+        },
+        "default_value": {
+          "type": ["string", "null"],
+          "description": "Default value expression"
+        },
+        "scope": {
+          "type": "string",
+          "description": "Variable scope (workflow, activity ID, etc.)"
+        }
+      },
+      "required": ["name", "type", "scope"],
+      "additionalProperties": false
+    },
+    "Expression": {
+      "type": "object",
+      "description": "Detailed expression object with metadata",
+      "properties": {
+        "content": {
+          "type": "string",
+          "description": "Expression text content"
+        },
+        "expression_type": {
+          "type": "string",
+          "description": "Expression classification (assignment, condition, etc.)"
+        },
+        "language": {
+          "type": "string",
+          "description": "Expression language (VisualBasic, CSharp)"
+        },
+        "context": {
+          "type": ["string", "null"],
+          "description": "Activity property containing this expression"
+        },
+        "contains_variables": {
+          "type": "array",
+          "description": "Variable names found in expression",
+          "items": {
+            "type": "string"
+          }
+        },
+        "contains_methods": {
+          "type": "array",
+          "description": "Method calls detected in expression",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["content", "expression_type", "language"],
+      "additionalProperties": false
+    }
+  }
+}
