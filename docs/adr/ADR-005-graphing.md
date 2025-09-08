@@ -1,6 +1,8 @@
 # ADR-005: Graph Visualization Options
 
-**Status:** Proposed
+**Status:** Implemented (Updated 2025-09-08)  
+**Date:** 2024-01-01  
+**Updated:** 2025-09-08
 
 ## Context
 
@@ -26,10 +28,17 @@ Visualization needed for workflow invocation graphs in docs and CI.
 * **Go:** Default = **Mermaid**; optional **Graphviz** export for large/CI diagrams.
 * **No-Go:** Additional graph libs (D3/Cytoscape/Vis.js) for this phase.
 
-## Roadmap Phase
+## Amendment Notes (2025-09-08)
 
-* **v0.1:** Mermaid support for GitHub/docs integration
-* **v0.2:** Optional Graphviz support for large/CI diagrams
+**What Changed**: Status updated from Proposed to Implemented, added implementation status
+**Why Amended**: Graph visualization system has been implemented with Mermaid support
+**Impact**: Confirms graph generation is operational for documentation and analysis
+
+## Implementation Status (Updated 2025-09-08)
+
+* **v0.0.2:** ✅ Mermaid support implemented and operational
+* **v0.0.3:** ✅ Graph generation via `rpax graph` command working
+* **Future:** Graphviz support for large/CI diagrams (architecture ready)
 
 ## Consequences
 

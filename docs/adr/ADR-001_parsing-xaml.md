@@ -1,6 +1,8 @@
 # ADR-001: Parsing XAML-based Workflow Projects
 
-**Status:** Proposed
+**Status:** Implemented (Updated 2025-09-08)  
+**Date:** 2024-01-01  
+**Updated:** 2025-09-08
 
 ## Context
 
@@ -62,15 +64,23 @@ Analysis of Windows Workflow Foundation (WF) and UiPath XAML workflows is requir
 
 ---
 
+## Amendment Notes (2025-09-08)
+
+**What Changed**: Status updated from Proposed to Implemented, added implementation status section
+**Why Amended**: Pattern-matching approach has been successfully implemented and is operational in v0.0.3
+**Impact**: Confirms the architectural decision is validated through working implementation
+
 ## Decision
 
 * **Go:** Proceed with **Option B (Pattern-Matching)** as baseline for analysis.
 * **No-Go:** Do not implement **Option A (Strict)** at this stage due to maintenance burden.
 * **No-Go (low priority):** Postpone **Option C (CLR Bridge)** unless access to full UiPath assemblies and a Windows/.NET runtime environment is guaranteed.
 
-## Roadmap Phase
+## Implementation Status (Updated 2025-09-08)
 
-* **v0.0.1:** Core implementation with lxml + defusedxml (ADR-015)
+* **v0.0.1:** ✅ Core implementation with lxml + defusedxml (ADR-015)
+* **v0.0.2:** ✅ Enhanced XAML analysis with activity detection and package extraction
+* **v0.0.3:** ✅ Production-ready pattern-matching parser with comprehensive test coverage
 
 ## Consequences
 

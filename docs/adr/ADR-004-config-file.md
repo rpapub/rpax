@@ -1,6 +1,8 @@
-# ADR: Configuration Schema (v1)
+# ADR-004: Configuration Schema (v1)
 
-**Status:** Proposed
+**Status:** Implemented (Updated 2025-09-08)  
+**Date:** 2024-01-01  
+**Updated:** 2025-09-08
 
 ## Context
 
@@ -65,9 +67,17 @@ Stable, validated configuration is required for CLI behavior across parsing, val
 * Clear evolution path via versioned files; deprecation notices in docs.
 * Slight maintenance overhead (mirror generation, tests).
 
-## Roadmap Phase
+## Amendment Notes (2025-09-08)
 
-* **v0.0.1:** Core configuration schema with validation; CLI `config` commands (ADR-003)
+**What Changed**: Status updated from Proposed to Implemented, added implementation status
+**Why Amended**: Configuration schema has been implemented and is operational in v0.0.3
+**Impact**: Confirms configuration system is ready for production use
+
+## Implementation Status (Updated 2025-09-08)
+
+* **v0.0.1:** ✅ Core configuration schema with validation implemented
+* **v0.0.2:** ✅ CLI `config` commands operational
+* **v0.0.3:** ✅ JSON Schema validation in production use
 
 ## Go / No-Go
 

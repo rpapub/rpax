@@ -123,6 +123,19 @@ uv run rpax list workflows --path .rpax-lake --search "Login"
 uv run rpax list workflows --path .rpax-lake --format table --verbose
 ```
 
+### 🗂️ **Discover Projects in Your Lake**
+
+```powershell
+# List all projects in your lake
+uv run rpax list-projects --path .rpax-lake
+
+# Search for specific projects
+uv run rpax list-projects --path .rpax-lake --search "calc"
+
+# Get JSON output for tooling
+uv run rpax list-projects --path .rpax-lake --format json
+```
+
 ### 🔎 **Find Unused Workflows (Orphans)**
 
 ```powershell
@@ -218,10 +231,10 @@ You can open all `.json` files in Notepad to see the data, or use online JSON vi
 
 ## Current Version
 
-**rpax v0.0.2** - Proof-of-concept with comprehensive UiPath parsing  
-**Status**: 🧪 Alpha - Demonstrates parsing capabilities, not production-ready  
+**rpax v0.0.3** - Advanced implementation with resource model and error collection  
+**Status**: 🚀 Released - Enhanced parsing with V0 schema, activity resources, and diagnostics  
 **Installation**: Development setup required (see Installation section above)  
-**Coming soon**: PyPI distribution, stable API, web interface
+**Next**: v0.3.0 consumption validation, PyPI distribution, HTTP API layer
 
 ---
 

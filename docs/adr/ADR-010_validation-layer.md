@@ -1,6 +1,8 @@
 # ADR-010: Lightweight Validation Layer
 
-**Status:** Proposed
+**Status:** Implemented (Updated 2025-09-08)  
+**Date:** 2024-01-01  
+**Updated:** 2025-09-08
 
 ## Context
 
@@ -67,3 +69,7 @@ Fast, deterministic guardrails; stable inputs for Access API/MCP; semantic depth
 * ADR-002: Layer 2 of the architectural stack
 * ADR-004: Configuration fields for validation behavior
 * ADR-009: Validates parser artifacts from this specification
+
+## Amendment Notes
+
+**2025-09-08 Status Update:** Lightweight validation layer has been implemented in rpax v0.0.2. The codebase includes validation directory structure with artifact validation, configuration-driven validation rules, and CI-ready exit codes as specified. Validation focuses on pipeline readiness rather than vendor IDE semantics. Amendment follows ADR-000 governance process.

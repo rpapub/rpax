@@ -1,0 +1,81 @@
+# rpax
+
+rpax is a code-first CLI tool that parses UiPath Process and Library projects into JSON call graphs, arguments, and diagrams for documentation, validation, and CI impact analysis.
+
+## Architecture
+
+4-layer architecture: Parser → Transformation/Enhancement → (API | MCP as siblings)
+
+Current version: v0.0.3 (released - advanced implementation with V0 schema, activity resources, error collection)
+
+## Key Technical Decisions
+
+See Architecture Decision Records in `docs/adr/` directory:
+
+- ADR-000: ADR maintenance lifecycle and update process (REQUIRED READING for any ADR work)
+- ADR-001: Pattern-matching XAML parsing approach (resilient, namespace-agnostic)
+- ADR-002: Layered architecture with transformation layer 
+- ADR-003: CLI surface and command structure
+- ADR-033: Multi-project lake access patterns
+
+**CRITICAL**: Before modifying any ADR, read ADR-000 completely. All ADR changes require explicit user approval per ADR-000 process.
+
+## Development Guidelines
+
+- Python 3.11+ with type hints everywhere
+- Use `uv` for dependency management (never pip)
+- Follow Black formatting, Ruff linting, mypy type checking
+- File-based architecture: JSON files only, no database dependencies
+- Read-only tool: parses and analyzes, never executes or modifies UiPath projects
+
+## File Structure
+
+```
+src/rpax/                 # Main Python package
+docs/adr/                 # Architecture Decision Records (authoritative)
+docs/development/         # Developer guides and code navigation
+docs/llm/context/         # LLM context and style guides  
+docs/risks/               # Risk register and edge cases
+CLAUDE.md                 # Detailed project instructions
+TODO.md                   # Current implementation status and next steps
+```
+
+## Working with ADRs
+
+All ADR work must follow ADR-000 process:
+1. Read target ADR completely
+2. Classify change: Editorial, Amendment, or Superseding
+3. For non-editorial changes: get explicit user approval first
+4. Use proper amendment format with date stamps
+5. Preserve original decision context
+
+## Test Corpuses
+
+Local UiPath projects for validation:
+- `D:\github.com\rpapub\rpax-corpuses\c25v001_CORE_00000001\project.json`
+- `D:\github.com\rpapub\rpax-corpuses\c25v001_CORE_00000010\project.json`  
+- `D:\github.com\rpapub\FrozenChlorine\project.json`
+- `D:\github.com\rpapub\PropulsiveForce\CPRIMA-USG-001_ShouldStopPresence\Violation\project.json`
+- `D:\github.com\rpapub\PropulsiveForce\CPRIMA-USG-001_ShouldStopPresence\NoViolation\project.json`
+
+## Current Focus
+
+Phase v0.3.0: Consumption validation and API layer implementation. V0.2.9 features need validation through real-world usage patterns.
+
+## Important Constraints
+
+- Never commit changes unless explicitly asked
+- Never create files unless absolutely necessary  
+- Always prefer editing existing files over creating new ones
+- Never execute shell commands that modify UiPath projects
+- All non-editorial documentation changes require user approval
+
+## Code Navigation
+
+For finding specific functionality: `docs/development/code-navigation.md`
+- "Where to find X" quick reference
+- Module organization and key classes  
+- Common development task patterns
+- Data flow and interface documentation
+
+For detailed guidance, see CLAUDE.md and docs/adr/ directory.

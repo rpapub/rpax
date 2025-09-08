@@ -19,8 +19,8 @@ class SchemaVersion:
         self.raw = version_str
         parts = version_str.split('.')
         self.major = int(parts[0])
-        self.minor = int(parts[1])  
-        self.patch = int(parts[2])
+        self.minor = int(parts[1]) if len(parts) > 1 else 0
+        self.patch = int(parts[2]) if len(parts) > 2 else 0
     
     def __str__(self):
         return self.raw

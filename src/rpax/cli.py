@@ -18,8 +18,13 @@ from rpax.artifacts import ArtifactGenerator
 from rpax.config import OutputFormat, load_config
 from rpax.explain import ExplanationFormatter, WorkflowAnalyzer
 from rpax.graph import GraphGenerator, MermaidRenderer
+from rpax.output.base import ParsedProjectData
+from rpax.output.v0 import V0LakeGenerator
+from rpax.output.lake_index import LakeIndexGenerator
 from rpax.parser.project import ProjectParser
 from rpax.parser.xaml import XamlDiscovery
+from rpax.parser.workflow_discovery import create_workflow_discovery
+from rpax.utils.cross_project_access import CrossProjectAccessor
 from rpax.schemas import ArtifactValidator, SchemaGenerator
 from rpax.validation import ValidationFramework
 
@@ -322,6 +327,10 @@ def parse(
         Path,
         typer.Option("--config", "-c", help="Configuration file path (default: search for .rpax.json)")
     ] = None,
+    schema: Annotated[
+        str,
+        typer.Option("--schema", help="Output schema version (legacy, v0)")
+    ] = "legacy",
     additional_paths: Annotated[
         list[Path],
         typer.Option("--path", help="Additional project paths for batch parsing (can be used multiple times)")
@@ -358,7 +367,13 @@ def parse(
         if out:
             base_config.output.dir = str(out)
         
+        # Validate schema option
+        if schema not in ["legacy", "v0"]:
+            console.print(f"[red]Error:[/red] Invalid schema '{schema}'. Supported: legacy, v0")
+            raise typer.Exit(1)
+        
         console.print(f"[blue]Output lake:[/blue] {base_config.output.dir}")
+        console.print(f"[blue]Schema version:[/blue] {schema}")
         console.print(f"[green]Parsing {len(project_paths)} project(s):[/green]")
         
         total_workflows = 0
@@ -388,9 +403,23 @@ def parse(
                 if not project_config.project.name:
                     project_config.project.name = project.name
                 
-                # Discover workflows
-                console.print("[dim]  Discovering XAML workflows...[/dim]")
-                discovery = XamlDiscovery(project_path, exclude_patterns=project_config.scan.exclude)
+                # Discover workflows (respecting configuration)
+                include_coded = project_config.parser.include_coded_workflows
+                if schema == "v0" and include_coded:
+                    console.print("[dim]  Discovering workflows (XAML + coded)...[/dim]")
+                    discovery = create_workflow_discovery(
+                        project_path, 
+                        exclude_patterns=project_config.scan.exclude,
+                        include_coded_workflows=True
+                    )
+                else:
+                    console.print("[dim]  Discovering XAML workflows...[/dim]")
+                    discovery = create_workflow_discovery(
+                        project_path,
+                        exclude_patterns=project_config.scan.exclude, 
+                        include_coded_workflows=False
+                    )
+                
                 workflow_index = discovery.discover_workflows()
                 
                 console.print(f"[green]  OK[/green] Found {workflow_index.total_workflows} workflows")
@@ -402,8 +431,26 @@ def parse(
                 
                 # Generate artifacts
                 console.print("[dim]  Generating artifacts...[/dim]")
-                generator = ArtifactGenerator(project_config, out)
-                artifacts = generator.generate_all_artifacts(project, workflow_index, project_path)
+                
+                if schema == "v0":
+                    # Use V0LakeGenerator for experimental schema
+                    from slugify import slugify
+                    project_slug = slugify(project.name)
+                    
+                    parsed_data = ParsedProjectData(
+                        project=project,
+                        workflow_index=workflow_index,
+                        project_root=project_path,
+                        project_slug=project_slug,
+                        timestamp=datetime.now()
+                    )
+                    
+                    generator = V0LakeGenerator(Path(base_config.output.dir))
+                    artifacts = generator.generate(parsed_data)
+                else:
+                    # Use legacy ArtifactGenerator
+                    generator = ArtifactGenerator(project_config, out)
+                    artifacts = generator.generate_all_artifacts(project, workflow_index, project_path)
                 
                 console.print(f"[green]  OK[/green] Generated {len(artifacts)} artifact files")
                 all_artifacts.update(artifacts)
@@ -420,6 +467,18 @@ def parse(
         console.print(f"  - Total artifacts: {len(all_artifacts)}")
         if total_errors > 0:
             console.print(f"  - [yellow]Errors/warnings: {total_errors}[/yellow]")
+        
+        # Generate lake-level index for project discovery (if enabled)
+        if base_config.v0.generate_lake_index:
+            console.print(f"\n[dim]Generating lake index for project discovery...[/dim]")
+            try:
+                lake_generator = LakeIndexGenerator(Path(base_config.output.dir))
+                lake_index_file = lake_generator.save_lake_index()
+                console.print(f"[green]OK[/green] Lake index: {lake_index_file.name}")
+            except Exception as e:
+                console.print(f"[yellow]WARN[/yellow] Failed to generate lake index: {e}")
+        else:
+            console.print(f"\n[dim]Lake index generation disabled in configuration[/dim]")
         
         console.print(f"\n[blue]Multi-project lake:[/blue] {base_config.output.dir}")
         console.print(f"[dim]Use 'rpax projects' to list all projects in the lake[/dim]")
@@ -2177,8 +2236,8 @@ def _display_all_metrics_table(all_metrics: list[dict[str, Any]], verbose: bool)
     summary="List all projects in the rpax lake",
     mcp_resource_type="project_list"
 )
-@app.command()
-def projects(
+@app.command("list-projects")
+def list_projects(
     path: Annotated[Path, typer.Argument(help="Path to rpax lake directory")] = Path(".rpax-lake"),
     format: Annotated[str, typer.Option("--format", "-f", help="Output format: table, json, csv (default: table)")] = "table",
     search: Annotated[str | None, typer.Option("--search", "-s", help="Search projects by name or slug")] = None,
@@ -3128,6 +3187,143 @@ def _show_object_repository_mcp_resources(object_repo_dir: Path, format: str, ve
         console.print(f"\n[dim]Generated at: {mcp_data.get('generatedAt', 'Unknown')}[/dim]")
     else:
         console.print(f"[red]Error:[/red] Unsupported format '{format}' for MCP resources")
+        raise typer.Exit(1)
+
+
+@app.command()
+def projects(
+    query: Annotated[str, typer.Argument(help="Project name or partial name to search for")] = "",
+    path: Annotated[Path, typer.Option("--path", "-p", help="Path to rpax lake directory")] = Path(".rpax-lake"),
+    action: Annotated[str, typer.Option("--action", "-a", help="Action to perform: resolve, summary, entry-points")] = "resolve",
+    detail_level: Annotated[str, typer.Option("--detail", "-d", help="Detail level for summaries: low, medium, high")] = "medium",
+    format: Annotated[str, typer.Option("--format", "-f", help="Output format: table, json")] = "table",
+) -> None:
+    """Cross-project access with fuzzy project resolution and MCP-optimized patterns.
+    
+    Examples:
+        rpax projects froz                    # Find projects matching "froz"
+        rpax projects frozenchlorine --action entry-points  # Get entry points for specific project
+        rpax projects --action summary        # Cross-project governance summary
+    """
+    console.print(f"[blue]Cross-Project Access[/blue] - {path}")
+    
+    try:
+        accessor = CrossProjectAccessor(path)
+        
+        if action == "resolve":
+            if not query:
+                console.print("[red]Error:[/red] Query required for resolve action")
+                console.print("[dim]Example: rpax projects froz[/dim]")
+                raise typer.Exit(1)
+                
+            matches = accessor.resolve_project(query)
+            
+            if format == "json":
+                import json as jsonlib
+                matches_data = [
+                    {
+                        "slug": m.slug,
+                        "name": m.name, 
+                        "display_name": m.display_name,
+                        "project_type": m.project_type,
+                        "confidence": m.confidence,
+                        "match_type": m.match_type
+                    } for m in matches
+                ]
+                print(jsonlib.dumps({"query": query, "matches": matches_data}, indent=2))
+            else:
+                if not matches:
+                    console.print(f"[yellow]No projects found matching '[dim]{query}[/dim]'[/yellow]")
+                elif len(matches) == 1:
+                    match = matches[0]
+                    console.print(f"[green]Found project:[/green] {match.display_name} ({match.slug})")
+                    console.print(f"  Type: {match.project_type}")
+                    console.print(f"  Confidence: {int(match.confidence * 100)}%")
+                    
+                    # Show available resources
+                    resources = accessor.get_project_resources(match.slug)
+                    if resources:
+                        console.print("\n[blue]Available resources:[/blue]")
+                        for resource_name, uri in resources.items():
+                            console.print(f"  {resource_name}: {uri}")
+                else:
+                    console.print(accessor.get_disambiguation_prompt(matches))
+        
+        elif action == "entry-points":
+            if not query:
+                console.print("[red]Error:[/red] Project name required for entry-points action")
+                raise typer.Exit(1)
+                
+            # Try to resolve project first
+            matches = accessor.resolve_project(query, max_results=1)
+            if not matches:
+                console.print(f"[red]Error:[/red] No project found matching '{query}'")
+                raise typer.Exit(1)
+            
+            project_slug = matches[0].slug
+            entry_points = accessor.get_project_entry_points(project_slug, detail_level)
+            
+            if format == "json":
+                import json as jsonlib
+                print(jsonlib.dumps(entry_points, indent=2))
+            else:
+                if not entry_points:
+                    console.print(f"[yellow]No entry points found for project '{project_slug}'[/yellow]")
+                else:
+                    console.print(f"[green]Entry Points for {matches[0].display_name}[/green]")
+                    console.print(f"Detail Level: {entry_points.get('detail_level', 'unknown')}")
+                    
+                    entry_point_list = entry_points.get("entry_points", [])
+                    console.print(f"Total Entry Points: {len(entry_point_list)}")
+                    
+                    for i, ep in enumerate(entry_point_list[:10], 1):  # Show first 10
+                        console.print(f"  {i}. {ep.get('display_name', 'Unknown')} ({ep.get('file', 'unknown')})")
+                        if detail_level in ["medium", "high"]:
+                            stats = ep.get("statistics", {})
+                            console.print(f"     Workflows: {stats.get('total_workflows', 0)}, "
+                                        f"Missing: {stats.get('missing_workflows', 0)}")
+                    
+                    if len(entry_point_list) > 10:
+                        console.print(f"  ... and {len(entry_point_list) - 10} more")
+        
+        elif action == "summary":
+            summary = accessor.get_cross_project_summary(detail_level)
+            
+            if format == "json":
+                import json as jsonlib
+                print(jsonlib.dumps(summary, indent=2))
+            else:
+                overview = summary.get("lake_overview", {})
+                console.print(f"[green]Lake Overview[/green]")
+                console.print(f"  Total Projects: {overview.get('total_projects', 0)}")
+                console.print(f"  Total Workflows: {overview.get('total_workflows', 0)}")
+                console.print(f"  Total Entry Points: {overview.get('total_entry_points', 0)}")
+                
+                project_types = overview.get("project_types", {})
+                if project_types:
+                    console.print(f"  Project Types:")
+                    for ptype, count in project_types.items():
+                        console.print(f"    {ptype}: {count}")
+                
+                projects = summary.get("projects", [])
+                console.print(f"\n[blue]Projects in Lake:[/blue]")
+                for project in projects:
+                    console.print(f"  • {project.get('display_name', 'Unknown')} ({project.get('slug', 'unknown')})")
+                    if detail_level in ["medium", "high"]:
+                        stats = project.get("statistics", {})
+                        console.print(f"    Type: {project.get('type', 'unknown')}, "
+                                    f"Workflows: {stats.get('total_workflows', 0)}")
+        
+        else:
+            console.print(f"[red]Error:[/red] Unknown action '{action}'. "
+                         f"Valid actions: resolve, summary, entry-points")
+            raise typer.Exit(1)
+            
+    except Exception as e:
+        console.print(f"[red]Error:[/red] {e}")
+        if "--debug" in str(e):  # Simple debug check
+            import traceback
+            console.print(traceback.format_exc())
         raise typer.Exit(1)
 
 

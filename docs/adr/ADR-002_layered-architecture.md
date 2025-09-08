@@ -1,10 +1,23 @@
 # ADR-002: Layered Architecture for UiPath Workflow Analysis
 
-**Status:** Accepted
+**Status:** Amended (Updated 2025-09-08)
 
 ## Context
 
 Need modular analysis of UiPath/WF projects with clear evolution path toward integrations.
+
+## Amendment Notes (2025-09-08)
+
+**What Changed**: Implementation exceeded original architectural vision
+- Layer 2 redefined as "Transformation/Enhancement" (was "Validation/CI")  
+- Added comprehensive activity resource model with package relationships
+- Added lake-level error collection with run-scoped diagnostics
+- Added V0 schema with progressive disclosure (low/medium/high detail levels)
+- Added integrated CLI pipeline architecture
+- Updated shared components to reflect actual implementation
+- Updated roadmap to reflect completed phases through v0.0.3
+
+**Why Amended**: Original architecture was foundational but implementation evolved beyond the initial scope while maintaining the core 4-layer principle.
 
 ## Architecture Overview
 
@@ -31,9 +44,13 @@ Layer 4: MCP Resources (independent code)
 **Layer 1 (Parser) Operations:**
 - `rpax parse` — discover `.xaml`, normalize IDs, emit canonical artifacts
 - `rpax schema` — generate JSON schemas for artifacts  
-- `rpax pseudocode` — generate pseudocode artifacts with recursive expansion
 
-**Layer 2 (Validation/CI) Operations:**
+**Layer 2 (Transformation/Enhancement) Operations:**
+- `rpax pseudocode` — generate pseudocode artifacts with recursive expansion
+- Activity resource generation with package relationships and container hierarchies
+- Enhanced XAML analysis with visual vs structural activity detection
+- V0 schema generation with progressive disclosure (low/medium/high detail levels)
+- Lake-level error collection with run-scoped diagnostics
 - `rpax validate` — apply configurable gates (missing/dynamic invokes, cycles, orphans)
 
 **Dev/Admin Operations (CLI-only):**
@@ -69,24 +86,38 @@ Layer 4: MCP Resources (independent code)
 
 ## Shared Components
 
-### **ArtifactsManager (Cross-Layer)**
-**Role**: Shared artifact access for all layers
-**Implementation**: Direct lake file system access
-**Usage**: CLI operations, API responses, MCP resources
+### **Shared Components (Cross-Layer)**
+
+**ArtifactsManager**: Direct lake file system access for all layers
+**ActivityResourceManager**: Activity-centric resource generation with package relationships
+**ErrorCollector**: Run-scoped error collection with lake-level diagnostics  
+**URIResolver**: Resource navigation and cross-references
+**IntegratedArtifactPipeline**: Unified pipeline combining all components
 
 ```python
 class ArtifactsManager:
     def get_workflows(self, project_slug: str) -> List[Workflow]
     def get_projects(self) -> List[Project] 
     def load_manifest(self, project_slug: str) -> Manifest
+
+class ActivityResourceManager:
+    def generate_activity_resources(self, workflow_index, project_root, project_slug, output_dir)
+    def generate_v0_activity_resources(self, workflow_index, project_root, project_slug, v0_dir)
+
+class ErrorCollector:
+    def collect_error(self, error, context, severity)
+    def flush_to_filesystem(self) -> Path
 ```
 
-## Roadmap Phases
+## Implementation Status (Updated 2025-09-08)
 
-* **v0.0.1:** Layer 1+2 CLI implementation (ADR-007, ADR-008, ADR-009, ADR-010)
-* **v0.1:** CLI decorator system for blueprint generation (ADR-024)  
-* **v0.2:** Layer 3 FastAPI service generated from OpenAPI spec (ADR-011)
-* **v0.3+:** Layer 4 MCP resources generated from API spec (ADR-012)
+* **v0.0.1:** ✅ Layer 1+2 CLI foundation (ADR-007, ADR-008, ADR-009, ADR-010)
+* **v0.0.2:** ✅ Enhanced XAML parsing, validation framework, Python packaging  
+* **v0.0.3:** ✅ V0 schema, activity resources, error collection, integrated pipeline
+* **v0.0.4:** 🔄 Architecture documentation, Layer 3 API implementation
+* **v0.0.5+:** 🔒 Layer 4 MCP resources with stable resource contracts
+
+**Note**: Previous internal roadmap versions (v0.1, v0.2, v0.3) were never published and have been superseded by the actual release sequence above.
 
 ## Consequences
 

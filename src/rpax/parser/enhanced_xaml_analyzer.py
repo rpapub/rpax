@@ -123,19 +123,22 @@ class EnhancedXamlAnalyzer:
         return metadata
     
     def _extract_visual_activities(self, elem: ET.Element, parent_path: str = "", 
-                                 depth: int = 0, parent_id: str | None = None) -> list[EnhancedActivityNode]:
-        """Recursively extract visual activities using proven gist approach."""
+                                 depth: int = 0, parent_id: str | None = None, 
+                                 parent_elem: ET.Element | None = None) -> list[EnhancedActivityNode]:
+        """Recursively extract visual activities using proven gist approach with stable indexed paths."""
         tag = self._get_local_tag(elem)
-        current_path = f"{parent_path}/{tag}" if parent_path else tag
         
         results = []
         
         # Determine if this element should be treated as a visual activity (using gist logic)
         is_visual = self._is_visual_activity(elem, tag)
         
+        # Build hierarchical path (all elements contribute to path, like original gist)
+        current_path = f"{parent_path}/{tag}" if parent_path else tag
+        
         if is_visual:
-            # Simple node ID without complex sibling counting
-            node_id = f"{current_path}_{depth}" 
+            # Generate stable indexed node ID like /Sequence[0]/If[1]/Then/Click[0]
+            node_id = self._generate_stable_node_id(elem, parent_path, tag, parent_elem)
             
             # Create enhanced activity node
             activity_node = self._create_activity_node(
@@ -143,20 +146,45 @@ class EnhancedXamlAnalyzer:
             )
             results.append(activity_node)
             
-            # Set parent for children
+            # Set parent for children - use node_id for visual parent
             parent_for_children = node_id
         else:
-            # Non-visual element - pass through parent
+            # Non-visual element - pass through parent ID
             parent_for_children = parent_id
+        
+        # All elements contribute to path (like original gist)
+        path_for_children = current_path
         
         # Process children (simple recursion like in gist)
         for child_elem in elem:
             child_activities = self._extract_visual_activities(
-                child_elem, current_path, depth + 1, parent_for_children
+                child_elem, path_for_children, depth + 1, parent_for_children, elem
             )
             results.extend(child_activities)
         
         return results
+    
+    def _generate_stable_node_id(self, elem: ET.Element, parent_path: str, tag: str, 
+                                parent_elem: ET.Element | None = None) -> str:
+        """Generate stable indexed node ID like /Sequence[0]/If[1]/Then/Click[0]."""        
+        if parent_elem is None:
+            # Root element
+            return f"/{tag}[0]"
+        
+        # Count preceding siblings of the same type that are visual
+        sibling_count = 0
+        for sibling in parent_elem:
+            if sibling is elem:
+                break
+            sibling_tag = self._get_local_tag(sibling)
+            if sibling_tag == tag and self._is_visual_activity(sibling, sibling_tag):
+                sibling_count += 1
+        
+        # Build indexed path
+        if parent_path:
+            return f"{parent_path}/{tag}[{sibling_count}]"
+        else:
+            return f"/{tag}[{sibling_count}]"
     
     def _is_visual_activity(self, elem: ET.Element, tag: str) -> bool:
         """Visual activity detection using exact gist logic."""
@@ -214,27 +242,6 @@ class EnhancedXamlAnalyzer:
         
         return node
     
-    def _generate_stable_node_id(self, path: str, elem: ET.Element) -> str:
-        """Generate stable node ID with sibling indexing."""
-        
-        # Get parent path for sibling counting
-        parent_path = "/".join(path.split("/")[:-1])
-        tag = path.split("/")[-1]
-        
-        # Initialize or increment sibling counter
-        sibling_key = f"{parent_path}#{tag}"
-        if sibling_key not in self.sibling_counters:
-            self.sibling_counters[sibling_key] = 0
-        else:
-            self.sibling_counters[sibling_key] += 1
-        
-        sibling_index = self.sibling_counters[sibling_key]
-        
-        # Build stable ID with sibling index
-        if sibling_index == 0:
-            return path  # First sibling doesn't need index
-        else:
-            return f"{path}[{sibling_index}]"
     
     def _get_local_tag(self, elem: ET.Element) -> str:
         """Extract local tag name without namespace."""
@@ -245,15 +252,22 @@ class EnhancedXamlAnalyzer:
         if not value:
             return False
         
-        # Common expression patterns
-        return (
-            value.startswith('[') and value.endswith(']') or
-            'Path.Combine' in value or
-            '.ToString()' in value or
-            'String.Format' in value or
-            ' = ' in value or
-            'new ' in value
-        )
+        # VB.NET/C# expressions are typically enclosed in brackets
+        if value.startswith('[') and value.endswith(']') and len(value) > 2:
+            return True
+        
+        # Method calls with parentheses (like Path.Combine(...), .ToString())
+        if ('.ToString()' in value or 
+            'Path.Combine(' in value or 
+            'String.Format(' in value or
+            'new ' in value):
+            return True
+        
+        # Assignment expressions
+        if ' = ' in value:
+            return True
+            
+        return False
     
     def _classify_invocation(self, workflow_filename: str) -> str:
         """Classify invocation type based on filename pattern."""

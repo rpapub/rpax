@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 The codebase is structured around a **4-layer architecture** (ADR-002):
 
 1. **Parser Layer** - Discovers `.xaml` files, normalizes IDs, emits canonical artifacts (graphs/manifests/indices)
-2. **Validation & CI Layer** - Applies configurable gates (missing/dynamic invokes, cycles, orphans) for pipelines  
+2. **Transformation/Enhancement Layer** - Activity resources, V0 schema, pseudocode, error collection, enhanced XAML analysis, and validation gates
 3. **Access API Layer** - Lightweight, read-only HTTP interface over artifacts for tools/CI
 4. **MCP/Integration Layer** - Stable external resource contracts (URIs/schemas) for broader ecosystem consumption
 
@@ -144,8 +144,8 @@ Follow this structured approach for implementing rpax features:
 ### Integration Testing Strategy
 
 Run comprehensive validation against provided test projects at these milestones:
-- **v0.0.1 completion**: All 3 test projects parse without crashes
-- **v0.1 features**: Validation rules and Mermaid graphs work on test projects  
+- **v0.0.1 completion**: All 5 test projects parse without crashes
+- **v0.3.0 validation**: V0 schema, activity resources, and error collection validated through consumption
 - **Major refactors**: Ensure no regressions in parsing or artifact generation
 
 ## Test Corpuses
@@ -162,6 +162,7 @@ These test corpuses provide real-world UiPath workflows for testing parser imple
 
 ## References
 
+- **Code Navigation**: `docs/development/code-navigation.md` - "Where to find X" reference for developers
 - Architecture decisions: `docs/adr/ADR-*.md`
 - Python style guide: `docs/llm/context/styleguide.md`
 - Risk register: `docs/risks/register.md`

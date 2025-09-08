@@ -1,6 +1,8 @@
 # ADR-006: `project.json` Parsing Strategy
 
-**Status:** Proposed
+**Status:** Implemented (Updated 2025-09-08)  
+**Date:** 2024-01-01  
+**Updated:** 2025-09-08
 
 ## Context
 
@@ -57,9 +59,17 @@ UiPath `project.json` defines roots/metadata needed for analysis, docs, CI.
 * **Docs:** surface metadata/deps; link diagrams to declared roots.
 * **Diff/CI:** stable identifiers enable change detection; show dependency drift.
 
-## Roadmap Phase
+## Amendment Notes (2025-09-08)
 
-* **v0.0.1:** Core project.json parsing for metadata and root discovery
+**What Changed**: Status updated from Proposed to Implemented, added implementation status
+**Why Amended**: Project.json parsing strategy has been implemented and is operational
+**Impact**: Confirms project metadata extraction is working in production
+
+## Implementation Status (Updated 2025-09-08)
+
+* **v0.0.1:** ✅ Core project.json parsing implemented with metadata extraction
+* **v0.0.2:** ✅ Root discovery and path normalization operational
+* **v0.0.3:** ✅ Complete project metadata fidelity with multi-project support
 
 ## Open Questions
 

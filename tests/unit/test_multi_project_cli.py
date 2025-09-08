@@ -21,7 +21,7 @@ class TestMultiProjectCLI:
         projects_file = tmp_path / "projects.json"
         projects_file.write_text(json.dumps({"projects": []}))
         
-        result = runner.invoke(app, ["projects", str(tmp_path)])
+        result = runner.invoke(app, ["list-projects", str(tmp_path)])
         
         assert result.exit_code == 0
         assert "No projects found in lake" in result.stdout
@@ -53,7 +53,7 @@ class TestMultiProjectCLI:
         projects_file = tmp_path / "projects.json"
         projects_file.write_text(json.dumps(projects_data))
         
-        result = runner.invoke(app, ["projects", str(tmp_path)])
+        result = runner.invoke(app, ["list-projects", str(tmp_path)])
         
         assert result.exit_code == 0
         assert "Test Project 1" in result.stdout
@@ -79,7 +79,7 @@ class TestMultiProjectCLI:
         projects_file = tmp_path / "projects.json"
         projects_file.write_text(json.dumps(projects_data))
         
-        result = runner.invoke(app, ["projects", str(tmp_path), "--format", "json"])
+        result = runner.invoke(app, ["list-projects", str(tmp_path), "--format", "json"])
         
         assert result.exit_code == 0
         
@@ -112,7 +112,7 @@ class TestMultiProjectCLI:
         projects_file = tmp_path / "projects.json"
         projects_file.write_text(json.dumps(projects_data))
         
-        result = runner.invoke(app, ["projects", str(tmp_path), "--search", "calc", "--format", "json"])
+        result = runner.invoke(app, ["list-projects", str(tmp_path), "--search", "calc", "--format", "json"])
         
         assert result.exit_code == 0
         output_data = json.loads(result.stdout)
@@ -123,19 +123,19 @@ class TestMultiProjectCLI:
         """Test projects command with missing projects.json."""
         runner = CliRunner()
         
-        result = runner.invoke(app, ["projects", str(tmp_path)])
+        result = runner.invoke(app, ["list-projects", str(tmp_path)])
         
         assert result.exit_code == 1
         assert "No projects.json found" in result.stdout
     
     @patch('rpax.cli._resolve_project_path')
-    @patch('rpax.cli.ProjectParser.parse_project_from_dir')
-    @patch('rpax.cli.XamlDiscovery')
+    @patch('rpax.cli.ProjectParser.parse_project_from_dir')  
+    @patch('rpax.parser.workflow_discovery.create_workflow_discovery')
     @patch('rpax.cli.ArtifactGenerator')
     def test_parse_command_multiple_projects(
         self, 
         mock_artifact_gen,
-        mock_xaml_discovery, 
+        mock_create_workflow_discovery, 
         mock_project_parser,
         mock_resolve_path,
         tmp_path
@@ -159,16 +159,22 @@ class TestMultiProjectCLI:
         mock_workflow_index1 = Mock()
         mock_workflow_index1.total_workflows = 5
         mock_workflow_index1.failed_parses = 0
+        mock_workflow_index1.workflows = [Mock(), Mock(), Mock(), Mock(), Mock()]  # 5 workflows
         
         mock_workflow_index2 = Mock()
         mock_workflow_index2.total_workflows = 3
         mock_workflow_index2.failed_parses = 1
+        mock_workflow_index2.workflows = [Mock(), Mock(), Mock()]  # 3 workflows
         
-        mock_discovery_instance = Mock()
-        mock_xaml_discovery.return_value = mock_discovery_instance
-        mock_discovery_instance.discover_workflows.side_effect = [
-            mock_workflow_index1, 
-            mock_workflow_index2
+        mock_discovery_instance1 = Mock()
+        mock_discovery_instance1.discover_workflows.return_value = mock_workflow_index1
+        
+        mock_discovery_instance2 = Mock()
+        mock_discovery_instance2.discover_workflows.return_value = mock_workflow_index2
+        
+        mock_create_workflow_discovery.side_effect = [
+            mock_discovery_instance1,
+            mock_discovery_instance2
         ]
         
         mock_generator_instance = Mock()

@@ -1,8 +1,8 @@
 # ADR-031: XAML Parsing Package Architecture for Workflow Metadata Extraction
 
-**Status**: Accepted  
-**Date**: 2025-09-06  
-**Context**: Layer 1 Stabilization - Complete workflow metadata extraction and reusable package design
+**Status:** Accepted  
+**Date:** 2024-01-01  
+**Updated:** 2025-09-08
 
 ## Context
 

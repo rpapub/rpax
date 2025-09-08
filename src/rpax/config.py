@@ -104,6 +104,13 @@ class ParserConfig(BaseModel):
     max_depth: int = Field(alias="maxDepth", default=50)
     custom_blacklist: list[str] = Field(alias="customBlacklist", default_factory=list)
     custom_whitelist: list[str] = Field(alias="customWhitelist", default_factory=list)
+    
+    # Enhanced parser features for v0 schema
+    include_coded_workflows: bool = Field(alias="includeCodedWorkflows", default=True)
+    discover_test_workflows: bool = Field(alias="discoverTestWorkflows", default=True)
+    enhanced_xaml_analysis: bool = Field(alias="enhancedXamlAnalysis", default=True)
+    extract_packages: bool = Field(alias="extractPackages", default=True)
+    resolve_invocation_paths: bool = Field(alias="resolveInvocationPaths", default=True)
 
     @field_validator("max_depth")
     @classmethod
@@ -179,6 +186,40 @@ class PseudocodeConfig(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
+class V0Config(BaseModel):
+    """V0 experimental schema configuration section."""
+    enabled: bool = True
+    generate_lake_index: bool = Field(alias="generateLakeIndex", default=True)
+    partial_name_matching: bool = Field(alias="partialNameMatching", default=True)
+    cross_project_analysis: bool = Field(alias="crossProjectAnalysis", default=True)
+    entry_points_recursive_depth: int = Field(alias="entryPointsRecursiveDepth", default=10)
+    call_graph_detail_levels: list[str] = Field(
+        alias="callGraphDetailLevels", 
+        default_factory=lambda: ["low", "medium", "high"]
+    )
+    
+    @field_validator("entry_points_recursive_depth")
+    @classmethod
+    def validate_entry_points_depth(cls, v):
+        """Validate entry points recursive depth."""
+        if v < 1 or v > 25:
+            raise ValueError("entry_points_recursive_depth must be between 1 and 25")
+        return v
+    
+    @field_validator("call_graph_detail_levels")
+    @classmethod
+    def validate_detail_levels(cls, v):
+        """Validate detail levels are valid."""
+        valid_levels = ["low", "medium", "high"]
+        if not all(level in valid_levels for level in v):
+            raise ValueError(f"call_graph_detail_levels must contain only {valid_levels}")
+        if not v:
+            raise ValueError("call_graph_detail_levels cannot be empty")
+        return v
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
 class LoggingConfig(BaseModel):
     """Logging configuration section."""
     level: LogLevel = LogLevel.INFO
@@ -195,6 +236,7 @@ class RpaxConfig(BaseModel):
     diff: DiffConfig = Field(default_factory=DiffConfig)
     parser: ParserConfig = Field(default_factory=ParserConfig)
     pseudocode: PseudocodeConfig = Field(default_factory=PseudocodeConfig)
+    v0: V0Config = Field(default_factory=V0Config)
     api: ApiConfig = Field(default_factory=ApiConfig)
     mcp: McpConfig = Field(default_factory=McpConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)

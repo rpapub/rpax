@@ -1,7 +1,8 @@
 # ADR-020: Automatic Inclusion of Known Dependencies in Project Resolution
 
 **Status:** Accepted  
-**Date:** 2025-09-05  
+**Date:** 2024-01-01  
+**Updated:** 2025-09-08  
 
 ## Context
 

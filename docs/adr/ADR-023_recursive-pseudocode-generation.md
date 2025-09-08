@@ -1,8 +1,8 @@
 # ADR-023: Recursive Pseudocode Generation at Parse Time
 
-**Status**: Approved  
-**Date**: 2025-09-06  
-**Deciders**: Development Team  
+**Status:** Approved  
+**Date:** 2024-01-01  
+**Updated:** 2025-09-08  
 
 ## Context
 

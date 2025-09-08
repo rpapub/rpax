@@ -1,6 +1,14 @@
 # ADR-015: Python Implementation Stack
 
-**Status:** Proposed
+**Status:** Implemented (Updated 2025-09-08)  
+**Date:** 2024-01-01  
+**Updated:** 2025-09-08
+
+## Amendment Notes (2025-09-08)
+
+**What Changed**: Added git dependency to Python stack requirements
+**Why Amended**: Current implementation requires git for repository operations and dependency analysis
+**Impact**: Git is now a required system dependency alongside Python for rpax operations
 
 ## Context
 
@@ -181,6 +189,7 @@ Implementation of rpax v0.0.1 requires a concrete Python technology stack that b
 * **Data Modeling:** Pydantic v2 — Validation and JSON Schema alignment with ADR-004)
 * **Parallelization:** Synchronous first — Add multiprocessing in v0.1 if needed
 * **Package Management:** uv — Fast, modern replacement for pip/pip-tools
+* **Version Control:** git — Required for repository operations and dependency analysis
 * **Testing:** pytest + pytest-cov — As specified in styleguide
 * **Code Quality:** Black (88) + isort + Ruff + mypy --strict
 * **Python Version:** 3.11+ — Modern type hints, performance improvements
@@ -269,3 +278,7 @@ dev = [
 * ADR-004: JSON Schema validation implemented with Pydantic
 * ADR-007: Parser requirements this stack implements
 * ADR-011: Future async/FastAPI evolution for Access API layer
+
+## Amendment Notes
+
+**2025-09-08 Status Update:** Python implementation stack has been fully implemented in rpax v0.0.2. The pyproject.toml demonstrates all specified technologies: Typer for CLI, Pydantic v2 for data modeling, lxml + defusedxml for XML parsing, and complete development toolchain with Black, Ruff, mypy, pytest. Python 3.11+ requirement and uv package management are enforced. Amendment follows ADR-000 governance process.

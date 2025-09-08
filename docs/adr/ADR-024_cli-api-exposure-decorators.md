@@ -1,8 +1,8 @@
 # ADR-024: CLI Blueprint Decorators for Layer 3/4 Generation
 
 **Status:** Accepted  
-**Date:** 2025-09-06  
-**Deciders:** System Architecture  
+**Date:** 2024-01-01  
+**Updated:** 2025-09-08  
 **Consulted:** CLI Design, Access API Layer, MCP Integration Layer
 
 ## Context

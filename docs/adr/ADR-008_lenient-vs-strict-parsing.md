@@ -1,6 +1,8 @@
 # ADR-008: Parser v0 — Lenient, Append-Only Telemetry
 
-**Status:** Proposed
+**Status:** Implemented (Updated 2025-09-08)  
+**Date:** 2024-01-01  
+**Updated:** 2025-09-08
 
 ## Context
 
@@ -105,3 +107,7 @@ Multiple runs append; each record carries `timestamp` and `runId` in `extras`.
 * ADR-007: Phase 0 implementation strategy  
 * ADR-009: Evolution path to strict canonical artifacts
 * ADR-014: Lake storage model and identity scheme
+
+## Amendment Notes
+
+**2025-09-08 Status Update:** Lenient parsing strategy has been implemented in rpax v0.0.2. The codebase demonstrates lenient XAML parsing with error capture, JSONL outputs, and append-only telemetry patterns as specified. Error handling follows "errors as data" principle with parse_error records rather than exceptions. Amendment follows ADR-000 governance process.

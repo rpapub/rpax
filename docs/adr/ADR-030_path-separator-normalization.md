@@ -1,8 +1,8 @@
 # ADR-030: Path Separator Normalization Strategy
 
 **Status:** Approved  
-**Date:** 2025-09-06  
-**Deciders:** System Architecture, MCP Integration Layer  
+**Date:** 2024-01-01  
+**Updated:** 2025-09-08  
 **Consulted:** Parser Layer, Access API Layer
 
 ## Context

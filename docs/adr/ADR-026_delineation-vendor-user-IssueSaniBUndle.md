@@ -1,7 +1,8 @@
 # ADR-026: Vendor vs User Data Delineation in IssueSaniBundle
 
 **Status:** Proposed  
-**Date:** 2025-09-06  
+**Date:** 2024-01-01  
+**Updated:** 2025-09-08  
 
 ## Context
 The `IssueSaniBundle` is designed as a redacted debug package suitable for sharing in public issue trackers.  

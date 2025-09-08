@@ -1,8 +1,8 @@
 # ADR-009: Parser Artifacts (Activities, CFG, Invokes)
 
-**Status:** Accepted  
-**Date:** 2025-09-07  
-**Updated:** Layer 1 Stabilization findings - Activity entity as first-class artifact
+**Status:** Implemented (Updated 2025-09-08)  
+**Date:** 2024-01-01  
+**Updated:** 2025-09-08
 
 ## Context
 
@@ -133,6 +133,10 @@ frozenchlorine-1082950b#StandardCalculator#Activity/Sequence/InvokeWorkflowFile_
 * **ADR-012**: MCP layer exposes these as resources (now includes Activity entities)
 * **ADR-014**: Identity scheme used throughout artifacts (extended for Activity identity)
 * **ADR-031**: XAML parsing strategy provides foundation for complete Activity extraction
+
+## Amendment Notes
+
+**2025-09-08 Status Update:** Parser artifacts specification has been implemented in rpax v0.0.2. The codebase demonstrates manifest.json generation, workflows indexing, invocations extraction, and activity processing as specified. Layer 1 stabilization findings from corpus testing confirmed Activity entities as core artifacts. Amendment follows ADR-000 governance process.
 
 ## Layer 1 Stabilization Evidence
 

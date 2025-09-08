@@ -1,8 +1,8 @@
 # ADR-021: CLI Commands and Parameters Specification
 
 **Status:** Accepted  
-**Date:** 2025-09-06  
-**Updated:** 2025-09-06 - Multi-project CLI support and always-multi-project architecture  
+**Date:** 2024-01-01  
+**Updated:** 2025-09-08  
 
 ## Context
 

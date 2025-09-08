@@ -1,7 +1,8 @@
 # ADR-027: CLI UX for IssueSaniBundle Generation
 
 **Status:** Proposed  
-**Date:** 2025-09-06  
+**Date:** 2024-01-01  
+**Updated:** 2025-09-08  
 
 ## Context
 UiPath developers need a **low-friction** way to produce sanitized debug packages for bug reports.  

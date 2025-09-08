@@ -1,8 +1,8 @@
 # ADR-029: Corpus Projects and Aspects for Parser/Lake Validation
 
 **Status:** Approved  
-**Date:** 2025-09-06  
-**Deciders:** System Architecture, Testing Strategy  
+**Date:** 2024-01-01  
+**Updated:** 2025-09-08  
 **Consulted:** Parser Layer, Validation Layer
 
 ## Context

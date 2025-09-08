@@ -1,6 +1,8 @@
 # ADR-003: rpax CLI Surface (Commands Only)
 
-**Status:** Proposed
+**Status:** Implemented  
+**Date:** 2025-09-08  
+**Updated:** 2025-09-08
 
 ## Context
 
@@ -19,8 +21,11 @@ Adopt **Option B**. Expose these subcommands:
 * `parse` — scan project; emit JSON artifacts (manifest, workflows, invocations).
 * `graph` — generate diagrams (Mermaid/HTML) from parsed data.
 * `list` — enumerate workflows, entry points, orphans.
+* `list-projects` — discover and search projects in lake.
+* `activities` — list activities and packages used in workflows.
 * `explain` — show details for one workflow (args, callers, callees).
 * `validate` — run rules (missing invokes, cycles, config checks).
+* `clear` — clean up lake artifacts and temporary files.
 * `diff` — compare two scans for PR impact (added/removed/changed workflows or edges).
 * `config` — view or edit local `.rpax.json` settings.
 * `summarize` — produce LLM-friendly outlines of workflows/graphs.
@@ -54,16 +59,14 @@ rpax
  │   ├─ calls [--out file]         # Diagrams of invocation graph
  │   └─ paths [root] [--out file]  # Call trees from entry points
  ├─ list
- │   ├─ roots                      # Entry points from project.json
  │   ├─ workflows                  # All discovered XAMLs
  │   ├─ orphans                    # Not invoked by any other
  │   └─ invokes [wf]               # Direct invokes inside workflow
+ ├─ list-projects [--search term]  # Discover projects in lake
+ ├─ activities [--search term]     # List activities and packages
  ├─ explain <workflow>             # Show args, callers, callees
- ├─ validate
- │   ├─ all                        # Run all validation rules
- │   ├─ missing                    # Missing invoke targets
- │   ├─ cycles                     # Cyclic invokes
- │   └─ config                     # Config consistency
+ ├─ validate [path]                # Run validation rules
+ ├─ clear [--all]                  # Clean lake artifacts
  ├─ diff <scanA> <scanB>           # Compare scans, PR impact
  ├─ config
  │   ├─ show                       # Print current config
@@ -76,12 +79,12 @@ rpax
  └─ mcp-export [--out dir]         # Emit MCP resource templates
 ```
 
-## Roadmap Phases
+## Implementation Status
 
-* **v0.0.1:** Core commands - `parse`, `help`, basic `list` workflows
-* **v0.1:** Add `graph` (Mermaid), `validate`, `explain`, enhanced `list`  
-* **v0.2:** Add `diff`, `summarize`, advanced graph options (Graphviz)
-* **v0.3+:** Add `mcp-export`, plugin support, advanced config management
+* **v0.0.1:** ✅ Core commands - `parse`, `help`, basic `list` workflows
+* **v0.0.2:** ✅ Add `graph` (Mermaid), `validate`, `explain`, enhanced `list`
+* **v0.0.3:** ✅ Add `list-projects`, `activities`, `clear`, lake management
+* **Future:** `diff`, `summarize`, `mcp-export`, plugin support
 
 ## Consequences
 

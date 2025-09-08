@@ -243,17 +243,25 @@ class TestEnhancedXamlAnalyzer:
         
         mock_elem = Mock()
         
-        # First occurrence should not have index
-        node_id = analyzer._generate_stable_node_id("Sequence", mock_elem)
-        assert node_id == "Sequence"
+        # Mock the helper methods
+        analyzer._get_local_tag = Mock(return_value="Sequence")
+        analyzer._is_visual_activity = Mock(return_value=True)
         
-        # Second occurrence should have index
-        node_id = analyzer._generate_stable_node_id("Sequence", mock_elem) 
-        assert node_id == "Sequence[1]"
+        # Mock parent element
+        mock_parent = Mock()
+        mock_parent.__iter__ = Mock(return_value=iter([mock_elem]))  # First child
         
-        # Third occurrence should increment index
-        node_id = analyzer._generate_stable_node_id("Sequence", mock_elem)
-        assert node_id == "Sequence[2]"
+        # First occurrence should have index [0]
+        node_id = analyzer._generate_stable_node_id(mock_elem, "", "Sequence", mock_parent)
+        assert node_id == "/Sequence[0]"
+        
+        # Add another element as sibling for second occurrence
+        mock_elem2 = Mock()
+        mock_parent.__iter__ = Mock(return_value=iter([mock_elem, mock_elem2]))
+        
+        # Second occurrence should have index [1] 
+        node_id = analyzer._generate_stable_node_id(mock_elem2, "", "Sequence", mock_parent)
+        assert node_id == "/Sequence[1]"
     
     def test_invocation_classification(self):
         """Test workflow invocation classification."""

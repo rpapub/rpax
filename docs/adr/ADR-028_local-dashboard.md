@@ -1,8 +1,8 @@
 # ADR-028: Local Dashboard for rpax (Read-Only, API-Backed)
 
-**Status:** Implemented 
-**Date:** 2025-09-06  
-**Implementation:** Dashboard mockup created with real API integration
+**Status:** Implemented (Updated 2025-09-08)  
+**Date:** 2024-01-01  
+**Updated:** 2025-09-08
 
 ## Context
 
@@ -75,6 +75,10 @@ It will embed static UI assets in the package and surface them under `/ui` when 
 
 * Keep CLI/API only: higher barrier for non-technical RPA devs.
 * Build heavy SPA: overkill, higher maintenance, more risk.
+
+## Amendment Notes
+
+**2025-09-08 Status Update:** Local dashboard implementation has been completed with mockup and API integration. Dashboard provides offline-friendly visualization of rpax artifacts with redaction-first approach. Amendment follows ADR-000 governance process.
 
 ## Future Work
 

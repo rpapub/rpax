@@ -1,7 +1,8 @@
 # ADR-017: Data Lake Nomenclature and Design Influence
 
 **Status:** Proposed  
-**Date:** 2025-09-05  
+**Date:** 2024-01-01  
+**Updated:** 2025-09-08  
 
 ## Context
 

@@ -1,6 +1,8 @@
 # ADR-014: Identity & Disambiguation (Multi-Project “Lake”)
 
-**Status:** Proposed
+**Status:** Proposed  
+**Date:** 2024-01-01  
+**Updated:** 2025-09-08
 
 ## Context
 

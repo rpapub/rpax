@@ -143,6 +143,9 @@ make parse-frozenchlorine
 make parse-corpus-core1  
 make parse-corpus-core10
 
+# Cross-project access testing
+make test-projects  # Test rpax list-projects command for cross-project discovery
+
 # Development and CI tasks (cross-platform)
 make test           # Run pytest test suite
 make lint           # Run ruff and mypy checks
@@ -200,6 +203,35 @@ make build          # Build distributions
 # Individual corpus testing
 make parse-frozenchlorine  # Test specific corpus project
 ```
+
+#### Cross-Project Development Testing
+
+The `rpax list-projects` command enables testing and development of cross-project discovery patterns, which are optimized for lake-level project management and MCP (Model Context Protocol) integration. This command supports project discovery scenarios where clients can:
+
+1. **List all projects** in a lake with search filtering
+2. **Get project metadata** including type, workflow count, and last updated
+3. **Output in multiple formats** (table, JSON) for different consumption patterns
+
+```powershell
+# Test cross-project access patterns
+make test-projects
+
+# Manual testing examples:
+uv run rpax list-projects --path .rpax-test-lake
+uv run rpax list-projects --path .rpax-test-lake --search "CORE"
+uv run rpax list-projects --path .rpax-test-lake --format json
+```
+
+**Command Options:**
+- `--search <pattern>` - Filter projects by name pattern (case-insensitive)
+- `--format <table|json>` - Output format (default: table)
+- `--path <lake_path>` - Path to rpax lake directory (defaults to `.rpax-lake`)
+
+**Use Cases:**
+- **Lake Management**: Discover and inventory projects across a lake
+- **MCP Integration**: Test progressive disclosure for project-level resources
+- **Multi-project development**: Validate cross-project discovery and navigation
+- **Governance tooling**: Generate project inventories for oversight workflows
 
 #### PowerShell Core Commands
 

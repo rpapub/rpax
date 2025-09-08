@@ -1,7 +1,8 @@
 # ADR-025: Canonical Name “IssueSaniBundle” for Redacted Debug Package
 
 **Status:** Accepted  
-**Date:** 2025-09-06
+**Date:** 2024-01-01  
+**Updated:** 2025-09-08
 
 ## Decision
 Use **IssueSaniBundle** as the canonical, user-facing name for the redacted diagnostic bundle.

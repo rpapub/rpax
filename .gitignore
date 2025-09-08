@@ -65,3 +65,4 @@ output/
 
 # Test output directories (should not be committed)
 test-output/
+docs/scratch/
