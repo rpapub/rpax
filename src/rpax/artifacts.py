@@ -576,10 +576,10 @@ class ArtifactGenerator:
         start_time = time.time()
         
         try:
-            # Import and use the standalone XAML parser 
-            from xaml_parser import XamlParser
-            from xaml_parser.extractors import ActivityExtractor
-            from xaml_parser.utils import ActivityUtils
+            # Import and use the standalone XAML parser
+            from cpmf_uips_xaml import XamlParser
+            from cpmf_uips_xaml.extractors import ActivityExtractor
+            from cpmf_uips_xaml.utils import ActivityUtils
             from dataclasses import asdict
             
             # Check if activity instances generation is enabled

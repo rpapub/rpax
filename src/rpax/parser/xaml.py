@@ -13,7 +13,7 @@ from rpax.models.workflow import Workflow, WorkflowIndex
 from rpax.parser.namespace_analyzer import NamespaceAnalyzer
 
 # Import standalone XAML parser
-from xaml_parser import XamlParser
+from cpmf_uips_xaml import XamlParser
 
 
 class XamlDiscovery:
