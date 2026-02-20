@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.11"
 
 [[package]]
@@ -301,6 +301,18 @@ wheels = [
 [package.optional-dependencies]
 toml = [
     { name = "tomli", marker = "python_full_version <= '3.11'" },
+]
+
+[[package]]
+name = "cpmf-uips-xaml"
+version = "0.1.0"
+source = { registry = "https://test.pypi.org/simple/" }
+dependencies = [
+    { name = "defusedxml" },
+]
+sdist = { url = "https://test-files.pythonhosted.org/packages/c0/51/da21bfc2aa046e774a6f36fd29d8b04126289884f79db8ae9171d4e4206d/cpmf_uips_xaml-0.1.0.tar.gz", hash = "sha256:92a440fced3df2a67e04ab324b7356647a3fec46163b397753bce41b9b4eb1aa", size = 257650, upload-time = "2026-02-20T12:12:51.067Z" }
+wheels = [
+    { url = "https://test-files.pythonhosted.org/packages/e3/a5/c77e87d066077c0db18257069573942d9685e1f8922608e7d480b426d830/cpmf_uips_xaml-0.1.0-py3-none-any.whl", hash = "sha256:065f4f52e359cfe715213ddf82c445c4a6997a405f3931080308054a2ad0990c", size = 199901, upload-time = "2026-02-20T12:12:48.686Z" },
 ]
 
 [[package]]
@@ -1260,6 +1272,7 @@ wheels = [
 name = "rpax"
 source = { editable = "." }
 dependencies = [
+    { name = "cpmf-uips-xaml" },
     { name = "defusedxml" },
     { name = "jsonschema" },
     { name = "lxml" },
@@ -1312,6 +1325,7 @@ dev = [
 requires-dist = [
     { name = "black", marker = "extra == 'dev'", specifier = ">=23.0.0" },
     { name = "build", marker = "extra == 'dev'", specifier = ">=1.0.0" },
+    { name = "cpmf-uips-xaml", specifier = "~=0.1.0", index = "https://test.pypi.org/simple/" },
     { name = "defusedxml", specifier = ">=0.7.1,<1.0.0" },
     { name = "fastapi", marker = "extra == 'api'", specifier = ">=0.104.0,<1.0.0" },
     { name = "jsonschema", specifier = ">=4.17.0,<5.0.0" },

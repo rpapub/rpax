@@ -38,6 +38,7 @@ dependencies = [
     "pyyaml>=6.0.2",
     "tomli-w>=1.2.0",
     "python-slugify>=8.0.4",
+    "cpmf-uips-xaml~=0.1.0",
 ]
 
 [project.optional-dependencies]
@@ -239,3 +240,11 @@ dev = [
     "pytest-cov>=6.2.1",
     "pytest-xdist>=3.8.0",
 ]
+
+[tool.uv.sources]
+cpmf-uips-xaml = { index = "test-pypi" }
+
+[[tool.uv.index]]
+name = "test-pypi"
+url = "https://test.pypi.org/simple/"
+explicit = true
