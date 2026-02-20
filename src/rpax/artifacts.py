@@ -578,8 +578,7 @@ class ArtifactGenerator:
         try:
             # Import and use the standalone XAML parser
             from cpmf_uips_xaml import XamlParser
-            from cpmf_uips_xaml.extractors import ActivityExtractor
-            from cpmf_uips_xaml.utils import ActivityUtils
+            from cpmf_uips_xaml.stages.parsing.extractors import ActivityExtractor
             from dataclasses import asdict
             
             # Check if activity instances generation is enabled
@@ -600,12 +599,15 @@ class ArtifactGenerator:
             # Extract project ID from workflow object or generate from path
             project_id = self._extract_project_id(workflow, workflow_path)
             
-            # Create activity extractor with default config
+            # Create activity extractor with UiPath dialect and config
+            from cpmf_uips_xaml.platforms.uipath import create_uipath_dialect
+
+            dialect = create_uipath_dialect()
             extractor_config = {
                 'extract_expressions': True,
                 'expression_language': parse_result.content.expression_language
             }
-            extractor = ActivityExtractor(extractor_config)
+            extractor = ActivityExtractor(dialect, extractor_config)
             
             # Re-parse XAML to get XML root element for activity extraction
             from xml.etree.ElementTree import parse as xml_parse
