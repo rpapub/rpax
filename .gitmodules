@@ -1,0 +1,4 @@
+[submodule "docs/policy/python"]
+	path = docs/policy/python
+	url = https://github.com/cprima-agents/context-substrate.git
+	branch = policy-python
