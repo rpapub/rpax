@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Activity xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <!-- Minimal empty workflow for testing edge cases -->
-  <Sequence DisplayName="Empty Workflow">
-    <!-- No activities -->
-  </Sequence>
-</Activity>

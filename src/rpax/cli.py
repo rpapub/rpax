@@ -18,9 +18,10 @@ from rpax.artifacts import ArtifactGenerator
 from rpax.config import OutputFormat, load_config
 from rpax.explain import ExplanationFormatter, WorkflowAnalyzer
 from rpax.graph import GraphGenerator, MermaidRenderer
-from rpax.output.base import ParsedProjectData
-from rpax.output.v0 import V0LakeGenerator
-from rpax.output.lake_index import LakeIndexGenerator
+# V0 schema imports - disabled due to incomplete implementation
+# from rpax.output.base import ParsedProjectData
+# from rpax.output.v0 import V0LakeGenerator
+# from rpax.output.lake_index import LakeIndexGenerator
 from rpax.parser.project import ProjectParser
 from rpax.parser.xaml import XamlDiscovery
 from rpax.parser.workflow_discovery import create_workflow_discovery
@@ -433,20 +434,10 @@ def parse(
                 console.print("[dim]  Generating artifacts...[/dim]")
                 
                 if schema == "v0":
-                    # Use V0LakeGenerator for experimental schema
-                    from slugify import slugify
-                    project_slug = slugify(project.name)
-                    
-                    parsed_data = ParsedProjectData(
-                        project=project,
-                        workflow_index=workflow_index,
-                        project_root=project_path,
-                        project_slug=project_slug,
-                        timestamp=datetime.now()
-                    )
-                    
-                    generator = V0LakeGenerator(Path(base_config.output.dir))
-                    artifacts = generator.generate(parsed_data)
+                    # V0 schema is incomplete - missing manifest_builder, entry_point_builder, detail_levels modules
+                    console.print("[red]Error:[/red] V0 schema is not yet implemented")
+                    console.print("[dim]Use --schema legacy (default) instead[/dim]")
+                    raise typer.Exit(1)
                 else:
                     # Use legacy ArtifactGenerator
                     generator = ArtifactGenerator(project_config, out)

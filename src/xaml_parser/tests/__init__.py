@@ -1,1 +1,0 @@
-"""Test suite for XAML parser package."""
