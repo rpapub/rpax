@@ -2,15 +2,24 @@
 
 rpax v0.0.2 is published on TestPyPI for testing before production release.
 
-## Quick Start with uvx (No Installation Required)
+## Quick Start - Recommended Installation
 
-Run rpax directly without installing:
+**Recommended**: Install with pip for reliable usage:
 
 ```bash
-uvx --index-url https://test.pypi.org/simple/ \
-    --extra-index-url https://pypi.org/simple/ \
-    rpax --version
+pip install --index-url https://test.pypi.org/simple/ \
+            --extra-index-url https://pypi.org/simple/ \
+            rpax
 ```
+
+Then use normally:
+
+```bash
+rpax parse /path/to/project.json
+rpax --version
+```
+
+> **Note**: While `uvx` (no-install usage) is supported, there's a known issue with certain package metadata. Installing with pip is more reliable.
 
 ## Usage Examples
 
