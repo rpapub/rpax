@@ -7,7 +7,7 @@ import signal
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Annotated, Any
+from typing import Annotated, Any, Optional
 
 import typer
 from rich.console import Console
@@ -1771,6 +1771,61 @@ def graph(
         raise typer.Exit(1)
 
 
+def _print_entry_points(console: Console, artifacts_dir: Path) -> None:
+    """Print a table of project entry points from manifest.json."""
+    manifest_file = artifacts_dir / "manifest.json"
+    if not manifest_file.exists():
+        console.print("[red]Error:[/red] manifest.json not found. Run 'rpax parse' first.")
+        return
+
+    with open(manifest_file, encoding="utf-8") as f:
+        manifest = jsonlib.load(f)
+
+    entry_points = manifest.get("entryPoints", [])
+    main_workflow = manifest.get("mainWorkflow", "")
+
+    if not entry_points:
+        console.print("[yellow]No entry points found in manifest.[/yellow]")
+        console.print("[dim]Tip: rpax explain <workflow> to inspect any workflow.[/dim]")
+        return
+
+    # Load argument counts from workflows.index.json (graceful fallback if absent)
+    arg_counts: dict[str, tuple[int, int]] = {}
+    index_file = artifacts_dir / "workflows.index.json"
+    if index_file.exists():
+        with open(index_file, encoding="utf-8") as f:
+            wf_index = jsonlib.load(f)
+        for wf in wf_index.get("workflows", []):
+            fp = wf.get("filePath", "")
+            args = wf.get("arguments", [])
+            ins = sum(1 for a in args if a.get("direction") == "in")
+            outs = sum(1 for a in args if a.get("direction") == "out")
+            arg_counts[fp] = (ins, outs)
+            # Also index by POSIX name for relative-path lookups
+            arg_counts[Path(fp).name] = (ins, outs)
+
+    project_name = manifest.get("projectName", "")
+    title = f"{project_name} — Entry Points ({len(entry_points)})" if project_name else f"Entry Points ({len(entry_points)})"
+    table = Table(title=title)
+    table.add_column("Workflow", style="bold")
+    table.add_column("Main", justify="center")
+    table.add_column("Inputs", justify="right")
+    table.add_column("Outputs", justify="right")
+
+    for ep in entry_points:
+        file_path = ep.get("filePath", "")
+        display = file_path.removesuffix(".xaml").removesuffix(".XAML")
+        is_main = "★" if file_path == main_workflow else ""
+        fallback = (len(ep.get("input", [])), len(ep.get("output", [])))
+        ins, outs = arg_counts.get(file_path) or arg_counts.get(Path(file_path).name, fallback)
+        table.add_row(display, is_main, str(ins), str(outs))
+
+    console.print(table)
+    console.print()
+    console.print("[dim]Run: rpax explain <workflow> to inspect a specific entry point.[/dim]")
+    console.print("[dim]★ = main workflow[/dim]")
+
+
 @api_expose(
     path="/projects/{project}/workflows/{workflow}",
     methods=["GET"],
@@ -1781,8 +1836,11 @@ def graph(
 @app.command()
 def explain(
     workflow: Annotated[
-        str, typer.Argument(help="Workflow identifier (ID, filename, or partial path)")
-    ],
+        Optional[str],
+        typer.Argument(
+            help="Workflow identifier (ID, filename, or partial path). Omit to list entry points."
+        ),
+    ] = None,
     path: Annotated[
         Path,
         typer.Option(
@@ -1843,6 +1901,11 @@ def explain(
         artifacts_dir = get_project_artifacts_dir(lake_dir, project_slug)
 
         console.print(f"[dim]Using project: {project_slug}[/dim]")
+
+        # No workflow specified — list entry points instead
+        if workflow is None:
+            _print_entry_points(console, artifacts_dir)
+            return
 
         # Load configuration
         rpax_config = load_config(config or path / ".rpax.json")
