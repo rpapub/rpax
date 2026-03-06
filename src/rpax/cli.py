@@ -3386,6 +3386,195 @@ def _load_invoked_workflow_pseudocode(workflow_name: str, pseudocode_dir):
     return None
 
 
+def _review_resolve_artifacts_dir(path: Path, bay: str | None) -> Path:
+    """Resolve artifacts directory for review command.
+
+    Supports three patterns:
+      1. Direct artifacts dir (contains manifest.json)
+      2. Warehouse dir (contains bays.json)
+      3. Project/CWD — search upward for warehouse
+    """
+    from rpax.utils.warehouse import (
+        BayNotFoundError,
+        MultipleBaysFoundError,
+        find_warehouse_directory,
+        get_bay_artifacts_dir,
+        resolve_bay_id,
+    )
+
+    if (path / "manifest.json").exists() and (path / "workflows.index.json").exists():
+        return path
+
+    try:
+        warehouse_dir = find_warehouse_directory(path)
+    except FileNotFoundError:
+        console.print(f"[red]Error:[/red] No warehouse found under {path}")
+        console.print("[dim]Run 'rpax parse' first.[/dim]")
+        raise typer.Exit(1)
+
+    try:
+        bay_id = resolve_bay_id(warehouse_dir, bay)
+    except BayNotFoundError as exc:
+        console.print(f"[red]Error:[/red] {exc}")
+        raise typer.Exit(1)
+    except MultipleBaysFoundError as exc:
+        console.print(f"[red]Error:[/red] {exc}")
+        console.print("[dim]Use --bay to specify which bay to review.[/dim]")
+        raise typer.Exit(1)
+
+    return get_bay_artifacts_dir(warehouse_dir, bay_id)
+
+
+def _review_output_summary(result: Any) -> None:
+    """Print review results in summary format (rule → issue count table)."""
+    status_color = (
+        "green" if result.status.value == "pass"
+        else "yellow" if result.status.value == "warn"
+        else "red"
+    )
+    console.print(f"[{status_color}]Review status: {result.status.value.upper()}[/{status_color}]")
+
+    rule_counts: dict[str, int] = {}
+    for issue in result.issues:
+        rule_counts[issue.rule] = rule_counts.get(issue.rule, 0) + 1
+
+    if rule_counts:
+        tbl = Table(show_header=True)
+        tbl.add_column("Rule", style="cyan")
+        tbl.add_column("Issues", style="yellow", justify="right")
+        for rule_name, count in sorted(rule_counts.items()):
+            tbl.add_row(rule_name, str(count))
+        console.print(tbl)
+    else:
+        console.print("[green]No issues found.[/green]")
+
+
+def _review_output_table(result: Any) -> None:
+    """Print review results in full table format (metrics + per-issue rows)."""
+    status_color = (
+        "green" if result.status.value == "pass"
+        else "yellow" if result.status.value == "warn"
+        else "red"
+    )
+    console.print(f"[{status_color}]Review status: {result.status.value.upper()}[/{status_color}]")
+
+    if result.counters:
+        console.print("\n[blue]Metrics:[/blue]")
+        metric_tbl = Table(show_header=True)
+        metric_tbl.add_column("Metric", style="cyan")
+        metric_tbl.add_column("Value", style="white", justify="right")
+        for key, value in sorted(result.counters.items()):
+            metric_tbl.add_row(key.replace("_", " ").title(), str(value))
+        console.print(metric_tbl)
+
+    if result.issues:
+        console.print(f"\n[blue]Issues ({len(result.issues)}):[/blue]")
+        issues_tbl = Table(show_header=True)
+        issues_tbl.add_column("Rule", style="cyan", no_wrap=True)
+        issues_tbl.add_column("Sev", style="white", no_wrap=True)
+        issues_tbl.add_column("Message", style="white")
+        issues_tbl.add_column("Location", style="dim")
+
+        for issue in result.issues:
+            sev_color = (
+                "red" if issue.severity.value == "fail"
+                else "yellow" if issue.severity.value == "warn"
+                else "green"
+            )
+            issues_tbl.add_row(
+                issue.rule,
+                f"[{sev_color}]{issue.severity.value.upper()}[/{sev_color}]",
+                issue.message,
+                issue.path or issue.artifact or "",
+            )
+        console.print(issues_tbl)
+    else:
+        console.print("\n[green]No issues found.[/green]")
+
+
+@app.command()
+def review(
+    path: Annotated[
+        Path,
+        typer.Argument(help="Path to project, warehouse, or artifacts directory"),
+    ] = Path("."),
+    bay: Annotated[
+        str | None,
+        typer.Option("--bay", "-b", help="Bay ID or name (required for multi-bay warehouses)"),
+    ] = None,
+    format: Annotated[
+        str,
+        typer.Option("--format", "-f", help="Output format: table, json, summary (default: table)"),
+    ] = "table",
+    max_activities: Annotated[
+        int,
+        typer.Option("--max-activities", help="Workflow size threshold (default: 50)"),
+    ] = 50,
+    min_activities: Annotated[
+        int,
+        typer.Option(
+            "--min-activities",
+            help="Minimum activities before annotation/error-handling checks apply (default: 10)",
+        ),
+    ] = 10,
+    config: Annotated[
+        Path | None,
+        typer.Option("--config", "-c", help="Configuration file path"),
+    ] = None,
+) -> None:
+    """Surface code quality issues from parsed artifacts.
+
+    Runs Tier 1 review checks on existing artifacts — no re-parsing needed:
+
+    \b
+    • argument_naming     — in_/out_/io_ prefix convention violations
+    • workflow_size       — workflows exceeding activity count threshold
+    • annotation_coverage — non-trivial workflows with no annotations
+    • error_handling      — non-trivial workflows with no TryCatch
+    • orphan_workflows    — workflows unreachable from entry points
+    """
+    from rpax.review import create_review_framework
+
+    valid_formats = ["table", "json", "summary"]
+    if format not in valid_formats:
+        console.print(
+            f"[red]Error:[/red] Invalid format '{format}'. Must be one of: {', '.join(valid_formats)}"
+        )
+        raise typer.Exit(1)
+
+    try:
+        path = path.resolve()
+        artifacts_dir = _review_resolve_artifacts_dir(path, bay)
+        rpax_config = load_config(config or path / ".rpax.json")
+
+        framework = create_review_framework(
+            rpax_config,
+            max_workflow_activities=max_activities,
+            min_activities_for_checks=min_activities,
+        )
+
+        console.print(f"[green]Reviewing:[/green] {artifacts_dir}")
+        result = framework.validate(artifacts_dir)
+
+        if format == "json":
+            console.print(jsonlib.dumps(result.to_dict(), indent=2))
+        elif format == "summary":
+            _review_output_summary(result)
+        else:
+            _review_output_table(result)
+
+        raise typer.Exit(result.exit_code)
+
+    except typer.Exit:
+        raise
+    except FileNotFoundError as exc:
+        console.print(f"[red]Error:[/red] {exc}")
+        raise typer.Exit(1)
+    except Exception as exc:
+        console.print(f"[red]Error:[/red] {exc}")
+        raise typer.Exit(1)
+
+
 @api_expose(enabled=False)  # CLI-only: dev/admin server management
 @app.command()
 def api(
