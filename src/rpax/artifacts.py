@@ -68,6 +68,8 @@ class ArtifactGenerator:
 
         # Cache project ID once so _extract_project_id avoids per-workflow filesystem walks
         self._cached_project_id = self._resolve_project_id_from_root(project_root)
+        # Cache expression language for activity tree generation
+        self._expression_language = project.expression_language or "VisualBasic"
 
         artifacts = {}
 
@@ -448,7 +450,9 @@ class ArtifactGenerator:
 
         # Choose analyzer based on configuration
         if self.config.parser.use_enhanced:
-            analyzer = EnhancedXamlAnalyzer()
+            analyzer = EnhancedXamlAnalyzer(
+                expression_language=getattr(self, "_expression_language", "VisualBasic")
+            )
             logger.debug(f"Using enhanced XAML parser for {workflow_index.total_workflows} workflows")
         else:
             analyzer = XamlAnalyzer()

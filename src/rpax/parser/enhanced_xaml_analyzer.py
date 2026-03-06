@@ -61,12 +61,14 @@ class EnhancedActivityNode:
     # Invocation-specific data
     invocation_target: str | None = None
     invocation_kind: str | None = None  # "invoke", "invoke-missing", "invoke-dynamic"
+    annotation: str | None = None  # sap2010:Annotation.AnnotationText
 
 
 class EnhancedXamlAnalyzer:
     """Enhanced XAML analyzer with visual/structural distinction."""
     
-    def __init__(self):
+    def __init__(self, expression_language: str = "VisualBasic"):
+        self.expression_language = expression_language
         self.current_workflow_id = ""
         self.sibling_counters = {}  # Track sibling indices for stable nodeIds
         
@@ -218,6 +220,11 @@ class EnhancedXamlAnalyzer:
                 "isExpression": is_expression
             }
         
+        # Lift annotation into dedicated field and remove from generic dicts
+        ANNOTATION_KEY = "Annotation.AnnotationText"
+        annotation_text = attributes.pop(ANNOTATION_KEY, None)
+        properties.pop(ANNOTATION_KEY, None)
+
         # Create node
         node = EnhancedActivityNode(
             node_id=node_id,
@@ -229,7 +236,8 @@ class EnhancedXamlAnalyzer:
             attributes=attributes,
             properties=properties,
             parent_id=parent_id,
-            line_number=getattr(elem, 'sourceline', None)
+            line_number=getattr(elem, 'sourceline', None),
+            annotation=annotation_text,
         )
         
         # Special handling for InvokeWorkflowFile
@@ -419,6 +427,7 @@ class EnhancedXamlAnalyzer:
                 "nodeId": node.node_id,
                 "activityType": node.tag,
                 "displayName": node.display_name,
+                "annotation": node.annotation,
                 "properties": node.properties,
                 "arguments": {},  # Could be enhanced
                 "parentId": node.parent_id,
@@ -426,7 +435,7 @@ class EnhancedXamlAnalyzer:
                 "timeout": None,
                 "viewStateId": node.attributes.get("WorkflowViewState.IdRef"),
                 "children": [serialize_node(child) for child in children],
-                
+
                 # Enhanced fields
                 "isVisual": node.is_visual,
                 "lineNumber": node.line_number,
@@ -450,6 +459,7 @@ class EnhancedXamlAnalyzer:
         
         return {
             "workflowId": metadata.get("workflow_id", ""),
+            "expressionLanguage": self.expression_language,
             "contentHash": "",  # Would be filled by caller
             "extractedAt": "",  # Would be filled by caller
             "extractorVersion": "0.1.0-enhanced",
@@ -457,7 +467,7 @@ class EnhancedXamlAnalyzer:
             "arguments": metadata.get("arguments", []),
             "imports": metadata.get("imports", []),
             "rootNode": root_node,
-            
+
             # Enhanced metadata
             "totalVisualActivities": len([a for a in visual_activities if a.is_visual]),
             "parseMethod": "enhanced-visual-detection"
