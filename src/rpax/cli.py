@@ -22,7 +22,7 @@ from rpax.graph import GraphGenerator, MermaidRenderer
 # V0 schema imports - disabled due to incomplete implementation
 # from rpax.output.base import ParsedProjectData
 # from rpax.output.v0 import V0LakeGenerator
-from rpax.output.lake_index import LakeIndexGenerator
+from rpax.output.warehouse_index import WarehouseIndexGenerator
 from rpax.parser.project import ProjectParser
 from rpax.parser.workflow_discovery import create_workflow_discovery
 from rpax.parser.xaml import XamlDiscovery
@@ -141,152 +141,152 @@ def main(
     _setup_signal_handlers()
 
 
-def _resolve_multiple_project_artifacts_paths(
-    lake_path: Path, project_slugs: list[str], command_context: str = "workflows"
+def _resolve_multiple_bay_artifacts_paths(
+    warehouse_path: Path, bay_ids: list[str], command_context: str = "workflows"
 ) -> list[tuple[str, Path]]:
-    """Resolve artifacts paths for multiple projects in a multi-project lake.
+    """Resolve artifacts paths for multiple records in a multi-record archive.
 
     Args:
-        lake_path: Path to the lake directory
-        project_slugs: List of project slugs to resolve
+        warehouse_path: Path to the archive directory
+        bay_ids: List of record IDs to resolve
         command_context: Context for error messages
 
     Returns:
-        List of (project_slug, artifacts_path) tuples
+        List of (bay_id, artifacts_path) tuples
 
     Raises:
-        typer.Exit: If project selection fails or projects not found
+        typer.Exit: If record selection fails or records not found
     """
-    projects_file = lake_path / "projects.json"
-    if not projects_file.exists():
-        console.print(f"[red]Error:[/red] No projects.json found in {lake_path}")
+    records_file = warehouse_path / "bays.json"
+    if not records_file.exists():
+        console.print(f"[red]Error:[/red] No bays.json found in {warehouse_path}")
         raise typer.Exit(1)
 
     try:
-        with open(projects_file, encoding="utf-8") as f:
+        with open(records_file, encoding="utf-8") as f:
             index_data = jsonlib.load(f)
 
-        projects = index_data.get("projects", [])
-        if not projects:
-            console.print("[red]Error:[/red] No projects found in lake")
+        records = index_data.get("bays", index_data.get("records", []))
+        if not records:
+            console.print("[red]Error:[/red] No bays found in warehouse")
             raise typer.Exit(1)
 
-        # Build slug to project mapping
-        project_map = {p.get("slug"): p for p in projects}
-        available_slugs = list(project_map.keys())
+        # Build bay_id to record mapping
+        record_map = {r.get("bayId"): r for r in records}
+        available_ids = list(record_map.keys())
 
-        # Resolve each requested project
-        resolved_projects = []
-        missing_projects = []
+        # Resolve each requested record
+        resolved_records = []
+        missing_records = []
 
-        for slug in project_slugs:
-            if slug in project_map:
-                artifacts_path = lake_path / slug
+        for rid in bay_ids:
+            if rid in record_map:
+                artifacts_path = warehouse_path / rid
                 if artifacts_path.exists():
-                    resolved_projects.append((slug, artifacts_path))
+                    resolved_records.append((rid, artifacts_path))
                 else:
                     console.print(
-                        f"[yellow]Warning:[/yellow] Project artifacts not found for '{slug}': {artifacts_path}"
+                        f"[yellow]Warning:[/yellow] Record artifacts not found for '{rid}': {artifacts_path}"
                     )
             else:
-                missing_projects.append(slug)
+                missing_records.append(rid)
 
-        # Report missing projects
-        if missing_projects:
+        # Report missing records
+        if missing_records:
             console.print(
-                f"[red]Error:[/red] Project(s) not found: {', '.join(missing_projects)}"
+                f"[red]Error:[/red] Record(s) not found: {', '.join(missing_records)}"
             )
-            console.print(f"Available projects: {', '.join(available_slugs)}")
+            console.print(f"Available bays: {', '.join(available_ids)}")
             raise typer.Exit(1)
 
-        return resolved_projects
+        return resolved_records
 
     except jsonlib.JSONDecodeError as e:
-        console.print(f"[red]Error:[/red] Invalid JSON in projects.json: {e}")
+        console.print(f"[red]Error:[/red] Invalid JSON in bays.json: {e}")
         raise typer.Exit(1)
     except Exception as e:
-        console.print(f"[red]Error:[/red] Failed to read projects index: {e}")
+        console.print(f"[red]Error:[/red] Failed to read bays index: {e}")
         raise typer.Exit(1)
 
 
-def _resolve_project_artifacts_path(
-    lake_path: Path, project_slug: str | None = None, command_context: str = "workflows"
+def _resolve_bay_artifacts_path(
+    warehouse_path: Path, bay_id: str | None = None, command_context: str = "workflows"
 ) -> Path:
-    """Resolve the artifacts path for a specific project in a multi-project lake.
+    """Resolve the artifacts path for a specific record in a multi-record archive.
 
     Args:
-        lake_path: Path to the lake directory
-        project_slug: Optional project slug to select specific project
+        warehouse_path: Path to the archive directory
+        bay_id: Optional record ID to select specific record
 
     Returns:
-        Path to the project's artifacts directory
+        Path to the record's artifacts directory
 
     Raises:
-        typer.Exit: If project selection fails or no projects found
+        typer.Exit: If record selection fails or no records found
     """
 
-    projects_file = lake_path / "projects.json"
-    if not projects_file.exists():
-        console.print(f"[red]Error:[/red] No projects.json found in {lake_path}")
+    records_file = warehouse_path / "bays.json"
+    if not records_file.exists():
+        console.print(f"[red]Error:[/red] No bays.json found in {warehouse_path}")
         raise typer.Exit(1)
 
     try:
-        with open(projects_file, encoding="utf-8") as f:
+        with open(records_file, encoding="utf-8") as f:
             index_data = jsonlib.load(f)
 
-        projects = index_data.get("projects", [])
-        if not projects:
-            console.print("[red]Error:[/red] No projects found in lake")
+        records = index_data.get("bays", index_data.get("records", []))
+        if not records:
+            console.print("[red]Error:[/red] No bays found in warehouse")
             raise typer.Exit(1)
 
-        if project_slug:
-            # Find specific project
-            for project in projects:
-                if project.get("slug") == project_slug:
-                    artifacts_path = lake_path / project_slug
+        if bay_id:
+            # Find specific record
+            for record in records:
+                if record.get("bayId") == bay_id:
+                    artifacts_path = warehouse_path / bay_id
                     if not artifacts_path.exists():
                         console.print(
-                            f"[red]Error:[/red] Project artifacts not found: {artifacts_path}"
+                            f"[red]Error:[/red] Record artifacts not found: {artifacts_path}"
                         )
                         raise typer.Exit(1)
                     return artifacts_path
 
-            # Project not found
-            available = [p.get("slug") for p in projects]
-            console.print(f"[red]Error:[/red] Project '{project_slug}' not found.")
-            console.print(f"Available projects: {', '.join(available)}")
+            # Bay not found
+            available = [r.get("bayId") for r in records]
+            console.print(f"[red]Error:[/red] Bay '{bay_id}' not found.")
+            console.print(f"Available bays: {', '.join(available)}")
             raise typer.Exit(1)
 
-        elif len(projects) == 1:
-            # Use single project as default
-            project = projects[0]
-            project_slug = project.get("slug")
+        elif len(records) == 1:
+            # Use single record as default
+            record = records[0]
+            bay_id = record.get("bayId")
             console.print(
-                f"[dim]Using project: {project.get('name')} ({project_slug})[/dim]"
+                f"[dim]Using bay: {record.get('name')} ({bay_id})[/dim]"
             )
-            return lake_path / project_slug
+            return warehouse_path / bay_id
 
         else:
-            # Multiple projects, user must specify
+            # Multiple records, user must specify
             console.print(
-                "[yellow]Multiple projects found. Please specify --project option:[/yellow]"
+                "[yellow]Multiple records found. Please specify --record option:[/yellow]"
             )
             console.print("")
 
             table = Table(show_header=True, header_style="bold cyan")
-            table.add_column("Slug")
+            table.add_column("Record ID")
             table.add_column("Name")
             table.add_column("Type")
             table.add_column("Last Parsed")
 
-            for project in projects:
+            for record in records:
                 table.add_row(
-                    project.get("slug", ""),
-                    project.get("name", ""),
-                    project.get("projectType", ""),
+                    record.get("recordId", ""),
+                    record.get("name", ""),
+                    record.get("projectType", ""),
                     (
-                        project.get("lastParsed", "")[:19]
-                        if project.get("lastParsed")
+                        record.get("lastParsed", "")[:19]
+                        if record.get("lastParsed")
                         else ""
                     ),  # Trim timestamp
                 )
@@ -294,16 +294,16 @@ def _resolve_project_artifacts_path(
             console.print(table)
             console.print("")
             # Show dynamic example based on the command context
-            sample_project = (
-                projects[0].get("slug", "f4aa3834") if projects else "f4aa3834"
+            sample_record = (
+                records[0].get("recordId", "f4aa3834") if records else "f4aa3834"
             )
             console.print(
-                f"Example: [cyan]rpax list {command_context} --project {sample_project}[/cyan]"
+                f"Example: [cyan]rpax list {command_context} --record {sample_record}[/cyan]"
             )
             raise typer.Exit(1)
 
     except (OSError, jsonlib.JSONDecodeError) as e:
-        console.print(f"[red]Error:[/red] Failed to read projects.json: {e}")
+        console.print(f"[red]Error:[/red] Failed to read bays.json: {e}")
         raise typer.Exit(1)
 
 
@@ -357,7 +357,7 @@ def parse(
     out: Annotated[
         Path,
         typer.Option(
-            "--out", "-o", help="Output directory for artifacts (default: .rpax-lake)"
+            "--out", "-o", help="Output directory for artifacts (default: .rpax-warehouse)"
         ),
     ] = None,
     config: Annotated[
@@ -420,7 +420,7 @@ def parse(
             )
             raise typer.Exit(1)
 
-        console.print(f"[blue]Output lake:[/blue] {base_config.output.dir}")
+        console.print(f"[blue]Output warehouse:[/blue] {base_config.output.dir}")
         console.print(f"[blue]Schema version:[/blue] {schema}")
         console.print(f"[green]Parsing {len(project_paths)} project(s):[/green]")
 
@@ -520,24 +520,24 @@ def parse(
         if total_errors > 0:
             console.print(f"  - [yellow]Errors/warnings: {total_errors}[/yellow]")
 
-        # Generate lake-level index for project discovery (if enabled)
-        if base_config.v0.generate_lake_index:
-            console.print("\n[dim]Generating lake index for project discovery...[/dim]")
+        # Generate warehouse-level index for bay discovery (if enabled)
+        if base_config.v0.generate_warehouse_index:
+            console.print("\n[dim]Generating warehouse index for bay discovery...[/dim]")
             try:
-                lake_generator = LakeIndexGenerator(Path(base_config.output.dir))
-                lake_index_file = lake_generator.save_lake_index()
-                console.print(f"[green]OK[/green] Lake index: {lake_index_file.name}")
+                warehouse_generator = WarehouseIndexGenerator(Path(base_config.output.dir))
+                warehouse_index_file = warehouse_generator.save_warehouse_index()
+                console.print(f"[green]OK[/green] Warehouse index: {warehouse_index_file.name}")
             except Exception as e:
                 console.print(
-                    f"[yellow]WARN[/yellow] Failed to generate lake index: {e}"
+                    f"[yellow]WARN[/yellow] Failed to generate warehouse index: {e}"
                 )
         else:
             console.print(
-                "\n[dim]Lake index generation disabled in configuration[/dim]"
+                "\n[dim]Warehouse index generation disabled in configuration[/dim]"
             )
 
-        console.print(f"\n[blue]Multi-project lake:[/blue] {base_config.output.dir}")
-        console.print("[dim]Use 'rpax projects' to list all projects in the lake[/dim]")
+        console.print(f"\n[blue]Multi-bay warehouse:[/blue] {base_config.output.dir}")
+        console.print("[dim]Use 'rpax list-bays' to list all bays in the warehouse[/dim]")
 
     except FileNotFoundError as e:
         console.print(f"[red]Error:[/red] {e}")
@@ -607,14 +607,14 @@ def _output_workflows_table(workflows: list[Any], verbose: bool = False) -> None
         console.print("[dim]No workflows found[/dim]")
         return
 
-    # Check if this is a multi-project listing (workflows have project_slug)
-    is_multi_project = workflows and hasattr(workflows[0], "project_slug")
+    # Check if this is a multi-record listing (workflows have bay_id)
+    is_multi_record = workflows and hasattr(workflows[0], "bay_id")
 
     # Create table
     table = Table(title=f"Workflows ({len(workflows)} found)")
 
-    if is_multi_project:
-        table.add_column("Project", style="magenta", no_wrap=True)
+    if is_multi_record:
+        table.add_column("Record", style="magenta", no_wrap=True)
 
     table.add_column("Path", style="cyan", no_wrap=True)
     table.add_column("Name", style="white")
@@ -636,12 +636,12 @@ def _output_workflows_table(workflows: list[Any], verbose: bool = False) -> None
 
         row = []
 
-        if is_multi_project:
-            # Add project slug (shortened for display)
-            project_display = getattr(workflow, "project_slug", "unknown")
-            if len(project_display) > 12:
-                project_display = project_display[:9] + "..."
-            row.append(project_display)
+        if is_multi_record:
+            # Add record ID (shortened for display)
+            record_display = getattr(workflow, "bay_id", "unknown")
+            if len(record_display) > 12:
+                record_display = record_display[:9] + "..."
+            row.append(record_display)
 
         row.extend(
             [
@@ -688,7 +688,7 @@ def _output_workflows_json(workflows: list[Any], verbose: bool = False) -> None:
                     "contentHash": workflow.content_hash,
                     "lastModified": workflow.last_modified,
                     "filePath": workflow.file_path,
-                    "projectSlug": workflow.project_slug,
+                    "recordId": workflow.bay_id,
                     "discoveredAt": workflow.discovered_at,
                 }
             )
@@ -705,7 +705,7 @@ def _output_workflows_csv(workflows: list[Any], verbose: bool = False) -> None:
     fieldnames = ["path", "name", "fileName", "size", "status"]
     if verbose:
         fieldnames.extend(
-            ["id", "contentHash", "lastModified", "filePath", "projectSlug"]
+            ["id", "contentHash", "lastModified", "filePath", "recordId"]
         )
 
     writer = csv.DictWriter(sys.stdout, fieldnames=fieldnames)
@@ -727,7 +727,7 @@ def _output_workflows_csv(workflows: list[Any], verbose: bool = False) -> None:
                     "contentHash": workflow.content_hash,
                     "lastModified": workflow.last_modified,
                     "filePath": workflow.file_path,
-                    "projectSlug": workflow.project_slug,
+                    "recordId": workflow.bay_id,
                 }
             )
 
@@ -754,9 +754,9 @@ def list_items(
         typer.Option(
             "--path",
             "-p",
-            help="Project path or lake directory to analyze (default: .rpax-lake)",
+            help="Project path or archive directory to analyze (default: .rpax-warehouse)",
         ),
-    ] = Path(".rpax-lake"),
+    ] = Path(".rpax-warehouse"),
     format: Annotated[
         str,
         typer.Option(
@@ -764,13 +764,13 @@ def list_items(
         ),
     ] = "table",
     project: Annotated[
-        str, typer.Option("--project", help="Project slug for single-project listing")
+        str, typer.Option("--bay", help="Bay ID for single-bay listing")
     ] = None,
     projects: Annotated[
         list[str],
         typer.Option(
-            "--projects",
-            help="Multiple project slugs for cross-project listing (comma-separated or multiple uses)",
+            "--records",
+            help="Multiple record IDs for cross-record listing (comma-separated or multiple uses)",
         ),
     ] = None,
     search: Annotated[
@@ -840,10 +840,10 @@ def list_items(
     # Validate project parameter usage
     if project and projects:
         console.print(
-            "[red]Error:[/red] Cannot use both --project and --projects. Use one or the other."
+            "[red]Error:[/red] Cannot use both --record and --records. Use one or the other."
         )
-        console.print("[dim]  --project SLUG     : Single project listing")
-        console.print("[dim]  --projects SLUG1,SLUG2 : Multi-project listing")
+        console.print("[dim]  --bay ID          : Single bay listing")
+        console.print("[dim]  --bays ID1,ID2    : Multi-bay listing")
         raise typer.Exit(1)
 
     # Convert single project to list for unified handling
@@ -875,33 +875,33 @@ def list_items(
 
         if item_type == "workflows":
             # Check if this is a multi-project lake directory
-            if (project_path / "projects.json").exists():
+            if (project_path / "bays.json").exists():
                 # Multi-project lake structure
                 from rpax.models.workflow import Workflow, WorkflowIndex
 
                 if target_projects and len(target_projects) > 1:
-                    # Multi-project query using --projects
-                    resolved_projects = _resolve_multiple_project_artifacts_paths(
+                    # Multi-record query using --records
+                    resolved_records = _resolve_multiple_bay_artifacts_paths(
                         project_path, target_projects, "workflows"
                     )
                     all_workflows = []
 
-                    for project_slug, artifacts_path in resolved_projects:
+                    for bay_id, artifacts_path in resolved_records:
                         with open(artifacts_path / "workflows.index.json") as f:
                             index_data = jsonlib.load(f)
 
-                        # Add project context to each workflow
+                        # Add record context to each workflow
                         project_workflows = []
                         for w_data in index_data.get("workflows", []):
                             workflow = Workflow(**w_data)
-                            # Add project context for multi-project display
-                            workflow.project_slug = project_slug
+                            # Add record context for multi-record display
+                            workflow.bay_id = bay_id
                             project_workflows.append(workflow)
 
                         all_workflows.extend(project_workflows)
 
                     workflow_index = WorkflowIndex(
-                        project_name=f"Multi-project ({len(resolved_projects)} projects)",
+                        project_name=f"Multi-record ({len(resolved_records)} records)",
                         project_root="<multiple>",
                         scan_timestamp="",
                         total_workflows=len(all_workflows),
@@ -983,7 +983,7 @@ def list_items(
 
         elif item_type == "roots":
             # Check if this is a multi-project lake directory
-            if (project_path / "projects.json").exists():
+            if (project_path / "bays.json").exists():
                 # Multi-project lake structure
                 artifacts_path = _resolve_project_artifacts_path(
                     project_path, project, "roots"
@@ -1700,7 +1700,7 @@ def graph(
             )
         else:
             # Path is project directory, look for artifacts
-            candidates = [path / ".rpax-lake", path / ".rpax-out", path / "output"]
+            candidates = [path / ".rpax-warehouse", path / ".rpax-lake", path / ".rpax-out", path / "output"]
 
             for candidate in candidates:
                 if (candidate / "manifest.json").exists():
@@ -1852,7 +1852,7 @@ def explain(
     project: Annotated[
         str,
         typer.Option(
-            "--project", help="Project slug (required for multi-project lakes)"
+            "--bay", help="Bay ID (required for multi-bay warehouses)"
         ),
     ] = None,
     config: Annotated[
@@ -1863,44 +1863,38 @@ def explain(
             help="Configuration file path (default: search for .rpax.json)",
         ),
     ] = None,
-    pseudocode: Annotated[
-        bool,
-        typer.Option(
-            "--pseudocode", help="Show pseudocode representation of workflow activities"
-        ),
-    ] = False,
 ) -> None:
     """Show detailed information about a specific workflow."""
-    from rpax.utils.lake import (
-        MultipleProjectsFoundError,
-        ProjectNotFoundError,
-        find_lake_directory,
-        get_project_artifacts_dir,
-        resolve_project_slug,
+    from rpax.utils.warehouse import (
+        MultipleBaysFoundError,
+        BayNotFoundError,
+        find_warehouse_directory,
+        get_bay_artifacts_dir,
+        resolve_bay_id,
     )
 
     try:
         path = path.resolve()
 
-        # Find lake directory
-        lake_dir = find_lake_directory(path)
-        if not lake_dir:
-            console.print(f"[red]Error:[/red] No rpax lake found in {path}")
+        # Find archive directory
+        warehouse_dir = find_warehouse_directory(path)
+        if not warehouse_dir:
+            console.print(f"[red]Error:[/red] No rpax warehouse found in {path}")
             console.print(
-                "[dim]Run 'rpax parse' first or specify lake directory with --path[/dim]"
+                "[dim]Run 'rpax parse' first or specify archive directory with --path[/dim]"
             )
             raise typer.Exit(1)
 
-        # Resolve project slug
+        # Resolve record ID
         try:
-            project_slug = resolve_project_slug(lake_dir, project)
-        except (MultipleProjectsFoundError, ProjectNotFoundError):
+            bay_id = resolve_bay_id(warehouse_dir, project)
+        except (MultipleBaysFoundError, BayNotFoundError):
             raise typer.Exit(1)
 
-        # Get project artifacts directory
-        artifacts_dir = get_project_artifacts_dir(lake_dir, project_slug)
+        # Get record artifacts directory
+        artifacts_dir = get_bay_artifacts_dir(warehouse_dir, bay_id)
 
-        console.print(f"[dim]Using project: {project_slug}[/dim]")
+        console.print(f"[dim]Using bay: {bay_id}[/dim]")
 
         # No workflow specified — list entry points instead
         if workflow is None:
@@ -1948,48 +1942,9 @@ def explain(
 
             raise typer.Exit(1)
 
-        # Format and display explanation
-        formatter.format_explanation(explanation)
-
-        # Show pseudocode if requested
-        if pseudocode:
-            console.print("\n[bold]Pseudocode[/bold]")
-            try:
-                from rpax.pseudocode import PseudocodeGenerator
-                from rpax.pseudocode.models import PseudocodeArtifact
-
-                # Look for pseudocode artifact
-                pseudocode_dir = artifacts_dir / "pseudocode"
-                if pseudocode_dir.exists():
-                    # Find matching pseudocode file
-                    matching_files = list(pseudocode_dir.glob(f"*{workflow}*.json"))
-
-                    if matching_files:
-                        pseudocode_file = matching_files[0]
-
-                        # Load and render pseudocode
-                        with open(pseudocode_file, encoding="utf-8") as f:
-                            artifact_data = jsonlib.load(f)
-
-                        generator = PseudocodeGenerator()
-                        artifact = PseudocodeArtifact(**artifact_data)
-                        text_output = generator.render_as_text(artifact)
-
-                        console.print(
-                            f"[dim]Activities: {artifact.total_activities} | Lines: {artifact.total_lines}[/dim]\n"
-                        )
-                        console.print(text_output)
-                    else:
-                        console.print(
-                            "[dim]No pseudocode artifact found for this workflow[/dim]"
-                        )
-                else:
-                    console.print(
-                        "[dim]No pseudocode artifacts found. Run 'rpax parse' to regenerate.[/dim]"
-                    )
-
-            except Exception as e:
-                console.print(f"[red]Error loading pseudocode:[/red] {e}")
+        # Load pseudocode (always) and format explanation
+        pseudocode_text = _load_pseudocode_for_workflow(artifacts_dir, explanation.relative_path)
+        formatter.format_explanation(explanation, pseudocode_text=pseudocode_text)
 
     except FileNotFoundError as e:
         console.print(f"[red]Error:[/red] {e}")
@@ -2088,7 +2043,7 @@ def schema(
                 artifacts_dir = path
             else:
                 # Look for artifacts in common locations
-                candidates = [path / ".rpax-lake", path / ".rpax-out", path / "output"]
+                candidates = [path / ".rpax-warehouse", path / ".rpax-lake", path / ".rpax-out", path / "output"]
 
                 for candidate in candidates:
                     if (candidate / "manifest.json").exists():
@@ -2192,13 +2147,13 @@ def activities(
         typer.Option(
             "--path",
             "-p",
-            help="Path to artifacts directory or lake directory (default: .rpax-lake)",
+            help="Path to artifacts directory or archive directory (default: .rpax-warehouse)",
         ),
-    ] = Path(".rpax-lake"),
+    ] = Path(".rpax-warehouse"),
     project: Annotated[
         str | None,
         typer.Option(
-            "--project", help="Project slug for multi-project lakes (optional)"
+            "--bay", help="Bay ID for multi-bay warehouses (optional)"
         ),
     ] = None,
     format: Annotated[
@@ -2235,7 +2190,7 @@ def activities(
         project_path = path.resolve()
 
         # Check for multi-project or single-project structure
-        if (project_path / "projects.json").exists():
+        if (project_path / "bays.json").exists():
             # Multi-project lake - use project resolution logic
             artifacts_path = _resolve_project_artifacts_path(
                 project_path, project, "activities"
@@ -2245,7 +2200,7 @@ def activities(
             artifacts_path = project_path
         else:
             console.print(
-                f"[red]Error:[/red] No manifest.json or projects.json found in {project_path}"
+                f"[red]Error:[/red] No manifest.json or bays.json found in {project_path}"
             )
             console.print(
                 "[dim]Run 'rpax parse' first or specify correct artifacts directory[/dim]"
@@ -2264,7 +2219,7 @@ def activities(
                 f"[red]Error:[/red] Workflow name required for '{action}' action"
             )
             console.print(
-                "[dim]Example: rpax activities tree PathKeeper --path .rpax-lake[/dim]"
+                "[dim]Example: rpax activities tree PathKeeper --path .rpax-warehouse[/dim]"
             )
             raise typer.Exit(1)
 
@@ -2641,16 +2596,16 @@ def _display_all_metrics_table(
 
 
 @api_expose(
-    path="/projects",
+    path="/records",
     methods=["GET"],
-    tags=["projects"],
-    summary="List all projects in the rpax lake",
-    mcp_resource_type="project_list",
+    tags=["records"],
+    summary="List all records in the rpax archive",
+    mcp_resource_type="record_list",
 )
-@app.command("list-projects")
-def list_projects(
-    path: Annotated[Path, typer.Argument(help="Path to rpax lake directory")] = Path(
-        ".rpax-lake"
+@app.command("list-bays")
+def list_bays(
+    path: Annotated[Path, typer.Argument(help="Path to rpax archive directory")] = Path(
+        ".rpax-warehouse"
     ),
     format: Annotated[
         str,
@@ -2660,48 +2615,48 @@ def list_projects(
     ] = "table",
     search: Annotated[
         str | None,
-        typer.Option("--search", "-s", help="Search projects by name or slug"),
+        typer.Option("--search", "-s", help="Search records by name or record ID"),
     ] = None,
     limit: Annotated[
         int | None, typer.Option("--limit", "-l", help="Limit number of results")
     ] = None,
 ) -> None:
-    """List all projects in the rpax lake."""
+    """List all records in the rpax archive."""
     try:
-        project_path = path.resolve()
+        warehouse_path = path.resolve()
 
-        # Check for projects.json
-        projects_file = project_path / "projects.json"
-        if not projects_file.exists():
-            console.print(f"[red]Error:[/red] No projects.json found in {project_path}")
-            console.print("[dim]This doesn't appear to be a multi-project lake[/dim]")
+        # Check for bays.json
+        records_file = warehouse_path / "bays.json"
+        if not records_file.exists():
+            console.print(f"[red]Error:[/red] No bays.json found in {warehouse_path}")
+            console.print("[dim]This doesn't appear to be a multi-bay warehouse[/dim]")
             raise typer.Exit(1)
 
-        # Load projects index
-        with open(projects_file, encoding="utf-8") as f:
+        # Load records index
+        with open(records_file, encoding="utf-8") as f:
             index_data = jsonlib.load(f)
 
-        projects = index_data.get("projects", [])
-        if not projects:
+        records = index_data.get("bays", index_data.get("records", []))
+        if not records:
             if format == "table":
-                console.print("[dim]No projects found in lake[/dim]")
+                console.print("[dim]No bays found in warehouse[/dim]")
             elif format == "json":
-                print(jsonlib.dumps({"projects": [], "total": 0}))
+                print(jsonlib.dumps({"bays": [], "total": 0}))
             return
 
         # Filter by search term
         if search:
             search_lower = search.lower()
-            projects = [
-                p
-                for p in projects
-                if search_lower in p.get("name", "").lower()
-                or search_lower in p.get("slug", "").lower()
+            records = [
+                r
+                for r in records
+                if search_lower in r.get("name", "").lower()
+                or search_lower in r.get("bayId", "").lower()
             ]
 
         # Apply limit
         if limit:
-            projects = projects[:limit]
+            records = records[:limit]
 
         # Output results
         if format == "table":
@@ -2709,26 +2664,26 @@ def list_projects(
 
             table = Table(show_header=True, header_style="bold magenta")
             table.add_column("Name", style="cyan")
-            table.add_column("Slug", style="green")
+            table.add_column("Bay ID", style="green")
             table.add_column("Type", style="blue")
             table.add_column("Workflows", justify="right", style="yellow")
             table.add_column("Last Updated", style="dim")
 
-            for project in projects:
+            for record in records:
                 table.add_row(
-                    project.get("name", ""),
-                    project.get("slug", ""),
-                    project.get("type", ""),
-                    str(project.get("totalWorkflows", 0)),
-                    project.get("lastUpdated", ""),
+                    record.get("name", ""),
+                    record.get("bayId", ""),
+                    record.get("projectType", ""),
+                    str(record.get("totalWorkflows", 0)),
+                    record.get("lastParsed", ""),
                 )
 
             console.print(table)
-            console.print(f"\n[dim]Total: {len(projects)} project(s)[/dim]")
+            console.print(f"\n[dim]Total: {len(records)} project(s)[/dim]")
 
         elif format == "json":
             print(
-                jsonlib.dumps({"projects": projects, "total": len(projects)}, indent=2)
+                jsonlib.dumps({"bays": records, "total": len(records)}, indent=2)
             )
 
         elif format == "csv":
@@ -2736,22 +2691,22 @@ def list_projects(
 
             writer = csv.DictWriter(
                 sys.stdout,
-                fieldnames=["name", "slug", "type", "totalWorkflows", "lastUpdated"],
+                fieldnames=["name", "recordId", "projectType", "totalWorkflows", "lastParsed"],
             )
             writer.writeheader()
-            for project in projects:
+            for record in records:
                 writer.writerow(
                     {
-                        "name": project.get("name", ""),
-                        "slug": project.get("slug", ""),
-                        "type": project.get("type", ""),
-                        "totalWorkflows": project.get("totalWorkflows", 0),
-                        "lastUpdated": project.get("lastUpdated", ""),
+                        "name": record.get("name", ""),
+                        "bayId": record.get("bayId", ""),
+                        "projectType": record.get("projectType", ""),
+                        "totalWorkflows": record.get("totalWorkflows", 0),
+                        "lastParsed": record.get("lastParsed", ""),
                     }
                 )
 
     except Exception as e:
-        console.print(f"[red]Error listing projects:[/red] {e}")
+        console.print(f"[red]Error listing bays:[/red] {e}")
         raise typer.Exit(1)
 
 
@@ -2759,16 +2714,16 @@ def list_projects(
 @app.command()
 def clear(
     scope: Annotated[
-        str, typer.Argument(help="Clear scope: lake, project, artifacts")
+        str, typer.Argument(help="Clear scope: warehouse, bay, artifacts")
     ] = "artifacts",
     path: Annotated[
-        Path, typer.Option("--path", "-p", help="Lake directory path")
-    ] = Path(".rpax-lake"),
+        Path, typer.Option("--path", "-p", help="Warehouse directory path")
+    ] = Path(".rpax-warehouse"),
     project: Annotated[
         str | None,
         typer.Option(
-            "--project",
-            help="Specific project slug to clear (required for 'project' scope)",
+            "--bay",
+            help="Specific bay ID to clear (required for 'bay' scope)",
         ),
     ] = None,
     confirm: Annotated[
@@ -2781,32 +2736,32 @@ def clear(
         bool, typer.Option("--force", help="Skip interactive confirmation prompts")
     ] = False,
 ) -> None:
-    """Clear rpax lake data with strong safety guardrails.
+    """Clear rpax warehouse data with strong safety guardrails.
 
     SCOPES:
       artifacts - Clear generated artifacts, preserve original files (SAFEST)
-      project   - Clear all data for specific project (requires --project)
-      lake      - Clear entire lake directory (DESTRUCTIVE)
+      bay       - Clear all data for specific bay (requires --bay)
+      warehouse - Clear entire warehouse directory (DESTRUCTIVE)
 
     SAFETY FEATURES:
       - Dry-run by default (use --confirm to execute)
       - Multiple confirmation prompts
       - Size warnings for large deletions
-      - Project validation and existence checks
+      - Bay validation and existence checks
 
     WARNING: This command is CLI-only and never exposed via API or MCP.
     """
     # Validate scope
-    valid_scopes = ["artifacts", "project", "lake"]
+    valid_scopes = ["artifacts", "bay", "warehouse"]
     if scope not in valid_scopes:
         console.print(
             f"[red]Error:[/red] Invalid scope '{scope}'. Valid options: {', '.join(valid_scopes)}"
         )
         raise typer.Exit(1)
 
-    # Validate lake directory exists
+    # Validate warehouse directory exists
     if not path.exists():
-        console.print(f"[red]Error:[/red] Lake directory does not exist: {path}")
+        console.print(f"[red]Error:[/red] Warehouse directory does not exist: {path}")
         raise typer.Exit(1)
 
     if not path.is_dir():
@@ -2814,16 +2769,16 @@ def clear(
         raise typer.Exit(1)
 
     # Scope-specific validation
-    if scope == "project":
+    if scope == "bay":
         if not project:
             console.print(
-                "[red]Error:[/red] --project is required when scope is 'project'"
+                "[red]Error:[/red] --bay is required when scope is 'bay'"
             )
             raise typer.Exit(1)
 
         project_dir = path / project
         if not project_dir.exists():
-            console.print(f"[red]Error:[/red] Project '{project}' not found in lake")
+            console.print(f"[red]Error:[/red] Bay '{project}' not found in warehouse")
             console.print(f"[dim]Expected: {project_dir}[/dim]")
             raise typer.Exit(1)
 
@@ -2832,10 +2787,10 @@ def clear(
     total_size = 0
 
     if scope == "artifacts":
-        # Clear artifacts but preserve project structure and projects.json
+        # Clear artifacts but preserve bay structure and bays.json
         for item in path.iterdir():
             if item.is_dir() and not item.name.startswith("."):
-                # This is a project directory - clear its contents
+                # This is a bay directory - clear its contents
                 for artifact in item.iterdir():
                     if (
                         artifact.name != "project.json"
@@ -2849,13 +2804,13 @@ def clear(
                                 for f in artifact.rglob("*")
                                 if f.is_file()
                             )
-            elif item.is_file() and item.name != "projects.json":
-                # This is a root-level artifact file - clear it but preserve projects.json
+            elif item.is_file() and item.name != "bays.json":
+                # This is a root-level artifact file - clear it but preserve bays.json
                 targets_to_delete.append(item)
                 total_size += item.stat().st_size
 
-    elif scope == "project":
-        # Clear entire project directory
+    elif scope == "bay":
+        # Clear entire bay directory
         project_dir = path / project
         targets_to_delete.append(project_dir)
         if project_dir.exists():
@@ -2863,8 +2818,8 @@ def clear(
                 f.stat().st_size for f in project_dir.rglob("*") if f.is_file()
             )
 
-    elif scope == "lake":
-        # Clear entire lake directory contents
+    elif scope == "warehouse":
+        # Clear entire warehouse directory contents
         for item in path.iterdir():
             targets_to_delete.append(item)
             if item.is_file():
@@ -2877,9 +2832,9 @@ def clear(
     # Display scope summary
     console.print("\n[bold]Clear Operation Summary[/bold]")
     console.print(f"Scope: [cyan]{scope}[/cyan]")
-    console.print(f"Lake Path: [dim]{path}[/dim]")
-    if scope == "project":
-        console.print(f"Project: [yellow]{project}[/yellow]")
+    console.print(f"Warehouse Path: [dim]{path}[/dim]")
+    if scope == "bay":
+        console.print(f"Bay: [yellow]{project}[/yellow]")
     console.print(f"Items to delete: [red]{len(targets_to_delete)}[/red]")
     console.print(f"Total size: [red]{_format_size(total_size)}[/red]")
 
@@ -2920,7 +2875,7 @@ def clear(
             return
 
         # Second confirmation for destructive operations
-        if scope in ["project", "lake"]:
+        if scope in ["bay", "warehouse"]:
             confirm_destructive = typer.confirm(
                 f"This will permanently delete {len(targets_to_delete)} items. Continue?"
             )
@@ -2985,11 +2940,11 @@ def pseudocode(
     path: Annotated[
         str,
         typer.Option(
-            "-p", "--path", help="Path to lake directory (default: .rpax-lake)"
+            "-p", "--path", help="Path to archive directory (default: .rpax-warehouse)"
         ),
-    ] = ".rpax-lake",
+    ] = ".rpax-warehouse",
     project: Annotated[
-        str, typer.Option(help="Project slug for multi-project lakes (optional)")
+        str, typer.Option("--bay", help="Bay ID for multi-bay warehouses (optional)")
     ] = None,
     format_type: Annotated[
         str,
@@ -3174,6 +3129,34 @@ def pseudocode(
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
         raise typer.Exit(1)
+
+
+def _load_pseudocode_for_workflow(
+    artifacts_dir: Path, relative_path: str
+) -> str | None:
+    """Load and render pseudocode for a workflow by its relative path (e.g. Process/Process.xaml)."""
+    try:
+        from rpax.pseudocode import PseudocodeGenerator
+        from rpax.pseudocode.models import PseudocodeArtifact
+
+        pseudocode_dir = artifacts_dir / "pseudocode"
+        if not pseudocode_dir.exists():
+            return None
+
+        # Exact lookup: pseudocode mirrors the relative-path tree, .xaml → .json
+        pseudocode_file = pseudocode_dir / Path(relative_path).with_suffix(".json")
+        if not pseudocode_file.exists():
+            return None
+
+        with open(pseudocode_file, encoding="utf-8") as f:
+            artifact_data = jsonlib.load(f)
+
+        generator = PseudocodeGenerator()
+        artifact = PseudocodeArtifact(**artifact_data)
+        return generator.render_as_text(artifact)
+
+    except Exception:
+        return None
 
 
 def _render_recursive_pseudocode(
@@ -3380,10 +3363,10 @@ def api(
         if bind is not None:
             rpax_config.api.bind = bind
 
-        # Validate lake directory exists
+        # Validate warehouse directory exists
         lake_path = Path(rpax_config.output.dir)
         if not lake_path.exists():
-            console.print(f"[red]Error:[/red] Lake directory not found: {lake_path}")
+            console.print(f"[red]Error:[/red] Warehouse directory not found: {lake_path}")
             console.print("[dim]Run 'rpax parse' first to create artifacts[/dim]")
             raise typer.Exit(1)
 
@@ -3428,27 +3411,31 @@ def health() -> None:
         console.print(f"Timestamp: {datetime.now(UTC).isoformat()}")
         console.print(f"Version: {__version__}")
 
-        # Check if lake directory exists
-        lake_path = Path(".rpax-lake")
-        if lake_path.exists():
-            console.print(f"Lake: [green]Available[/green] ({lake_path.resolve()})")
+        # Check if archive directory exists
+        warehouse_path = Path(".rpax-warehouse")
+        if not warehouse_path.exists():
+            warehouse_path = Path(".rpax-lake")  # legacy fallback
+        if warehouse_path.exists():
+            console.print(f"Warehouse: [green]Available[/green] ({warehouse_path.resolve()})")
 
-            # Count projects if possible
+            # Count bays if possible
             try:
-                projects_file = lake_path / "projects.json"
-                if projects_file.exists():
+                records_file = warehouse_path / "bays.json"
+                if not records_file.exists():
+                    records_file = warehouse_path / "projects.json"  # legacy fallback
+                if records_file.exists():
                     import json
 
-                    with open(projects_file) as f:
-                        projects_data = json.load(f)
-                    project_count = len(projects_data.get("projects", []))
-                    console.print(f"Projects: {project_count}")
+                    with open(records_file) as f:
+                        records_data = json.load(f)
+                    bay_count = len(records_data.get("bays", records_data.get("records", records_data.get("projects", []))))
+                    console.print(f"Bays: {bay_count}")
                 else:
-                    console.print("Projects: [dim]Not indexed[/dim]")
+                    console.print("Bays: [dim]Not indexed[/dim]")
             except Exception:
-                console.print("Projects: [dim]Unable to count[/dim]")
+                console.print("Bays: [dim]Unable to count[/dim]")
         else:
-            console.print(f"Lake: [yellow]Not found[/yellow] ({lake_path.resolve()})")
+            console.print(f"Warehouse: [yellow]Not found[/yellow] ({warehouse_path.resolve()})")
 
     except Exception as e:
         console.print(f"[red]Health check failed:[/red] {e}")
@@ -3469,13 +3456,13 @@ def object_repository(
         typer.Option(
             "--path",
             "-p",
-            help="Path to artifacts directory or lake directory (default: .rpax-lake)",
+            help="Path to artifacts directory or archive directory (default: .rpax-warehouse)",
         ),
-    ] = Path(".rpax-lake"),
+    ] = Path(".rpax-warehouse"),
     project: Annotated[
         str | None,
         typer.Option(
-            "--project", help="Project slug for multi-project lakes (optional)"
+            "--bay", help="Bay ID for multi-bay warehouses (optional)"
         ),
     ] = None,
     format: Annotated[
@@ -3511,7 +3498,7 @@ def object_repository(
         project_path = path.resolve()
 
         # Check for multi-project or single-project structure
-        if (project_path / "projects.json").exists():
+        if (project_path / "bays.json").exists():
             # Multi-project lake - use project resolution logic
             artifacts_path = _resolve_project_artifacts_path(
                 project_path, project, "object-repository"
@@ -3521,7 +3508,7 @@ def object_repository(
             artifacts_path = project_path
         else:
             console.print(
-                f"[red]Error:[/red] No manifest.json or projects.json found in {project_path}"
+                f"[red]Error:[/red] No manifest.json or bays.json found in {project_path}"
             )
             console.print(
                 "[dim]Run 'rpax parse' first or specify correct artifacts directory[/dim]"
@@ -3549,7 +3536,7 @@ def object_repository(
         if action == "targets" and not app_name:
             console.print(f"[red]Error:[/red] App name required for '{action}' action")
             console.print(
-                "[dim]Example: rpax object-repository targets Calculator --path .rpax-lake[/dim]"
+                "[dim]Example: rpax object-repository targets Calculator --path .rpax-warehouse[/dim]"
             )
             raise typer.Exit(1)
 
@@ -3774,8 +3761,8 @@ def projects(
         str, typer.Argument(help="Project name or partial name to search for")
     ] = "",
     path: Annotated[
-        Path, typer.Option("--path", "-p", help="Path to rpax lake directory")
-    ] = Path(".rpax-lake"),
+        Path, typer.Option("--path", "-p", help="Path to rpax archive directory")
+    ] = Path(".rpax-warehouse"),
     action: Annotated[
         str,
         typer.Option(
@@ -3864,8 +3851,8 @@ def projects(
                 console.print(f"[red]Error:[/red] No project found matching '{query}'")
                 raise typer.Exit(1)
 
-            project_slug = matches[0].slug
-            entry_points = accessor.get_project_entry_points(project_slug, detail_level)
+            bay_id = matches[0].slug
+            entry_points = accessor.get_project_entry_points(bay_id, detail_level)
 
             if format == "json":
                 import json as jsonlib
@@ -3874,7 +3861,7 @@ def projects(
             else:
                 if not entry_points:
                     console.print(
-                        f"[yellow]No entry points found for project '{project_slug}'[/yellow]"
+                        f"[yellow]No entry points found for record '{bay_id}'[/yellow]"
                     )
                 else:
                     console.print(
@@ -3910,7 +3897,7 @@ def projects(
                 print(jsonlib.dumps(summary, indent=2))
             else:
                 overview = summary.get("lake_overview", {})
-                console.print("[green]Lake Overview[/green]")
+                console.print("[green]Warehouse Overview[/green]")
                 console.print(f"  Total Projects: {overview.get('total_projects', 0)}")
                 console.print(
                     f"  Total Workflows: {overview.get('total_workflows', 0)}"
@@ -3926,7 +3913,7 @@ def projects(
                         console.print(f"    {ptype}: {count}")
 
                 projects = summary.get("projects", [])
-                console.print("\n[blue]Projects in Lake:[/blue]")
+                console.print("\n[blue]Bays in Warehouse:[/blue]")
                 for project in projects:
                     console.print(
                         f"  • {project.get('display_name', 'Unknown')} ({project.get('slug', 'unknown')})"

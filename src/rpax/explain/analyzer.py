@@ -1,5 +1,6 @@
 """Workflow analysis and explanation engine."""
 
+import json
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -54,6 +55,7 @@ class WorkflowExplanation:
 
     # Arguments and variables
     arguments: list[ArgumentInfo] = field(default_factory=list)
+    variables: list[dict] = field(default_factory=list)
 
     # Invocations and relationships
     invokes: list[InvocationInfo] = field(default_factory=list)
@@ -64,6 +66,9 @@ class WorkflowExplanation:
     is_orphan: bool = False
     is_test: bool = False
     folder_category: str | None = None
+
+    # Annotations
+    annotated_activities: list[tuple[str, str]] = field(default_factory=list)
 
     # Statistics
     total_invocations: int = 0
@@ -134,6 +139,9 @@ class WorkflowAnalyzer:
         # Calculate statistics
         self._calculate_statistics(explanation)
 
+        # Load annotations from activities.tree
+        self._load_annotations(explanation, artifacts_dir)
+
         logger.info(f"Analysis complete for {explanation.display_name}")
         return explanation
 
@@ -197,7 +205,8 @@ class WorkflowAnalyzer:
             file_size=workflow.get("fileSize", 0),
             last_modified=workflow.get("lastModified"),
             parse_successful=workflow.get("parseSuccessful", True),
-            parse_errors=workflow.get("parseErrors", [])
+            parse_errors=workflow.get("parseErrors", []),
+            variables=workflow.get("variables", []),
         )
 
     def _analyze_invocations(self, explanation: WorkflowExplanation, artifacts: ArtifactSet) -> None:
@@ -251,3 +260,31 @@ class WorkflowAnalyzer:
         """Calculate workflow statistics."""
         explanation.total_invocations = len(explanation.invokes)
         explanation.unique_dependencies = len(set(inv.target_workflow for inv in explanation.invokes))
+
+    def _load_annotations(self, explanation: WorkflowExplanation, artifacts_dir: Path) -> None:
+        """Load annotated activities from activities.tree JSON."""
+        workflow_id = explanation.workflow_id
+        # workflow_id is "<hash>#relative/path.xaml" — extract the path part
+        wf_path = workflow_id.split("#", 1)[-1] if "#" in workflow_id else workflow_id
+        tree_rel = Path(wf_path).with_suffix(".json")
+        tree_file = artifacts_dir / "activities.tree" / tree_rel
+        if not tree_file.exists():
+            return
+        try:
+            with open(tree_file, encoding="utf-8") as f:
+                tree_data = json.load(f)
+        except Exception as e:
+            logger.debug(f"Could not load activities.tree for {workflow_id}: {e}")
+            return
+
+        def walk(node: dict) -> None:
+            if not node:
+                return
+            annotation = node.get("annotation")
+            if annotation is not None:
+                display_name = node.get("displayName", node.get("activityType", ""))
+                explanation.annotated_activities.append((display_name, annotation))
+            for child in node.get("children", []):
+                walk(child)
+
+        walk(tree_data.get("rootNode"))
