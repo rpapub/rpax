@@ -1863,6 +1863,10 @@ def explain(
             help="Configuration file path (default: search for .rpax.json)",
         ),
     ] = None,
+    depth: Annotated[
+        int,
+        typer.Option("--depth", "-d", help="Activity tree depth to show in pseudocode (default 2)"),
+    ] = 2,
 ) -> None:
     """Show detailed information about a specific workflow."""
     from rpax.utils.warehouse import (
@@ -1943,7 +1947,7 @@ def explain(
             raise typer.Exit(1)
 
         # Load pseudocode (always) and format explanation
-        pseudocode_text = _load_pseudocode_for_workflow(artifacts_dir, explanation.relative_path)
+        pseudocode_text = _load_pseudocode_for_workflow(artifacts_dir, explanation.relative_path, depth=depth)
         formatter.format_explanation(explanation, pseudocode_text=pseudocode_text)
 
     except FileNotFoundError as e:
@@ -3132,18 +3136,18 @@ def pseudocode(
 
 
 def _load_pseudocode_for_workflow(
-    artifacts_dir: Path, relative_path: str
+    artifacts_dir: Path, relative_path: str, depth: int = 2
 ) -> str | None:
-    """Load and render pseudocode for a workflow by its relative path (e.g. Process/Process.xaml)."""
-    try:
-        from rpax.pseudocode import PseudocodeGenerator
-        from rpax.pseudocode.models import PseudocodeArtifact
+    """Load pseudocode for a workflow from pre-rendered entries in the artifact JSON.
 
+    Walks the entries tree collecting formattedLine values up to `depth` levels.
+    depth=0 means show all levels.
+    """
+    try:
         pseudocode_dir = artifacts_dir / "pseudocode"
         if not pseudocode_dir.exists():
             return None
 
-        # Exact lookup: pseudocode mirrors the relative-path tree, .xaml → .json
         pseudocode_file = pseudocode_dir / Path(relative_path).with_suffix(".json")
         if not pseudocode_file.exists():
             return None
@@ -3151,9 +3155,23 @@ def _load_pseudocode_for_workflow(
         with open(pseudocode_file, encoding="utf-8") as f:
             artifact_data = jsonlib.load(f)
 
-        generator = PseudocodeGenerator()
-        artifact = PseudocodeArtifact(**artifact_data)
-        return generator.render_as_text(artifact)
+        lines: list[str] = []
+
+        def walk(nodes: list[dict]) -> None:
+            for node in nodes:
+                node_depth = node.get("depth", 1)
+                if depth > 0 and node_depth > depth:
+                    continue
+                line = node.get("formattedLine")
+                if line:
+                    target = node.get("targetRelativePath")
+                    if target:
+                        line = f"{line}  → {target}"
+                    lines.append(line)
+                walk(node.get("children", []))
+
+        walk(artifact_data.get("entries", []))
+        return "\n".join(lines) if lines else None
 
     except Exception:
         return None

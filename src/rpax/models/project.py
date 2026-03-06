@@ -137,26 +137,26 @@ class UiPathProject(BaseModel):
         """Check if this is a process project."""
         return self.project_type == "process"
 
-    def generate_project_slug(self, project_json_path: Path | None = None) -> str:
-        """Generate stable project slug for multi-project lake storage.
-        
+    def generate_bay_id(self, project_json_path: Path | None = None) -> str:
+        """Generate stable record ID for archive storage.
+
         Strategy: Always use rock-solid slugify(name) + "-" + shortSha256(project.json)[:10]
         This ensures:
-        - Human-readable project names in slugs
+        - Human-readable project names in record IDs
         - No collisions (unique content hash)
-        - Stable slugs (name changes don't break references)
-        - Consistent format across all projects
-        - CLI comma-separation safety (no commas in slugs)
+        - Stable IDs (name changes don't break references)
+        - Consistent format across all records
+        - CLI comma-separation safety (no commas in IDs)
         - MCP URI compatibility (URI-safe characters only)
-        
+
         Args:
             project_json_path: Path to project.json for content hashing
-            
+
         Returns:
-            Project slug format: "{slugified-name}-{hash10}" (11-38 chars)
+            Record ID format: "{slugified-name}-{hash10}" (11-38 chars)
         """
-        # Rock-solid slug sanitization for CLI and MCP URI safety
-        name_part = self._sanitize_slug_name(self.name)[:20]
+        # Rock-solid record name sanitization for CLI and MCP URI safety
+        name_part = self._sanitize_bay_name(self.name)[:20]
         name_part = name_part or "unnamed"  # Ensure we have a name part
 
         if project_json_path and project_json_path.exists():
@@ -178,8 +178,11 @@ class UiPathProject(BaseModel):
 
         return f"{name_part}-{hash_val}"
     
-    def _sanitize_slug_name(self, name: str) -> str:
-        """Rock-solid slug sanitization for CLI and MCP URI safety.
+    # Backward compat alias
+    generate_project_slug = generate_bay_id
+
+    def _sanitize_bay_name(self, name: str) -> str:
+        """Rock-solid record name sanitization for CLI and MCP URI safety.
         
         Sanitization strategy:
         1. Convert to lowercase

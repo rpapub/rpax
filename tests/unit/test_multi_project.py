@@ -12,7 +12,7 @@ from rpax.models.project import UiPathProject
 class TestMultiProjectLake:
     """Test multi-project lake functionality."""
 
-    def test_project_slug_generation_with_id(self):
+    def test_bay_id_generation_with_id(self):
         """Test project slug generation when projectId exists."""
         project = UiPathProject(
             name="FrozenChlorine",
@@ -31,7 +31,7 @@ class TestMultiProjectLake:
             }, f)
             project_json_path = Path(f.name)
 
-        slug = project.generate_project_slug(project_json_path)
+        slug = project.generate_bay_id(project_json_path)
         
         # New implementation always uses name + hash format
         assert slug.startswith("frozenchlorine-")
@@ -40,7 +40,7 @@ class TestMultiProjectLake:
         # Cleanup
         project_json_path.unlink()
 
-    def test_project_slug_generation_without_id(self):
+    def test_bay_id_generation_without_id(self):
         """Test project slug generation when projectId is missing."""
         project = UiPathProject(
             name="CPRIMA-USG-001-Violating",
@@ -59,7 +59,7 @@ class TestMultiProjectLake:
             }, f)
             project_json_path = Path(f.name)
 
-        slug = project.generate_project_slug(project_json_path)
+        slug = project.generate_bay_id(project_json_path)
 
         # Should be normalized name + hash
         assert slug.startswith("cprima-usg-001-viola")  # Note: truncated at 20 chars
@@ -69,7 +69,7 @@ class TestMultiProjectLake:
         # Cleanup
         project_json_path.unlink()
 
-    def test_project_slug_normalization(self):
+    def test_bay_id_normalization(self):
         """Test project name normalization for slug generation."""
         project = UiPathProject(
             name="My-Special/Project Name (v2)!",
@@ -82,7 +82,7 @@ class TestMultiProjectLake:
             json.dump({"name": "My-Special/Project Name (v2)!"}, f)
             project_json_path = Path(f.name)
 
-        slug = project.generate_project_slug(project_json_path)
+        slug = project.generate_bay_id(project_json_path)
 
         # Should normalize special characters
         assert slug.startswith("my-special-project-n")  # Note: truncated at 20 chars
@@ -131,39 +131,39 @@ class TestMultiProjectLake:
             artifacts = generator.generate_all_artifacts(project, workflow_index, temp_path)
 
             # Check project subdirectory was created
-            project_slug = project.generate_project_slug()
-            project_dir = temp_path / project_slug
+            bay_id = project.generate_bay_id()
+            project_dir = temp_path / bay_id
             assert project_dir.exists()
             assert project_dir.is_dir()
 
-            # Check projects.json index was created
-            projects_index = temp_path / "projects.json"
+            # Check bays.json index was created
+            projects_index = temp_path / "bays.json"
             assert projects_index.exists()
 
             with open(projects_index) as f:
                 index_data = json.load(f)
 
             assert "rpaxSchemaVersion" in index_data
-            assert "projects" in index_data
-            assert len(index_data["projects"]) == 1
+            assert "bays" in index_data
+            assert len(index_data["bays"]) == 1
 
-            project_entry = index_data["projects"][0]
-            assert project_entry["slug"] == project_slug
+            project_entry = index_data["bays"][0]
+            assert project_entry["bayId"] == bay_id
             assert project_entry["name"] == "TestProject"
             assert project_entry["projectId"] == "test-1234-5678-90ab"
             assert project_entry["projectType"] == "process"
 
     def test_projects_index_updates_existing_project(self):
-        """Test that projects.json index updates existing project entries."""
+        """Test that bays.json index updates existing project entries."""
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
 
-            # Create existing projects.json
-            projects_file = temp_path / "projects.json"
+            # Create existing bays.json
+            projects_file = temp_path / "bays.json"
             existing_data = {
                 "schemaVersion": "1.0",
-                "projects": [{
-                    "slug": "existing-12345678",
+                "bays": [{
+                    "bayId": "existing-12345678",
                     "name": "ExistingProject",
                     "projectId": "existing-1234-5678-90ab",
                     "lastParsed": "2025-09-04T12:00:00Z"
@@ -199,17 +199,17 @@ class TestMultiProjectLake:
             # Generate artifacts
             generator.generate_all_artifacts(project, workflow_index, temp_path)
 
-            # Check projects.json was updated
+            # Check bays.json was updated
             with open(projects_file) as f:
                 updated_data = json.load(f)
 
-            assert len(updated_data["projects"]) == 2
+            assert len(updated_data["bays"]) == 2
 
-            # Should be sorted by slug
-            slugs = [p["slug"] for p in updated_data["projects"]]
+            # Should be sorted by bayId
+            slugs = [p["bayId"] for p in updated_data["bays"]]
             assert slugs == sorted(slugs)
 
             # Check both projects exist
-            project_names = {p["name"] for p in updated_data["projects"]}
+            project_names = {p["name"] for p in updated_data["bays"]}
             assert "ExistingProject" in project_names
             assert "NewProject" in project_names

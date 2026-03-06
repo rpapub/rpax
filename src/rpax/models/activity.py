@@ -82,6 +82,7 @@ class WorkflowMetrics:
     log_count: int = 0
     try_catch_count: int = 0
     selector_count: int = 0
+    annotated_activity_count: int = 0
 
     # Activity type counts
     activity_types: dict[str, int] = field(default_factory=dict)

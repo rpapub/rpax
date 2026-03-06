@@ -69,7 +69,7 @@ class ScanConfig(BaseModel):
 
 class OutputConfig(BaseModel):
     """Output configuration section."""
-    dir: str = ".rpax-lake"
+    dir: str = ".rpax-warehouse"
     formats: list[OutputFormat] = Field(default_factory=lambda: [
         OutputFormat.JSON, OutputFormat.MERMAID
     ])
@@ -189,7 +189,7 @@ class PseudocodeConfig(BaseModel):
 class V0Config(BaseModel):
     """V0 experimental schema configuration section."""
     enabled: bool = True
-    generate_lake_index: bool = Field(alias="generateLakeIndex", default=True)
+    generate_warehouse_index: bool = Field(alias="generateWarehouseIndex", default=True)
     partial_name_matching: bool = Field(alias="partialNameMatching", default=True)
     cross_project_analysis: bool = Field(alias="crossProjectAnalysis", default=True)
     entry_points_recursive_depth: int = Field(alias="entryPointsRecursiveDepth", default=10)

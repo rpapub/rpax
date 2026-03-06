@@ -125,9 +125,9 @@ class XamlDiscovery:
 
         # Generate normalized paths and IDs according to ADR-014
         relative_path = Workflow.normalize_path(xaml_file, self.project_root)
-        project_slug = self._generate_project_slug()
-        workflow_id = relative_path  # ADR-014: wfId is the canonical path ID, not dot-separated
-        composite_id = Workflow.generate_composite_id(project_slug, workflow_id, content_hash)
+        bay_id = self._generate_bay_id()
+        workflow_id = relative_path.removesuffix(".xaml").removesuffix(".XAML")  # ADR-014: extension-free logical identifier
+        composite_id = Workflow.generate_composite_id(bay_id, workflow_id, content_hash)
 
         # File metadata
         try:
@@ -213,7 +213,7 @@ class XamlDiscovery:
 
         return Workflow(
             id=composite_id,
-            project_slug=project_slug,
+            bay_id=bay_id,
             workflow_id=workflow_id,
             content_hash=content_hash,
             file_path=str(xaml_file),
@@ -242,7 +242,7 @@ class XamlDiscovery:
             parse_errors=all_errors
         )
 
-    def _generate_project_slug(self) -> str:
+    def _generate_bay_id(self) -> str:
         """Generate project slug according to ADR-014: kebab(name) + "-" + shortHash(project.json)."""
         try:
             # Find and read project.json

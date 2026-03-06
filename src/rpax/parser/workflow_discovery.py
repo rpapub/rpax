@@ -103,7 +103,7 @@ class EnhancedWorkflowDiscovery(XamlDiscovery):
         # Generate IDs similar to XAML workflows
         relative_path_str = coded_info.relative_path
         project_slug = self._generate_project_slug()
-        workflow_id = relative_path_str.replace("\\", "/")
+        workflow_id = relative_path_str.replace("\\", "/").removesuffix(".xaml").removesuffix(".XAML")
         content_hash = self._generate_content_hash(file_path)
         composite_id = f"{project_slug}#{workflow_id}#{content_hash}"
 

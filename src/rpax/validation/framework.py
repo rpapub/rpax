@@ -110,6 +110,15 @@ class ValidationRule(ABC):
 
 
 @dataclass
+class WorkflowArtifacts:
+    """Per-workflow artifact bundle returned by ArtifactSet.workflow_artifacts()."""
+
+    tree: dict | None = None        # activities.tree/{wfId}.json
+    instances: dict | None = None   # activities.instances/{safe_wfId}.json
+    pseudocode: dict | None = None  # pseudocode/{wfId}.json
+
+
+@dataclass
 class ArtifactSet:
     """Loaded parser artifacts for validation."""
     artifacts_dir: Path
@@ -148,6 +157,44 @@ class ArtifactSet:
                             continue
 
         return artifacts
+
+    def workflow_artifacts(self, workflow_id: str) -> WorkflowArtifacts:
+        """Load per-workflow artifact bundle for a given workflowId.
+
+        All three artifact types share a common path convention.  Path
+        construction is centralised here so callers never rebuild it ad-hoc.
+
+        Args:
+            workflow_id: Workflow identifier as stored in the artifacts
+                (e.g. ``"Process/Process.xaml"``).  Forward slashes expected;
+                backslashes are normalised automatically.
+
+        Returns:
+            WorkflowArtifacts with tree / instances / pseudocode populated
+            from disk (None when a file does not exist yet).
+        """
+        wf_id = workflow_id.replace("\\", "/")
+        # activities.instances uses a flat filename (slashes replaced by _)
+        safe_id = wf_id.replace("/", "_")
+
+        result = WorkflowArtifacts()
+
+        tree_path = self.artifacts_dir / "activities.tree" / f"{wf_id}.json"
+        if tree_path.exists():
+            with open(tree_path, encoding="utf-8") as f:
+                result.tree = json.load(f)
+
+        instances_path = self.artifacts_dir / "activities.instances" / f"{safe_id}.json"
+        if instances_path.exists():
+            with open(instances_path, encoding="utf-8") as f:
+                result.instances = json.load(f)
+
+        pseudocode_path = self.artifacts_dir / "pseudocode" / f"{wf_id}.json"
+        if pseudocode_path.exists():
+            with open(pseudocode_path, encoding="utf-8") as f:
+                result.pseudocode = json.load(f)
+
+        return result
 
 
 class ValidationFramework:

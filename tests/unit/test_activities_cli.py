@@ -225,7 +225,7 @@ class TestActivitiesCLI:
                 "activities", "tree", "TestWorkflow", "--path", str(temp_path)
             ])
             assert result.exit_code == 1
-            assert "No manifest.json or projects.json found" in result.stdout
+            assert "No manifest.json or bays.json found" in result.stdout
 
             # Create manifest but test invalid action
             manifest_file = temp_path / "manifest.json"

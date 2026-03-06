@@ -1,5 +1,6 @@
 """Output generators for rpax artifacts."""
 
-from rpax.output.lake_index import LakeIndexGenerator
+from rpax.output.warehouse_index import WarehouseIndexGenerator
+from rpax.output.lake_index import LakeIndexGenerator  # legacy
 
-__all__ = ["LakeIndexGenerator"]
+__all__ = ["WarehouseIndexGenerator", "LakeIndexGenerator"]

@@ -47,7 +47,7 @@ class TestEnhancedParserIntegration:
         # Create mock workflow data
         workflow = Workflow(
             id="test-project#TestWorkflow#abcd1234",
-            project_slug="test-project",
+            bay_id="test-project",
             workflow_id="TestWorkflow",
             content_hash="abcd1234567890123456789012345678",
             file_path="TestWorkflow.xaml",
@@ -69,7 +69,7 @@ class TestEnhancedParserIntegration:
         
         project = Mock(spec=UiPathProject)
         project.name = "TestProject"
-        project.generate_project_slug.return_value = "test-project-abcd1234"
+        project.generate_bay_id.return_value = "test-project-abcd1234"
         
         # Create a simple XAML file for testing
         xaml_content = '''<?xml version="1.0" encoding="utf-8"?>
@@ -117,7 +117,7 @@ class TestEnhancedParserIntegration:
         # Create mock workflow data
         workflow = Workflow(
             id="test-project#TestWorkflow#abcd1234",
-            project_slug="test-project",
+            bay_id="test-project",
             workflow_id="TestWorkflow",
             content_hash="abcd1234567890123456789012345678",
             file_path="TestWorkflow.xaml",

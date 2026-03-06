@@ -8,8 +8,8 @@ from pydantic import BaseModel, Field
 
 class Workflow(BaseModel):
     """Individual XAML workflow model."""
-    id: str  # Composite ID: projectSlug + wfId + contentHash
-    project_slug: str = Field(alias="projectSlug")
+    id: str  # Composite ID: recordId + wfId + contentHash
+    bay_id: str = Field(alias="bayId")
     workflow_id: str = Field(alias="workflowId")  # Normalized file path
     content_hash: str = Field(alias="contentHash")
 
@@ -52,13 +52,13 @@ class Workflow(BaseModel):
         return hashlib.sha256(content).hexdigest()  # Full SHA-256 hash
 
     @classmethod
-    def generate_composite_id(cls, project_slug: str, workflow_id: str, content_hash: str) -> str:
+    def generate_composite_id(cls, bay_id: str, workflow_id: str, content_hash: str) -> str:
         """Generate composite ID following ADR-014 identity system.
-        
-        Format: projectSlug#wfId#contentHash
-        Where projectSlug = kebab(name) + "-" + shortHash(project.json)
+
+        Format: bayId#wfId#contentHash
+        Where bayId = kebab(name) + "-" + shortHash(project.json)
         """
-        return f"{project_slug}#{workflow_id}#{content_hash[:16]}"  # Use short hash in composite ID
+        return f"{bay_id}#{workflow_id}#{content_hash[:16]}"  # Use short hash in composite ID
 
     @classmethod
     def normalize_path(cls, file_path: Path, project_root: Path) -> str:

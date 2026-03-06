@@ -8,8 +8,6 @@ from rich.table import Table
 
 from .analyzer import ArgumentInfo, WorkflowExplanation
 
-_MAX_VARS_SHOWN = 10
-
 
 class ExplanationFormatter:
     """Formats workflow explanations for rich console display."""
@@ -99,8 +97,7 @@ class ExplanationFormatter:
 
         self.console.print(Rule(f" Variables ({len(variables)}) ", align="left"))
 
-        shown = variables[:_MAX_VARS_SHOWN]
-        for var in shown:
+        for var in variables:
             name = var.get("name", "?")
             # Prefer 'default' (activities.tree) then 'default_value' (index)
             expr = var.get("default") or var.get("default_value") or ""
@@ -112,10 +109,6 @@ class ExplanationFormatter:
                 self.console.print(f"  [cyan]{name}[/cyan]  [dim]({type_name})[/dim]")
             else:
                 self.console.print(f"  [cyan]{name}[/cyan]")
-
-        remaining = len(variables) - _MAX_VARS_SHOWN
-        if remaining > 0:
-            self.console.print(f"  [dim]... {remaining} more[/dim]")
 
         self.console.print()
 

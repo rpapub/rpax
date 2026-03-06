@@ -17,32 +17,32 @@ class TestMultiProjectCLI:
         """Test projects command with empty lake."""
         runner = CliRunner()
         
-        # Create empty projects.json
-        projects_file = tmp_path / "projects.json"
-        projects_file.write_text(json.dumps({"projects": []}))
+        # Create empty bays.json
+        projects_file = tmp_path / "bays.json"
+        projects_file.write_text(json.dumps({"bays": []}))
         
-        result = runner.invoke(app, ["list-projects", str(tmp_path)])
+        result = runner.invoke(app, ["list-bays", str(tmp_path)])
         
         assert result.exit_code == 0
-        assert "No projects found in lake" in result.stdout
+        assert "No bays found in warehouse" in result.stdout
     
     def test_projects_command_with_sample_data(self, tmp_path):
         """Test projects command with sample project data."""
         runner = CliRunner()
         
-        # Create projects.json with sample data
+        # Create bays.json with sample data
         projects_data = {
-            "projects": [
+            "bays": [
                 {
                     "name": "Test Project 1",
-                    "slug": "test-project-1-abcd1234",
+                    "bayId": "test-project-1-abcd1234",
                     "type": "process",
                     "totalWorkflows": 5,
                     "lastUpdated": "2025-09-06T10:00:00Z"
                 },
                 {
                     "name": "Test Project 2", 
-                    "slug": "test-project-2-efgh5678",
+                    "bayId": "test-project-2-efgh5678",
                     "type": "library",
                     "totalWorkflows": 3,
                     "lastUpdated": "2025-09-06T11:00:00Z"
@@ -50,10 +50,10 @@ class TestMultiProjectCLI:
             ]
         }
         
-        projects_file = tmp_path / "projects.json"
+        projects_file = tmp_path / "bays.json"
         projects_file.write_text(json.dumps(projects_data))
         
-        result = runner.invoke(app, ["list-projects", str(tmp_path)])
+        result = runner.invoke(app, ["list-bays", str(tmp_path)])
         
         assert result.exit_code == 0
         assert "Test Project 1" in result.stdout
@@ -64,73 +64,73 @@ class TestMultiProjectCLI:
         """Test projects command with JSON output."""
         runner = CliRunner()
         
-        # Create projects.json
+        # Create bays.json
         projects_data = {
-            "projects": [
+            "bays": [
                 {
                     "name": "Test Project",
-                    "slug": "test-project-abcd1234",
+                    "bayId": "test-project-abcd1234",
                     "type": "process",
                     "totalWorkflows": 5
                 }
             ]
         }
         
-        projects_file = tmp_path / "projects.json"
+        projects_file = tmp_path / "bays.json"
         projects_file.write_text(json.dumps(projects_data))
         
-        result = runner.invoke(app, ["list-projects", str(tmp_path), "--format", "json"])
+        result = runner.invoke(app, ["list-bays", str(tmp_path), "--format", "json"])
         
         assert result.exit_code == 0
         
         # Parse JSON output
         output_data = json.loads(result.stdout)
-        assert "projects" in output_data
+        assert "bays" in output_data
         assert "total" in output_data
         assert output_data["total"] == 1
-        assert len(output_data["projects"]) == 1
+        assert len(output_data["bays"]) == 1
     
     def test_projects_command_search_filter(self, tmp_path):
         """Test projects command with search filtering.""" 
         runner = CliRunner()
         
         projects_data = {
-            "projects": [
+            "bays": [
                 {
                     "name": "Calculator Project",
-                    "slug": "calculator-abcd1234",
+                    "bayId": "calculator-abcd1234",
                     "type": "process"
                 },
                 {
                     "name": "Invoice Processing",
-                    "slug": "invoice-efgh5678", 
+                    "bayId": "invoice-efgh5678", 
                     "type": "process"
                 }
             ]
         }
         
-        projects_file = tmp_path / "projects.json"
+        projects_file = tmp_path / "bays.json"
         projects_file.write_text(json.dumps(projects_data))
         
-        result = runner.invoke(app, ["list-projects", str(tmp_path), "--search", "calc", "--format", "json"])
+        result = runner.invoke(app, ["list-bays", str(tmp_path), "--search", "calc", "--format", "json"])
         
         assert result.exit_code == 0
         output_data = json.loads(result.stdout)
         assert output_data["total"] == 1
-        assert "Calculator" in output_data["projects"][0]["name"]
+        assert "Calculator" in output_data["bays"][0]["name"]
     
     def test_projects_command_missing_projects_file(self, tmp_path):
-        """Test projects command with missing projects.json."""
+        """Test projects command with missing bays.json."""
         runner = CliRunner()
         
-        result = runner.invoke(app, ["list-projects", str(tmp_path)])
+        result = runner.invoke(app, ["list-bays", str(tmp_path)])
         
         assert result.exit_code == 1
-        assert "No projects.json found" in result.stdout
+        assert "No bays.json found" in result.stdout
     
     @patch('rpax.cli._resolve_project_path')
-    @patch('rpax.cli.ProjectParser.parse_project_from_dir')  
-    @patch('rpax.parser.workflow_discovery.create_workflow_discovery')
+    @patch('rpax.cli.ProjectParser.parse_project_from_dir')
+    @patch('rpax.cli.create_workflow_discovery')
     @patch('rpax.cli.ArtifactGenerator')
     def test_parse_command_multiple_projects(
         self, 

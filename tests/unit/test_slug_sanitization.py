@@ -16,13 +16,13 @@ class TestSlugSanitization:
             uipath_schema_version="1.0"
         )
         
-        result = project._sanitize_slug_name("My Project")
+        result = project._sanitize_bay_name("My Project")
         assert result == "my-project"
         
-        result = project._sanitize_slug_name("Calculator-Tool")
+        result = project._sanitize_bay_name("Calculator-Tool")
         assert result == "calculator-tool"
         
-        result = project._sanitize_slug_name("simple")
+        result = project._sanitize_bay_name("simple")
         assert result == "simple"
 
     def test_sanitize_comma_safety(self):
@@ -35,11 +35,11 @@ class TestSlugSanitization:
         )
         
         # Commas should be converted to hyphens
-        result = project._sanitize_slug_name("Project,Name,With,Commas")
+        result = project._sanitize_bay_name("Project,Name,With,Commas")
         assert result == "project-name-with-commas"
         
         # Edge case: only commas
-        result = project._sanitize_slug_name(",,")
+        result = project._sanitize_bay_name(",,")
         assert result == ""
 
     def test_sanitize_mcp_uri_safety(self):
@@ -52,15 +52,15 @@ class TestSlugSanitization:
         )
         
         # Special characters that are not URI-safe
-        result = project._sanitize_slug_name("Project@#$%Name")
+        result = project._sanitize_bay_name("Project@#$%Name")
         assert result == "project-name"
         
         # Unicode characters
-        result = project._sanitize_slug_name("Prøject Näme")
+        result = project._sanitize_bay_name("Prøject Näme")
         assert result == "pr-ject-n-me"
         
         # Spaces and tabs
-        result = project._sanitize_slug_name("Project\t\nName")
+        result = project._sanitize_bay_name("Project\t\nName")
         assert result == "project-name"
 
     def test_sanitize_consecutive_hyphens(self):
@@ -73,11 +73,11 @@ class TestSlugSanitization:
         )
         
         # Multiple hyphens should collapse to single
-        result = project._sanitize_slug_name("My--Project---Name")
+        result = project._sanitize_bay_name("My--Project---Name")
         assert result == "my-project-name"
         
         # Mixed special chars creating consecutive hyphens
-        result = project._sanitize_slug_name("Project@@@@Name")
+        result = project._sanitize_bay_name("Project@@@@Name")
         assert result == "project-name"
 
     def test_sanitize_edge_cases(self):
@@ -90,21 +90,21 @@ class TestSlugSanitization:
         )
         
         # Leading/trailing hyphens should be stripped
-        result = project._sanitize_slug_name("-Project-")
+        result = project._sanitize_bay_name("-Project-")
         assert result == "project"
         
         # Empty or whitespace-only should return empty
-        result = project._sanitize_slug_name("")
+        result = project._sanitize_bay_name("")
         assert result == ""
         
-        result = project._sanitize_slug_name("   ")
+        result = project._sanitize_bay_name("   ")
         assert result == ""
         
-        result = project._sanitize_slug_name(None)
+        result = project._sanitize_bay_name(None)
         assert result == ""
         
         # Only special characters should return empty
-        result = project._sanitize_slug_name("@#$%^&*()")
+        result = project._sanitize_bay_name("@#$%^&*()")
         assert result == ""
 
     def test_generate_slug_with_sanitization(self):
@@ -117,7 +117,7 @@ class TestSlugSanitization:
             uipath_schema_version="1.0"
         )
         
-        slug = project.generate_project_slug()
+        slug = project.generate_bay_id()
         
         # Should start with sanitized name
         assert slug.startswith("my-complex-project-")
@@ -142,7 +142,7 @@ class TestSlugSanitization:
             uipath_schema_version="1.0"
         )
         
-        slug = project.generate_project_slug()
+        slug = project.generate_bay_id()
         
         # Should use 'unnamed' fallback
         assert slug.startswith("unnamed-")
@@ -171,5 +171,5 @@ class TestSlugSanitization:
         ]
         
         for input_name, expected in test_cases:
-            result = project._sanitize_slug_name(input_name)
+            result = project._sanitize_bay_name(input_name)
             assert result == expected, f"Failed for {input_name}: got {result}, expected {expected}"

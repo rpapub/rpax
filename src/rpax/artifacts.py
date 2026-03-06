@@ -34,6 +34,29 @@ def _activity_dict_to_camel(data: dict) -> dict:
     return {_snake_to_camel(k): v for k, v in data.items()}
 
 
+def _node_id_to_activity_path(node_id: str) -> str:
+    """Derive activityPath from an activities.instances nodeId.
+
+    The instances extractor appends a positional counter suffix (_N) to each
+    path component for non-first siblings and a global counter to the full
+    node_id.  Stripping the trailing ``_\\d+`` from every component yields the
+    canonical activity path that matches ``pseudocode.entries[].activityPath``.
+
+    Examples::
+
+        "Activity_1"                              → "Activity"
+        "Activity/Sequence_3"                     → "Activity/Sequence"
+        "Activity/Sequence/InvokeWorkflowFile_7"  → "Activity/Sequence/InvokeWorkflowFile"
+        "Activity/Sequence_2/If_5"                → "Activity/Sequence/If"
+    """
+    import re
+
+    parts = node_id.split("/")
+    # Strip ALL trailing _N suffixes (sibling index + global counter may stack)
+    cleaned = [re.sub(r"(_\d+)+$", "", part) for part in parts]
+    return "/".join(cleaned)
+
+
 class ArtifactGenerator:
     """Generates rpax artifacts from parsed project data."""
 
@@ -67,12 +90,12 @@ class ArtifactGenerator:
         Returns:
             Dict mapping artifact names to file paths
         """
-        # Generate project slug for multi-project support
+        # Generate record ID for multi-record archive support
         project_json_path = project_root / "project.json"
-        project_slug = project.generate_project_slug(project_json_path)
+        bay_id = project.generate_bay_id(project_json_path)
 
-        # Create project-specific subdirectory
-        project_dir = self.output_dir / project_slug
+        # Create record-specific subdirectory
+        project_dir = self.output_dir / bay_id
         project_dir.mkdir(parents=True, exist_ok=True)
 
         # Store original output_dir and temporarily switch to project_dir
@@ -181,8 +204,8 @@ class ArtifactGenerator:
         # Restore original output directory
         self.output_dir = original_output_dir
 
-        # Update projects.json index
-        self._update_projects_index(project, project_slug, project_root, project_dir)
+        # Update bays.json index
+        self._update_bays_index(project, bay_id, project_root, project_dir)
 
         return artifacts
 
@@ -280,7 +303,11 @@ class ArtifactGenerator:
                                 )
 
                                 invocation_record = {
-                                    "kind": invocation.kind,
+                                    "kind": (
+                                        invocation.kind
+                                        if to_id.startswith(("missing:", "unknown:", "dynamic:"))
+                                        else "invoke"
+                                    ),
                                     "from": from_id,
                                     "to": to_id,
                                     "arguments": invocation.arguments,
@@ -537,9 +564,7 @@ class ArtifactGenerator:
         for workflow in workflow_index.workflows:
             try:
                 workflow_path = project_root / workflow.relative_path
-                workflow_id = workflow.relative_path.replace("\\", "/").replace(
-                    ".xaml", ""
-                )
+                workflow_id = workflow.workflow_id.replace("\\", "/")
 
                 logger.debug(f"Processing activities for {workflow_id}")
 
@@ -802,14 +827,18 @@ class ArtifactGenerator:
             )
 
             # Generate artifact according to implementation plan schema
+            def _enrich_activity(activity_obj) -> dict:
+                data = _activity_dict_to_camel(asdict(activity_obj))
+                # R2: add canonical activityPath (join key with pseudocode entries)
+                data["activityPath"] = _node_id_to_activity_path(data.get("nodeId", ""))
+                return data
+
             artifact = {
-                "schemaVersion": "2.0",
+                "schemaVersion": "2.1",
                 "workflowId": workflow_id,
                 "generatedAt": datetime.now(UTC).isoformat(),
                 "totalActivities": len(activities),
-                "activities": [
-                    _activity_dict_to_camel(asdict(activity)) for activity in activities
-                ],
+                "activities": [_enrich_activity(activity) for activity in activities],
             }
 
             # Write to activities.instances/{wfId}.json
@@ -899,49 +928,55 @@ class ArtifactGenerator:
 
         return self._resolve_project_id_from_root(project_json_path)
 
-    def _update_projects_index(
+    def _update_bays_index(
         self,
         project: UiPathProject,
-        project_slug: str,
+        bay_id: str,
         project_root: Path,
         project_dir: Path,
     ) -> None:
-        """Update projects.json index with current project information.
+        """Update bays.json index with current record information.
 
         Args:
             project: Parsed UiPath project
-            project_slug: Generated project slug
+            bay_id: Generated record ID
             project_root: Root directory of project
-            project_dir: Project artifacts directory
+            project_dir: Record artifacts directory
         """
-        projects_index_file = self.output_dir / "projects.json"
+        records_index_file = self.output_dir / "bays.json"
 
         # Load existing index or create new one
-        if projects_index_file.exists():
+        if records_index_file.exists():
             try:
-                with open(projects_index_file, encoding="utf-8") as f:
+                with open(records_index_file, encoding="utf-8") as f:
                     index_data = json.load(f)
             except (OSError, json.JSONDecodeError) as e:
                 logger.warning(
-                    f"Failed to read existing projects.json, creating new one: {e}"
+                    f"Failed to read existing bays.json, creating new one: {e}"
                 )
-                index_data = {"rpaxSchemaVersion": "1.0", "projects": []}
+                index_data = {"rpaxSchemaVersion": "1.0", "bays": []}
         else:
-            index_data = {"rpaxSchemaVersion": "1.0", "projects": []}
+            index_data = {"rpaxSchemaVersion": "1.0", "bays": []}
 
-        # Find existing project entry or create new one
-        project_entry = None
-        for p in index_data["projects"]:
-            if p.get("slug") == project_slug:
-                project_entry = p
+        # Normalize legacy key "projects" → "bays"
+        if "projects" in index_data and "bays" not in index_data:
+            index_data["bays"] = index_data.pop("projects")
+        elif "bays" not in index_data:
+            index_data["bays"] = []
+
+        # Find existing record entry or create new one
+        record_entry = None
+        for r in index_data["bays"]:
+            if r.get("bayId") == bay_id:
+                record_entry = r
                 break
 
-        if project_entry is None:
-            project_entry = {"slug": project_slug}
-            index_data["projects"].append(project_entry)
+        if record_entry is None:
+            record_entry = {"bayId": bay_id}
+            index_data["bays"].append(record_entry)
 
-        # Update project entry
-        project_entry.update(
+        # Update record entry
+        record_entry.update(
             {
                 "name": project.name,
                 "projectId": project.project_id,
@@ -952,15 +987,15 @@ class ArtifactGenerator:
             }
         )
 
-        # Sort projects by slug for consistency
-        index_data["projects"].sort(key=lambda p: p["slug"])
+        # Sort records by bayId for consistency
+        index_data["bays"].sort(key=lambda r: r["bayId"])
 
         # Write updated index
-        with open(projects_index_file, "w", encoding="utf-8") as f:
+        with open(records_index_file, "w", encoding="utf-8") as f:
             json.dump(index_data, f, indent=2, ensure_ascii=False)
 
         logger.debug(
-            f"Updated projects index with {len(index_data['projects'])} projects"
+            f"Updated bays index with {len(index_data['bays'])} bays"
         )
 
     def _generate_pseudocode_artifacts(
@@ -993,14 +1028,7 @@ class ArtifactGenerator:
         # Generate pseudocode for each workflow
         for workflow in workflow_index.workflows:
             xaml_path = project_root / workflow.relative_path
-            # Strip .xaml extension: workflow.workflow_id is the raw relative path per ADR-014
-            # (e.g. "Framework/CheckExists.xaml"). Pseudocode IDs use extension-free paths
-            # (e.g. "Framework/CheckExists") to avoid double-extension filenames and clashes.
-            workflow_id = (
-                workflow.workflow_id.replace("\\", "/")
-                .removesuffix(".xaml")
-                .removesuffix(".XAML")
-            )
+            workflow_id = workflow.workflow_id.replace("\\", "/")
 
             try:
                 artifact = generator.generate_workflow_pseudocode(
@@ -1048,11 +1076,11 @@ class ArtifactGenerator:
                 )
 
         # Generate pseudocode index from lightweight summaries (no full artifacts in RAM)
-        project_slug = project.generate_project_slug(project_root / "project.json")
-        # Use project_id if available, otherwise fall back to project_slug
-        effective_project_id = project.project_id or project_slug
+        bay_id = project.generate_bay_id(project_root / "project.json")
+        # Use project_id if available, otherwise fall back to bay_id
+        effective_project_id = project.project_id or bay_id
         index = generator.generate_project_pseudocode_index(
-            project_slug, effective_project_id, pseudocode_summaries
+            bay_id, effective_project_id, pseudocode_summaries
         )
 
         # Write pseudocode index
@@ -1182,7 +1210,7 @@ class ArtifactGenerator:
             "generatedAt": self.timestamp,
             "rpaxVersion": "0.0.1",  # Would get from rpax.__version__
             "projectId": call_graph.project_id,
-            "projectSlug": call_graph.project_slug,
+            "bayId": call_graph.bay_id,
             "totalExpandedWorkflows": workflow_count,
             "expansionConfig": {
                 "maxDepth": self.config.pseudocode.max_expansion_depth,
@@ -1358,8 +1386,8 @@ class ArtifactGenerator:
             )
 
             # Set project context - we need to pass project_root from the caller
-            # For now, use a fallback method to generate slug
-            package_analysis.project_slug = (
+            # For now, use a fallback method to generate record ID
+            package_analysis.bay_id = (
                 project.project_id or project.name.lower().replace(" ", "-")
             )
             package_analysis.project_name = project.name

@@ -257,22 +257,33 @@ class EnhancedXamlAnalyzer:
         """Detect if attribute value is VB.NET/C# expression."""
         if not value:
             return False
-        
-        # VB.NET/C# expressions are typically enclosed in brackets
-        if value.startswith('[') and value.endswith(']') and len(value) > 2:
+
+        if self.expression_language == "VisualBasic":
+            # VB.NET expressions are enclosed in square brackets
+            if value.startswith('[') and value.endswith(']') and len(value) > 2:
+                return True
+        else:
+            # C# expressions are enclosed in curly braces
+            if value.startswith('{') and value.endswith('}') and len(value) > 2:
+                return True
+            # C#-specific operators
+            if '??' in value or '?.' in value or '=>' in value:
+                return True
+            # Ternary operator: requires both ? and : with content
+            if ' ? ' in value and ' : ' in value:
+                return True
+
+        # Shared patterns common to both VB and C#
+        if ('.ToString()' in value or
+                'Path.Combine(' in value or
+                'String.Format(' in value or
+                'new ' in value):
             return True
-        
-        # Method calls with parentheses (like Path.Combine(...), .ToString())
-        if ('.ToString()' in value or 
-            'Path.Combine(' in value or 
-            'String.Format(' in value or
-            'new ' in value):
-            return True
-        
-        # Assignment expressions
+
+        # Assignment expressions (e.g. "myVar = someValue")
         if ' = ' in value:
             return True
-            
+
         return False
     
     def _classify_invocation(self, workflow_filename: str) -> str:
@@ -402,7 +413,10 @@ class EnhancedXamlAnalyzer:
                 metrics.try_catch_count += 1
             elif "selector" in tag_lower:
                 metrics.selector_count += 1
-        
+
+            if node.get("annotation") is not None:
+                metrics.annotated_activity_count += 1
+
         return metrics
 
     def generate_activity_tree_json(self, visual_activities: list[EnhancedActivityNode],

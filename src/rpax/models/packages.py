@@ -29,7 +29,7 @@ class PackageReference(BaseModel):
 
 class ProjectPackageAnalysis(BaseModel):
     """Complete package analysis for a UiPath project."""
-    project_slug: str = Field(alias="projectSlug")
+    bay_id: str = Field(alias="bayId")
     project_name: str = Field(alias="projectName") 
     analyzed_at: str = Field(alias="analyzedAt")  # ISO timestamp
     
@@ -115,7 +115,7 @@ def analyze_package_usage(
     undeclared_packages = sorted(all_used - all_declared)
     
     return ProjectPackageAnalysis(
-        project_slug="",  # Will be filled by caller
+        bay_id="",  # Will be filled by caller
         project_name="",  # Will be filled by caller
         analyzed_at=datetime.now(UTC).isoformat(),
         declared_dependencies=declared_dependencies,

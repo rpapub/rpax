@@ -81,7 +81,7 @@ class IntegratedArtifactPipeline:
                         ErrorContext(
                             operation="generate_activity_resources",
                             component="ActivityResourceManager",
-                            project_slug=data.project_slug,
+                            bay_id=data.bay_id,
                             project_root=str(data.project_root)
                         ),
                         ErrorSeverity.WARNING
@@ -95,7 +95,7 @@ class IntegratedArtifactPipeline:
                 ErrorContext(
                     operation="generate_project_artifacts",
                     component="IntegratedArtifactPipeline",
-                    project_slug=data.project_slug,
+                    bay_id=data.bay_id,
                     project_root=str(data.project_root)
                 ),
                 ErrorSeverity.CRITICAL
@@ -119,7 +119,7 @@ class IntegratedArtifactPipeline:
                 ErrorContext(
                     operation="generate_v0_artifacts",
                     component="V0LakeGenerator",
-                    project_slug=data.project_slug
+                    bay_id=data.bay_id
                 )
             )
             raise
@@ -141,7 +141,7 @@ class IntegratedArtifactPipeline:
                 ErrorContext(
                     operation="generate_legacy_artifacts",
                     component="ArtifactGenerator",
-                    project_slug=data.project_slug
+                    bay_id=data.bay_id
                 )
             )
             raise
@@ -158,16 +158,16 @@ class IntegratedArtifactPipeline:
             return self.activity_resource_manager.generate_v0_activity_resources(
                 data.workflow_index,
                 data.project_root,
-                data.project_slug,
-                self.output_dir / data.project_slug / "v0"
+                data.bay_id,
+                self.output_dir / data.bay_id / "v0"
             )
         else:
             # Generate legacy activity resources
             return self.activity_resource_manager.generate_activity_resources(
                 data.workflow_index,
                 data.project_root,
-                data.project_slug,
-                self.output_dir / data.project_slug
+                data.bay_id,
+                self.output_dir / data.bay_id
             )
     
     def finalize_run(self) -> Optional[Path]:
@@ -250,12 +250,12 @@ def integrated_parse_project(
         workflow_index = discovery.discover_workflows()
         
         # Create parsed data structure
-        project_slug = slugify(project.name)
+        bay_id = slugify(project.name)
         parsed_data = ParsedProjectData(
             project=project,
             workflow_index=workflow_index,
             project_root=project_path,
-            project_slug=project_slug,
+            bay_id=bay_id,
             timestamp=datetime.now()
         )
         

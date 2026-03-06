@@ -20,6 +20,7 @@ class PseudocodeEntry:
     depth: int
     is_visual: bool
     children: list["PseudocodeEntry"] = None
+    target_relative_path: str | None = None
 
     def __post_init__(self):
         if self.children is None:
@@ -39,7 +40,7 @@ class PseudocodeArtifact(BaseModel):
     project_id: str = Field(description="Project identifier")
     project_slug: str = Field(description="Project slug")
     relative_path: str = Field(default="", description="Source XAML relative path")
-    schema_version: str = Field(default="1.0.0", description="Artifact schema version")
+    schema_version: str = Field(default="1.1.0", description="Artifact schema version")
     generated_at: str = Field(description="Generation timestamp")
     rpax_version: str = Field(description="rpax version used for generation")
 
@@ -77,13 +78,13 @@ class PseudocodeArtifact(BaseModel):
 class PseudocodeIndex(BaseModel):
     """Index of all pseudocode artifacts in project."""
 
-    project_id: str = Field(description="Project identifier")
-    project_slug: str = Field(description="Project slug")
-    total_workflows: int = Field(description="Total workflows with pseudocode")
+    project_id: str = Field(alias="projectId", description="Project identifier")
+    project_slug: str = Field(alias="bayId", description="Bay/project slug identifier")
+    total_workflows: int = Field(alias="totalWorkflows", description="Total workflows with pseudocode")
     workflows: list[dict[str, Any]] = Field(
         description="Workflow pseudocode references"
     )
     rpax_schema_version: str = Field(alias="rpaxSchemaVersion", default="1.0")
-    generated_at: str = Field(description="Generation timestamp")
+    generated_at: str = Field(alias="generatedAt", description="Generation timestamp")
 
     model_config = {"extra": "forbid", "populate_by_name": True}

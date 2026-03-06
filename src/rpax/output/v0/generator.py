@@ -46,7 +46,7 @@ class V0LakeGenerator(OutputGenerator):
         logger.info(f"Generating v0/ schema for project: {data.project.name}")
         
         # Create project directory with v0 subdirectory
-        project_dir = self.create_project_directory(data.project_slug)
+        project_dir = self.create_project_directory(data.bay_id)
         v0_dir = project_dir / "v0"
         v0_dir.mkdir(exist_ok=True)
         

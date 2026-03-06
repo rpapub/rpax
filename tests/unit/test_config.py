@@ -49,7 +49,7 @@ class TestRpaxConfig:
             project=ProjectConfig(type=ProjectType.PROCESS)
         )
         assert config.project.type == ProjectType.PROCESS
-        assert config.output.dir == ".rpax-lake"
+        assert config.output.dir == ".rpax-warehouse"
         assert config.validation.fail_on_missing is True
 
     def test_config_from_dict(self):
@@ -176,7 +176,7 @@ class TestConfigFileOperations:
         """Test default config creation."""
         config = create_default_config()
         assert config.project.type == ProjectType.PROCESS
-        assert config.output.dir == ".rpax-lake"
+        assert config.output.dir == ".rpax-warehouse"
         assert config.validation.fail_on_missing is True
 
 

@@ -18,14 +18,19 @@ class ParsedProjectData:
         project: Parsed UiPath project
         workflow_index: Index of discovered workflows
         project_root: Root directory of the project
-        project_slug: URL-safe project identifier
+        bay_id: URL-safe record identifier
         timestamp: Timestamp of parsing
     """
     project: UiPathProject
     workflow_index: WorkflowIndex
     project_root: Path
-    project_slug: str
+    bay_id: str
     timestamp: datetime
+
+    @property
+    def project_slug(self) -> str:
+        """Backward-compat alias for bay_id."""
+        return self.bay_id
 
 
 class OutputGenerator(ABC):
@@ -58,15 +63,19 @@ class OutputGenerator(ABC):
         """
         pass
 
-    def create_project_directory(self, project_slug: str) -> Path:
-        """Create and return project-specific directory within lake.
+    def create_bay_directory(self, bay_id: str) -> Path:
+        """Create and return record-specific directory within archive.
 
         Args:
-            project_slug: URL-safe project identifier
+            bay_id: URL-safe record identifier
 
         Returns:
-            Path to project directory
+            Path to record directory
         """
-        project_dir = self.output_dir / project_slug
-        project_dir.mkdir(parents=True, exist_ok=True)
-        return project_dir
+        record_dir = self.output_dir / bay_id
+        record_dir.mkdir(parents=True, exist_ok=True)
+        return record_dir
+
+    def create_project_directory(self, bay_id: str) -> Path:
+        """Backward-compat alias for create_bay_directory."""
+        return self.create_bay_directory(bay_id)

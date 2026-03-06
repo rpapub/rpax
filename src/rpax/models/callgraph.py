@@ -56,7 +56,7 @@ class CallGraphArtifact(BaseModel):
     
     # Metadata
     project_id: str = Field(description="Project identifier")
-    project_slug: str = Field(description="Project slug for file naming")
+    bay_id: str = Field(description="Record ID for file naming")
     schema_version: str = Field(default="1.0.0", description="Call graph schema version")
     generated_at: datetime = Field(description="Timestamp when call graph was generated")
     rpax_version: str = Field(description="Version of rpax that generated this artifact")

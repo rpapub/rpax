@@ -133,12 +133,13 @@ class TestXamlDiscovery:
 
             # Check identity components
             expected_slug = temp_path.name.lower().replace(" ", "-").replace("_", "-")
-            assert workflow.project_slug == expected_slug
-            assert workflow.workflow_id == "TestWorkflow.xaml"
+            assert workflow.bay_id == expected_slug
+            assert workflow.workflow_id == "TestWorkflow"
+            assert workflow.relative_path == "TestWorkflow.xaml"
             assert len(workflow.content_hash) == 64  # Full SHA256
 
             # Check composite ID format (uses truncated hash)
-            expected_id = f"{workflow.project_slug}#{workflow.workflow_id}#{workflow.content_hash[:16]}"
+            expected_id = f"{workflow.bay_id}#{workflow.workflow_id}#{workflow.content_hash[:16]}"
             assert workflow.id == expected_id
 
     def test_path_normalization(self):
@@ -158,7 +159,7 @@ class TestXamlDiscovery:
             workflow = index.workflows[0]
             # Should be POSIX format regardless of OS
             assert workflow.relative_path == "some/nested/path/NestedWorkflow.xaml"
-            assert workflow.workflow_id == "some/nested/path/NestedWorkflow.xaml"
+            assert workflow.workflow_id == "some/nested/path/NestedWorkflow"
 
     def test_case_insensitive_xaml_discovery(self):
         """Test case-insensitive XAML file discovery."""

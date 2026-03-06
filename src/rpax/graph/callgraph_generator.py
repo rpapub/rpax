@@ -74,7 +74,7 @@ class CallGraphGenerator:
         
         call_graph = CallGraphArtifact(
             project_id=project_id,
-            project_slug=f"{project_id or manifest.project_name.lower()}-generated",
+            bay_id=f"{project_id or manifest.project_name.lower()}-generated",
             generated_at=datetime.now(UTC),
             rpax_version=__version__,
             workflows=workflows,

@@ -161,7 +161,7 @@ class RpaxApiHandler(BaseHTTPRequestHandler):
             "rpaxVersion": __version__,
             "uptime": uptime_str,
             "startedAt": datetime.fromtimestamp(self.api_server.start_time, UTC).isoformat(),
-            "mountedLakes": self.api_server.get_lake_status(),
+            "mountedWarehouses": self.api_server.get_warehouse_status(),
             "totalProjectCount": self.api_server.get_total_project_count(),
             "latestActivityAt": self.api_server.get_latest_activity(),
             "memoryUsage": memory_usage
@@ -331,27 +331,27 @@ class RpaxApiServer:
         self.actual_port = None
         self.service_info_file = None
 
-    def get_lake_status(self) -> list[dict[str, Any]]:
+    def get_warehouse_status(self) -> list[dict[str, Any]]:
         """Get status of mounted lakes."""
-        lake_path = Path(self.config.output.dir)
-        if not lake_path.exists():
+        warehouse_path = Path(self.config.output.dir)
+        if not warehouse_path.exists():
             return []
 
         try:
-            project_count = self._count_projects_in_lake(lake_path)
+            project_count = self._count_bays_in_warehouse(warehouse_path)
             return [{
-                "path": str(lake_path.absolute()),
+                "path": str(warehouse_path.absolute()),
                 "projectCount": project_count,
                 "lastScanAt": datetime.now(UTC).isoformat()  # Placeholder - would track actual scan time
             }]
         except Exception:
-            logger.exception(f"Error reading lake status from {lake_path}")
+            logger.exception(f"Error reading warehouse status from {warehouse_path}")
             return []
 
-    def _count_projects_in_lake(self, lake_path: Path) -> int:
-        """Count projects in lake directory."""
+    def _count_bays_in_warehouse(self, warehouse_path: Path) -> int:
+        """Count bays in warehouse directory."""
         try:
-            projects_file = lake_path / "projects.json"
+            projects_file = warehouse_path / "bays.json"
             if projects_file.exists():
                 with open(projects_file) as f:
                     projects_data = json.load(f)
@@ -360,12 +360,12 @@ class RpaxApiServer:
             pass
         
         # Fallback: count project directories
-        project_dirs = [d for d in lake_path.iterdir() if d.is_dir() and not d.name.startswith('.')]
+        project_dirs = [d for d in warehouse_path.iterdir() if d.is_dir() and not d.name.startswith('.')]
         return len(project_dirs)
 
     def get_total_project_count(self) -> int:
         """Get total project count across all lakes."""
-        return sum(lake["projectCount"] for lake in self.get_lake_status())
+        return sum(warehouse["projectCount"] for lake in self.get_warehouse_status())
 
     def get_latest_activity(self) -> str:
         """Get timestamp of latest activity."""
@@ -402,7 +402,7 @@ class RpaxApiServer:
                 "pid": os.getpid(),
                 "startedAt": datetime.fromtimestamp(self.start_time, UTC).isoformat(),
                 "rpaxVersion": __version__,
-                "lakes": [str(Path(self.config.output.dir).absolute())],
+                "warehouses": [str(Path(self.config.output.dir).absolute())],
                 "projectCount": self.get_total_project_count(),
                 "configPath": ""  # Would be populated if config file path is tracked
             }
@@ -453,9 +453,9 @@ class RpaxApiServer:
 
         # Single-line startup output per ADR-022
         project_count = self.get_total_project_count()
-        lake_count = len(self.get_lake_status())
+        lake_count = len(self.get_warehouse_status())
         lake_suffix = "s" if lake_count != 1 else ""
-        startup_message = f"rpax API started at {url} ({project_count} projects, {lake_count} lake{lake_suffix})"
+        startup_message = f"rpax API started at {url} ({project_count} projects, {lake_count} warehouse{lake_suffix})"
         print(startup_message)
         logger.info(startup_message)
 

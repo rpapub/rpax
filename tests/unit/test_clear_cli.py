@@ -11,23 +11,23 @@ from rpax.cli import app
 class TestClearCLI:
     """Test clear command functionality with safety guardrails."""
 
-    def setup_test_lake(self, temp_path: Path) -> None:
-        """Set up test lake structure with sample data."""
-        # Create projects.json
-        projects_file = temp_path / "projects.json"
-        projects_file.write_text('{"projects": []}')
+    def setup_test_warehouse(self, temp_path: Path) -> None:
+        """Set up test warehouse structure with sample data."""
+        # Create bays.json
+        bays_file = temp_path / "bays.json"
+        bays_file.write_text('{"bays": []}')
 
-        # Create project directory with artifacts
-        project_dir = temp_path / "test-proj-1234"
-        project_dir.mkdir()
+        # Create bay directory with artifacts
+        bay_dir = temp_path / "test-proj-1234"
+        bay_dir.mkdir()
 
         # Create artifacts
-        (project_dir / "manifest.json").write_text('{"projectName": "TestProject"}')
-        (project_dir / "workflows.index.json").write_text('{"workflows": []}')
-        (project_dir / "invocations.jsonl").write_text('{"invoker": "Main.xaml"}\n')
+        (bay_dir / "manifest.json").write_text('{"projectName": "TestProject"}')
+        (bay_dir / "workflows.index.json").write_text('{"workflows": []}')
+        (bay_dir / "invocations.jsonl").write_text('{"invoker": "Main.xaml"}\n')
 
         # Create activities directory
-        activities_dir = project_dir / "activities.tree"
+        activities_dir = bay_dir / "activities.tree"
         activities_dir.mkdir()
         (activities_dir / "Main.json").write_text('{"workflowId": "Main"}')
 
@@ -37,7 +37,7 @@ class TestClearCLI:
 
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
-            self.setup_test_lake(temp_path)
+            self.setup_test_warehouse(temp_path)
 
             result = runner.invoke(app, [
                 "clear", "artifacts", "--path", str(temp_path)
@@ -63,10 +63,10 @@ class TestClearCLI:
 
             assert result.exit_code == 1
             assert "Invalid scope 'invalid'" in result.stdout
-            assert "artifacts, project, lake" in result.stdout
+            assert "artifacts, bay, warehouse" in result.stdout
 
-    def test_clear_nonexistent_lake(self):
-        """Test validation of non-existent lake directory."""
+    def test_clear_nonexistent_warehouse(self):
+        """Test validation of non-existent warehouse directory."""
         runner = CliRunner()
 
         result = runner.invoke(app, [
@@ -74,35 +74,36 @@ class TestClearCLI:
         ])
 
         assert result.exit_code == 1
-        assert "Lake directory does not exist" in result.stdout
+        assert "Warehouse directory does not exist" in result.stdout
 
-    def test_clear_project_scope_requires_project_param(self):
-        """Test that project scope requires --project parameter."""
+    def test_clear_bay_scope_requires_bay_param(self):
+        """Test that bay scope requires --bay parameter."""
         runner = CliRunner()
 
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
 
             result = runner.invoke(app, [
-                "clear", "project", "--path", str(temp_path)
+                "clear", "bay", "--path", str(temp_path)
             ])
 
             assert result.exit_code == 1
-            assert "--project is required when scope is 'project'" in result.stdout
+            assert "--bay is required when scope is 'bay'" in result.stdout
 
-    def test_clear_project_scope_validates_project_exists(self):
-        """Test that project scope validates project exists."""
+    def test_clear_bay_scope_validates_bay_exists(self):
+        """Test that bay scope validates bay exists."""
         runner = CliRunner()
 
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
+            temp_path.mkdir(exist_ok=True)
 
             result = runner.invoke(app, [
-                "clear", "project", "--path", str(temp_path), "--project", "nonexistent"
+                "clear", "bay", "--path", str(temp_path), "--bay", "nonexistent"
             ])
 
             assert result.exit_code == 1
-            assert "Project 'nonexistent' not found in lake" in result.stdout
+            assert "Bay 'nonexistent' not found in warehouse" in result.stdout
 
     def test_clear_artifacts_scope_shows_summary(self):
         """Test that artifacts scope shows proper summary."""
@@ -110,7 +111,7 @@ class TestClearCLI:
 
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
-            self.setup_test_lake(temp_path)
+            self.setup_test_warehouse(temp_path)
 
             result = runner.invoke(app, [
                 "clear", "artifacts", "--path", str(temp_path)
@@ -128,8 +129,8 @@ class TestClearCLI:
 
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
-            # Create empty lake (just projects.json)
-            (temp_path / "projects.json").write_text('{"projects": []}')
+            # Create empty warehouse (just bays.json)
+            (temp_path / "bays.json").write_text('{"bays": []}')
 
             result = runner.invoke(app, [
                 "clear", "artifacts", "--path", str(temp_path)
@@ -147,8 +148,8 @@ class TestClearCLI:
         assert result.exit_code == 0
         assert "SCOPES:" in result.stdout
         assert "artifacts - Clear generated artifacts" in result.stdout
-        assert "project   - Clear all data for specific project" in result.stdout
-        assert "lake      - Clear entire lake directory" in result.stdout
+        assert "bay" in result.stdout
+        assert "warehouse" in result.stdout
         assert "SAFETY FEATURES:" in result.stdout
         assert "Dry-run by default" in result.stdout
         assert "CLI-only and never exposed via API or MCP" in result.stdout

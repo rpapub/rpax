@@ -156,6 +156,11 @@ class PseudocodeGenerator:
         # Generate pseudocode line for current activity
         formatted_line = self._format_pseudocode_line(activity, indent)
 
+        # Derive targetRelativePath for InvokeWorkflowFile entries
+        target_relative_path: str | None = None
+        if activity.tag == "InvokeWorkflowFile" and activity.invocation_target:
+            target_relative_path = activity.invocation_target.replace("\\", "/")
+
         # Create entry
         entry = PseudocodeEntry(
             indent=indent,
@@ -166,6 +171,7 @@ class PseudocodeGenerator:
             node_id=activity.node_id,
             depth=activity.depth,
             is_visual=activity.is_visual,
+            target_relative_path=target_relative_path,
         )
 
         entries.append(entry)
@@ -209,7 +215,7 @@ class PseudocodeGenerator:
         Returns:
             Dictionary representation
         """
-        return {
+        result = {
             "indent": entry.indent,
             "displayName": entry.display_name,
             "tag": entry.tag,
@@ -220,6 +226,9 @@ class PseudocodeGenerator:
             "isVisual": entry.is_visual,
             "children": [self._serialize_entry(child) for child in entry.children],
         }
+        if entry.target_relative_path is not None:
+            result["targetRelativePath"] = entry.target_relative_path
+        return result
 
     def _create_empty_artifact(
         self, workflow_id: str, error: str = None, relative_path: str = ""
