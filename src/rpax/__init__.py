@@ -10,6 +10,7 @@ __email__ = "contact@rpapub.dev"
 __description__ = "Code-first CLI tool for UiPath project analysis"
 
 from rpax.config import RpaxConfig
+import rpax.utils.logging_setup  # registers TRACE level on first import  # noqa: F401
 
 __all__ = [
     "__version__",

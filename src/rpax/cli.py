@@ -344,6 +344,7 @@ def parse(
     All projects are parsed into the same multi-project lake.
     """
     try:
+        from rpax.utils.logging_setup import configure_logging
         # Collect all project paths to parse
         project_paths = []
         
@@ -363,6 +364,7 @@ def parse(
         
         # Load base configuration from first project
         base_config = load_config(config or project_paths[0] / ".rpax.json")
+        configure_logging(base_config.logging.level)
         
         # Override output directory if specified  
         if out:
@@ -3329,6 +3331,102 @@ def _format_size(size_bytes: int) -> str:
     p = math.pow(1024, i)
     s = round(size_bytes / p, 2)
     return f"{s} {size_names[i]}"
+
+
+@app.command(hidden=True)
+def bench(
+    path: Annotated[
+        Path,
+        typer.Argument(help="Path to UiPath project directory"),
+    ] = Path("."),
+    out: Annotated[
+        Path,
+        typer.Option("--out", "-o", help="Output directory for artifacts"),
+    ] = None,
+    config: Annotated[
+        Path,
+        typer.Option("--config", "-c", help="Configuration file path"),
+    ] = None,
+    as_json: Annotated[
+        bool,
+        typer.Option("--json", help="Emit results as JSON to stdout"),
+    ] = False,
+    top_allocs: Annotated[
+        int,
+        typer.Option("--top-allocs", help="Show top N Python allocators per phase (0 = disabled)"),
+    ] = 0,
+    log_level: Annotated[
+        str,
+        typer.Option("--log-level", help="Log level: trace/debug/info/warn/error"),
+    ] = "info",
+) -> None:
+    """[Internal] Per-phase timing, CPU, memory, and I/O diagnostics for rpax parse."""
+    import json as _json
+    import tempfile
+    from rpax.utils.logging_setup import configure_logging
+    from rpax.utils.diagnostics import PhaseTimer, format_phase_table, phases_to_dict
+
+    configure_logging(log_level)
+
+    try:
+        project_path = _resolve_project_path(path)
+        project_config = load_config(config or project_path / ".rpax.json")
+
+        # Use a temp dir if no --out supplied
+        _tmp_dir = None
+        if out:
+            project_config.output.dir = str(out)
+        else:
+            _tmp_dir = tempfile.mkdtemp(prefix="rpax-bench-")
+            project_config.output.dir = _tmp_dir
+
+        phases: list = []
+
+        # Phase: project parse
+        with PhaseTimer(top_allocs=top_allocs) as t:
+            project = ProjectParser.parse_project_from_dir(project_path)
+        phases.append(t.result("project_parse", 1))
+
+        # Phase: workflow discovery
+        with PhaseTimer(top_allocs=top_allocs) as t:
+            discovery = create_workflow_discovery(
+                project_path,
+                exclude_patterns=project_config.scan.exclude,
+                include_coded_workflows=False,
+            )
+            workflow_index = discovery.discover_workflows()
+        phases.append(t.result("workflow_discovery", workflow_index.total_workflows))
+
+        # Artifact generation phases (instrumented via collect_phases)
+        generator = ArtifactGenerator(project_config, out)
+        generator.generate_all_artifacts(
+            project, workflow_index, project_path, collect_phases=phases
+        )
+
+        if as_json:
+            import sys
+            print(_json.dumps({"project": project.name, "phases": phases_to_dict(phases)}, indent=2))
+        else:
+            console.print(format_phase_table(phases, project_name=project.name))
+
+        # Show top allocators if requested
+        if top_allocs > 0 and not as_json:
+            for p in phases:
+                if p.top_allocators:
+                    console.print(f"\n[dim]Top allocators — {p.name}:[/dim]")
+                    for a in p.top_allocators:
+                        console.print(f"  {a['location']}  +{a['size_delta_kb']} KB  ({a['count_delta']:+d} objects)")
+
+        # Clean up temp dir
+        if _tmp_dir:
+            import shutil
+            shutil.rmtree(_tmp_dir, ignore_errors=True)
+
+    except Exception as e:
+        console.print(f"[red]bench error:[/red] {e}")
+        import traceback
+        console.print(f"[dim]{traceback.format_exc()}[/dim]")
+        raise typer.Exit(1)
 
 
 if __name__ == "__main__":

@@ -39,15 +39,18 @@ class ArtifactGenerator:
         self,
         project: UiPathProject,
         workflow_index: WorkflowIndex,
-        project_root: Path
+        project_root: Path,
+        collect_phases: "list | None" = None,
     ) -> dict[str, Path]:
         """Generate all artifacts for a project.
-        
+
         Args:
             project: Parsed UiPath project
             workflow_index: Discovered workflows
             project_root: Root directory of project
-            
+            collect_phases: When provided (list), append a PhaseResult per phase.
+                Used by ``rpax bench``; ignored in normal ``rpax parse`` runs.
+
         Returns:
             Dict mapping artifact names to file paths
         """
@@ -65,46 +68,70 @@ class ArtifactGenerator:
 
         artifacts = {}
 
+        def _phase(name: str, fn, *args, **kwargs):
+            """Run fn(*args, **kwargs), optionally wrapping with PhaseTimer."""
+            if collect_phases is None:
+                result = fn(*args, **kwargs)
+            else:
+                from rpax.utils.diagnostics import PhaseTimer
+                with PhaseTimer() as t:
+                    result = fn(*args, **kwargs)
+                count = len(result) if isinstance(result, dict) else (1 if result else 0)
+                collect_phases.append(t.result(name, count))
+            return result
+
         # Generate manifest.json
-        manifest_file = self._generate_manifest(project, workflow_index, project_root)
+        manifest_file = _phase("manifest", self._generate_manifest, project, workflow_index, project_root)
         artifacts["manifest"] = manifest_file
 
         # Generate workflows.index.json
-        index_file = self._generate_workflow_index(workflow_index)
+        index_file = _phase("workflow_index", self._generate_workflow_index, workflow_index)
         artifacts["workflow_index"] = index_file
 
         # Generate invocations.jsonl with actual XAML analysis
-        invocations_file = self._generate_invocations_placeholder(workflow_index)
+        invocations_file = _phase("invocations", self._generate_invocations_placeholder, workflow_index)
         artifacts["invocations"] = invocations_file
 
         # Generate call graph artifact (ISSUE-038 - first-class call graph)
         manifest_data = self._load_manifest_for_callgraph(manifest_file)
-        call_graph_file = self._generate_call_graph_artifact(manifest_data, workflow_index, invocations_file)
+        call_graph_file = _phase(
+            "call_graph", self._generate_call_graph_artifact,
+            manifest_data, workflow_index, invocations_file
+        )
         artifacts["call_graph"] = call_graph_file
 
         # Generate activities artifacts (according to ADR-009)
         if self.config.output.generate_activities:
-            activities_artifacts = self._generate_activities_artifacts(workflow_index, project_root)
+            activities_artifacts = _phase(
+                "activities", self._generate_activities_artifacts, workflow_index, project_root
+            )
             artifacts.update(activities_artifacts)
 
         # Generate pseudocode artifacts (ISSUE-027)
-        pseudocode_artifacts = self._generate_pseudocode_artifacts(workflow_index, project, project_root)
+        pseudocode_artifacts = _phase(
+            "pseudocode", self._generate_pseudocode_artifacts, workflow_index, project, project_root
+        )
         artifacts.update(pseudocode_artifacts)
 
         # Generate expanded pseudocode artifacts (ISSUE-036, ISSUE-040)
         if self.config.pseudocode.generate_expanded:
-            expanded_artifacts = self._generate_expanded_pseudocode_artifacts(
+            expanded_artifacts = _phase(
+                "expanded_pseudocode", self._generate_expanded_pseudocode_artifacts,
                 call_graph_file, pseudocode_artifacts.get("pseudocode_index")
             )
             artifacts.update(expanded_artifacts)
 
         # Generate Object Repository artifacts for Library projects
         if project.project_type.lower() == "library":
-            object_repository_artifacts = self._generate_object_repository_artifacts(project_root)
+            object_repository_artifacts = _phase(
+                "object_repository", self._generate_object_repository_artifacts, project_root
+            )
             artifacts.update(object_repository_artifacts)
 
         # Generate package analysis artifacts
-        package_artifacts = self._generate_package_analysis_artifacts(project, workflow_index)
+        package_artifacts = _phase(
+            "package_analysis", self._generate_package_analysis_artifacts, project, workflow_index
+        )
         artifacts.update(package_artifacts)
 
         # Restore original output directory
@@ -433,12 +460,22 @@ class ArtifactGenerator:
 
                 # Parse ONCE — share the root element across all analyzers and activity instances
                 from defusedxml.ElementTree import fromstring as defused_fromstring
+                import time as _time
+                _t0 = _time.perf_counter_ns()
                 xml_bytes = workflow_path.read_bytes()
                 xml_str = xml_bytes.decode("utf-8-sig", errors="replace")
                 xml_root = defused_fromstring(xml_str)
+                _parse_ms = (_time.perf_counter_ns() - _t0) / 1e6
+                logger.trace(  # type: ignore[attr-defined]
+                    "[%s] parsed %.1f KB in %.1fms", workflow_id, len(xml_bytes) / 1024, _parse_ms
+                )
 
                 # Extract activity tree
+                _t1 = _time.perf_counter_ns()
                 activity_tree = analyzer.extract_activity_tree(workflow_path, root=xml_root)
+                logger.trace(  # type: ignore[attr-defined]
+                    "[%s] extract_activity_tree %.1fms", workflow_id, (_time.perf_counter_ns() - _t1) / 1e6
+                )
                 if activity_tree:
                     # Generate activities.tree/<wfId>.json
                     tree_file = activities_tree_dir / f"{workflow_id}.json"
@@ -457,7 +494,11 @@ class ArtifactGenerator:
                     activities_artifacts[f"activities_instances_{workflow_id}"] = instances_artifact
 
                 # Extract control flow
+                _t2 = _time.perf_counter_ns()
                 control_flow = analyzer.extract_control_flow(workflow_path, root=xml_root)
+                logger.trace(  # type: ignore[attr-defined]
+                    "[%s] extract_control_flow %.1fms", workflow_id, (_time.perf_counter_ns() - _t2) / 1e6
+                )
                 if control_flow:
                     # Generate activities.cfg/<wfId>.jsonl
                     cfg_file = activities_cfg_dir / f"{workflow_id}.jsonl"
@@ -476,7 +517,11 @@ class ArtifactGenerator:
                     activities_artifacts[f"activities_cfg_{workflow_id}"] = cfg_file
 
                 # Extract resource references
+                _t3 = _time.perf_counter_ns()
                 resources = analyzer.extract_resources(workflow_path, root=xml_root)
+                logger.trace(  # type: ignore[attr-defined]
+                    "[%s] extract_resources %.1fms", workflow_id, (_time.perf_counter_ns() - _t3) / 1e6
+                )
                 if resources:
                     # Generate activities.refs/<wfId>.json
                     refs_file = activities_refs_dir / f"{workflow_id}.json"
