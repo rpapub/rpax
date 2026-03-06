@@ -99,7 +99,7 @@
             "properties": {
                 "dir": {
                     "type": "string",
-                    "default": ".rpax-out"
+                    "default": ".rpax-lake"
                 },
                 "formats": {
                     "type": "array",
