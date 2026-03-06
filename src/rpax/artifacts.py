@@ -246,7 +246,7 @@ class ArtifactGenerator:
                             except Exception as e:
                                 logger.warning(f"Failed to analyze workflow {workflow_path}: {e}")
 
-                logger.info(f"Generated {invocation_count} invocation records")
+                logger.debug(f"Generated {invocation_count} invocation records")
 
         except ImportError:
             # Fallback to placeholder if XAML analyzer not available
@@ -449,10 +449,10 @@ class ArtifactGenerator:
         # Choose analyzer based on configuration
         if self.config.parser.use_enhanced:
             analyzer = EnhancedXamlAnalyzer()
-            logger.info(f"Using enhanced XAML parser for {workflow_index.total_workflows} workflows")
+            logger.debug(f"Using enhanced XAML parser for {workflow_index.total_workflows} workflows")
         else:
             analyzer = XamlAnalyzer()
-            logger.info(f"Using legacy XAML parser for {workflow_index.total_workflows} workflows")
+            logger.debug(f"Using legacy XAML parser for {workflow_index.total_workflows} workflows")
 
         for workflow in workflow_index.workflows:
             try:
@@ -574,7 +574,7 @@ class ArtifactGenerator:
             except Exception as e:
                 logger.warning(f"Failed to generate activities for {workflow.relative_path}: {e}")
 
-        logger.info(f"Generated {len(activities_artifacts)} activities artifacts")
+        logger.debug(f"Generated {len(activities_artifacts)} activities artifacts")
         return activities_artifacts
 
     def _serialize_activity_tree(self, activity_tree) -> dict[str, Any]:
@@ -831,7 +831,7 @@ class ArtifactGenerator:
         with open(projects_index_file, "w", encoding="utf-8") as f:
             json.dump(index_data, f, indent=2, ensure_ascii=False)
 
-        logger.info(f"Updated projects index with {len(index_data['projects'])} projects")
+        logger.debug(f"Updated projects index with {len(index_data['projects'])} projects")
     
     def _generate_pseudocode_artifacts(
         self,
@@ -859,24 +859,28 @@ class ArtifactGenerator:
         # Lightweight summaries — full artifacts released after writing to disk
         pseudocode_summaries: list[dict] = []
 
-        logger.info(f"Generating pseudocode for {len(workflow_index.workflows)} workflows")
+        logger.debug(f"Generating pseudocode for {len(workflow_index.workflows)} workflows")
 
         # Generate pseudocode for each workflow
         for workflow in workflow_index.workflows:
             xaml_path = project_root / workflow.relative_path
+            # Strip .xaml extension: workflow.workflow_id is the raw relative path per ADR-014
+            # (e.g. "Framework/CheckExists.xaml"). Pseudocode IDs use extension-free paths
+            # (e.g. "Framework/CheckExists") to avoid double-extension filenames and clashes.
+            workflow_id = workflow.workflow_id.replace("\\", "/").removesuffix(".xaml").removesuffix(".XAML")
 
             try:
-                artifact = generator.generate_workflow_pseudocode(xaml_path)
+                artifact = generator.generate_workflow_pseudocode(xaml_path, workflow_id=workflow_id)
 
                 # Write individual pseudocode file immediately
-                output_file = pseudocode_dir / f"{workflow.workflow_id}.json"
+                output_file = pseudocode_dir / f"{workflow_id}.json"
                 # Ensure parent directory exists for nested workflows (e.g., Framework/, Tests/)
                 output_file.parent.mkdir(parents=True, exist_ok=True)
                 with open(output_file, "w", encoding="utf-8") as f:
                     json.dump(artifact.model_dump(by_alias=True), f, indent=2, ensure_ascii=False)
 
-                artifacts[f"pseudocode_{workflow.workflow_id}"] = output_file
-                logger.debug(f"Generated pseudocode for {workflow.workflow_id}: {artifact.total_lines} lines")
+                artifacts[f"pseudocode_{workflow_id}"] = output_file
+                logger.debug(f"Generated pseudocode for {workflow_id}: {artifact.total_lines} lines")
 
                 # Keep only lightweight summary — release full artifact
                 pseudocode_summaries.append({
@@ -887,9 +891,9 @@ class ArtifactGenerator:
                 })
 
             except Exception as e:
-                logger.error(f"Failed to generate pseudocode for {workflow.workflow_id}: {e}")
+                logger.error(f"Failed to generate pseudocode for {workflow_id}: {e}")
                 pseudocode_summaries.append({
-                    "workflowId": workflow.workflow_id,
+                    "workflowId": workflow_id,
                     "totalLines": 0,
                     "totalActivities": 0,
                     "hasError": True,
@@ -910,7 +914,7 @@ class ArtifactGenerator:
         
         artifacts["pseudocode_index"] = index_file
         
-        logger.info(f"Generated pseudocode artifacts: {len(pseudocode_summaries)} workflows, index file")
+        logger.debug(f"Generated pseudocode artifacts: {len(pseudocode_summaries)} workflows, index file")
         return artifacts
 
     def _load_manifest_for_callgraph(self, manifest_file: Path) -> "ProjectManifest":
@@ -931,7 +935,7 @@ class ArtifactGenerator:
         """Generate call graph artifact (ISSUE-038)."""
         from rpax.graph.callgraph_generator import CallGraphGenerator
         
-        logger.info("Generating call graph artifact")
+        logger.debug("Generating call graph artifact")
         
         generator = CallGraphGenerator(self.config)
         call_graph = generator.generate_call_graph(manifest, workflow_index, invocations_file)
@@ -941,7 +945,7 @@ class ArtifactGenerator:
         with open(call_graph_file, "w", encoding="utf-8") as f:
             json.dump(call_graph.model_dump(by_alias=True), f, indent=2, ensure_ascii=False)
         
-        logger.info(f"Call graph artifact generated: {call_graph_file}")
+        logger.debug(f"Call graph artifact generated: {call_graph_file}")
         return call_graph_file
 
     def _generate_expanded_pseudocode_artifacts(
@@ -956,7 +960,7 @@ class ArtifactGenerator:
             load_pseudocode_artifacts,
         )
         
-        logger.info("Generating expanded pseudocode artifacts")
+        logger.debug("Generating expanded pseudocode artifacts")
         
         # Load call graph and pseudocode artifacts
         call_graph = load_call_graph_artifact(call_graph_file)
@@ -1003,7 +1007,7 @@ class ArtifactGenerator:
         
         artifacts["expanded_pseudocode_index"] = expanded_index_file
         
-        logger.info(f"Generated expanded pseudocode artifacts: {expanded_count} workflows")
+        logger.debug(f"Generated expanded pseudocode artifacts: {expanded_count} workflows")
         return artifacts
 
     def _generate_expanded_pseudocode_index(self, workflow_count: int, call_graph) -> dict:
@@ -1141,8 +1145,8 @@ class ArtifactGenerator:
                 
             artifacts["object_repository_mcp_resources"] = mcp_resources_file
             
-            logger.info(f"Generated Object Repository artifacts: {len(repository.apps)} apps, "
-                      f"{sum(len(app.targets) for app in repository.apps)} targets")
+            logger.debug(f"Generated Object Repository artifacts: {len(repository.apps)} apps, "
+                       f"{sum(len(app.targets) for app in repository.apps)} targets")
             
         except ImportError:
             logger.warning("Object Repository parser not available")
@@ -1224,7 +1228,7 @@ class ArtifactGenerator:
                     
                     artifacts[f"workflow_packages_{safe_workflow_id}"] = workflow_packages_file
             
-            logger.info(f"Generated package analysis artifacts: {len(package_analysis.packages)} packages analyzed")
+            logger.debug(f"Generated package analysis artifacts: {len(package_analysis.packages)} packages analyzed")
             
             if package_analysis.has_unused_packages:
                 logger.warning(f"Found {len(package_analysis.unused_packages)} unused packages: {', '.join(package_analysis.unused_packages)}")

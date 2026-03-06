@@ -45,7 +45,7 @@ class CallGraphGenerator:
         Returns:
             CallGraphArtifact: Complete call graph with cycles and metrics
         """
-        logger.info(f"Generating call graph for project {manifest.project_name}")
+        logger.debug(f"Generating call graph for project {manifest.project_name}")
 
         # Load invocations data
         invocations = self._load_invocations(invocations_file)
@@ -84,7 +84,7 @@ class CallGraphGenerator:
             generation_config=self._get_generation_config(),
         )
 
-        logger.info(
+        logger.debug(
             f"Call graph generated: {metrics.total_workflows} workflows, "
             f"{metrics.total_dependencies} dependencies, {metrics.cycles_detected} cycles"
         )
@@ -158,12 +158,22 @@ class CallGraphGenerator:
         self, workflows: Dict[str, WorkflowNode], invocations: List[Dict[str, Any]]
     ) -> None:
         """Process invocations into workflow dependencies."""
+        KIND_MAP = {"invoke": "static", "invoke-missing": "missing", "invoke-dynamic": "dynamic"}
+
         for invocation in invocations:
-            source_id = invocation.get("source_workflow_id")
-            target_path = invocation.get("target_workflow_path", "")
-            invocation_type = invocation.get("invocation_type", "unknown")
-            activity_id = invocation.get("activity_id", "")
+            # Read actual invocations.jsonl schema
+            from_composite = invocation.get("from", "")
+            target_path = (
+                invocation.get("targetPath")
+                or invocation.get("target_workflow_path", "")
+            )
+            kind = invocation.get("kind") or invocation.get("invocation_type", "unknown")
+            invocation_type = KIND_MAP.get(kind, kind)
             arguments = invocation.get("arguments", {})
+
+            # Extract workflow_id from composite ID "slug#workflow_id#hash"
+            parts = from_composite.split("#")
+            source_id = parts[1] if len(parts) >= 3 else from_composite
 
             if not source_id:
                 continue
@@ -180,7 +190,7 @@ class CallGraphGenerator:
                 target_workflow_id=target_id or "",
                 target_workflow_path=target_path,
                 invocation_type=invocation_type,
-                call_sites=[activity_id] if activity_id else [],
+                call_sites=[],
                 arguments=arguments,
             )
 

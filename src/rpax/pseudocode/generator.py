@@ -19,29 +19,33 @@ class PseudocodeGenerator:
     def __init__(self):
         self.analyzer = EnhancedXamlAnalyzer()
     
-    def generate_workflow_pseudocode(self, xaml_path: Path) -> PseudocodeArtifact:
+    def generate_workflow_pseudocode(self, xaml_path: Path, workflow_id: str | None = None) -> PseudocodeArtifact:
         """Generate pseudocode for a single workflow.
-        
+
         Args:
             xaml_path: Path to workflow XAML file
-            
+            workflow_id: Stable relative workflow ID (e.g. "Framework/CheckExists").
+                         Defaults to the file stem when not provided, which loses
+                         subdirectory context and causes filename collisions.
+
         Returns:
             PseudocodeArtifact with structured pseudocode entries
         """
+        effective_id = workflow_id or xaml_path.stem
         try:
             # Analyze workflow with enhanced parser
             visual_activities, metadata = self.analyzer.analyze_workflow(xaml_path)
-            
+
             if not visual_activities:
                 logger.warning(f"No visual activities found in {xaml_path}")
-                return self._create_empty_artifact(xaml_path.stem)
-            
+                return self._create_empty_artifact(effective_id)
+
             # Generate pseudocode entries
             entries = self._generate_pseudocode_entries(visual_activities)
-            
+
             # Create artifact
             artifact = PseudocodeArtifact(
-                workflow_id=xaml_path.stem,
+                workflow_id=effective_id,
                 project_id="unknown",  # Default when no project context
                 project_slug="unknown",  # Default when no project context
                 generated_at=datetime.now(timezone.utc).isoformat(),
@@ -62,7 +66,7 @@ class PseudocodeGenerator:
             
         except Exception as e:
             logger.error(f"Failed to generate pseudocode for {xaml_path}: {e}")
-            return self._create_empty_artifact(xaml_path.stem, error=str(e))
+            return self._create_empty_artifact(effective_id, error=str(e))
     
     def generate_project_pseudocode_index(
         self,
