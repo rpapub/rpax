@@ -111,11 +111,15 @@ class PhaseTimer:
         self._py_peak_kb = 0
 
     def __enter__(self) -> "PhaseTimer":
-        # Start or reset tracemalloc
+        # Start or reset tracemalloc.
+        # Use 1 stack frame by default — enough for size accounting with minimal overhead.
+        # 25 frames (the old default) caused 10-50× slowdown in allocation-heavy code
+        # (e.g. cpmf_uips_xaml.parse_content) which skewed bench timings badly.
+        nframes = max(1, self._top_allocs) if self._top_allocs > 0 else 1
         if tracemalloc.is_tracing():
             tracemalloc.clear_traces()
         else:
-            tracemalloc.start(25)
+            tracemalloc.start(nframes)
 
         self._rss0 = _read_proc_rss_kb()
         self._res0 = resource.getrusage(resource.RUSAGE_SELF)

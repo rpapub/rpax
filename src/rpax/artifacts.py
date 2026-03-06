@@ -66,6 +66,9 @@ class ArtifactGenerator:
         original_output_dir = self.output_dir
         self.output_dir = project_dir
 
+        # Cache project ID once so _extract_project_id avoids per-workflow filesystem walks
+        self._cached_project_id = self._resolve_project_id_from_root(project_root)
+
         artifacts = {}
 
         def _phase(name: str, fn, *args, **kwargs):
@@ -628,6 +631,7 @@ class ArtifactGenerator:
         start_time = time.time()
 
         try:
+            import time as _inst_time
             # Import and use the standalone XAML parser
             from cpmf_uips_xaml import XamlParser
             from cpmf_uips_xaml.stages.parsing.extractors import ActivityExtractor
@@ -639,8 +643,13 @@ class ArtifactGenerator:
                 return None
 
             # Parse using pre-decoded string — no second file read
+            _t_pc0 = _inst_time.perf_counter_ns()
             parser = XamlParser()
             parse_result = parser.parse_content(xml_str, str(workflow.file_path))
+            logger.trace(  # type: ignore[attr-defined]
+                "[%s] cpmf parse_content %.1fms", workflow_id,
+                (_inst_time.perf_counter_ns() - _t_pc0) / 1e6
+            )
 
             if not parse_result.success or not parse_result.content:
                 logger.warning(f"Failed to parse XAML for activity instances: {workflow.file_path} - Errors: {parse_result.errors}")
@@ -665,11 +674,16 @@ class ArtifactGenerator:
             # xml_root already provided by caller — no additional file read needed
 
             # Extract activity instances with complete business logic
+            _t_ext0 = _inst_time.perf_counter_ns()
             activities = extractor.extract_activity_instances(
                 xml_root,
                 parse_result.content.namespaces,
                 workflow_id,
                 project_id
+            )
+            logger.trace(  # type: ignore[attr-defined]
+                "[%s] extract_activity_instances %.1fms → %d activities", workflow_id,
+                (_inst_time.perf_counter_ns() - _t_ext0) / 1e6, len(activities)
             )
             
             # Generate artifact according to implementation plan schema
@@ -716,46 +730,50 @@ class ArtifactGenerator:
             logger.debug(f"Full traceback: {traceback.format_exc()}")
             return None
     
-    def _extract_project_id(self, workflow, workflow_path: Path) -> str:
-        """Extract or generate project ID for activity instances.
-        
-        Args:
-            workflow: Workflow object from workflow index
-            workflow_path: Path to XAML workflow file
-            
-        Returns:
-            Project ID string for activity identification
+    def _resolve_project_id_from_root(self, project_root: Path) -> str:
+        """Read project.json once and return a stable project ID string.
+
+        Called once per generate_all_artifacts() invocation; result cached in
+        self._cached_project_id so _extract_project_id() never hits the filesystem
+        again for subsequent workflows.
         """
-        # Try to get project ID from workflow object
-        project_id = getattr(workflow, 'project_id', None)
+        try:
+            project_json_file = project_root / "project.json"
+            if project_json_file.exists():
+                with open(project_json_file, "r", encoding="utf-8") as f:
+                    project_data = json.load(f)
+                if "projectId" in project_data and project_data["projectId"]:
+                    return project_data["projectId"][:8]
+                if "name" in project_data:
+                    return project_data["name"].lower().replace(" ", "-")[:20]
+        except Exception:
+            pass
+        return project_root.name.lower().replace(" ", "-")[:20]
+
+    def _extract_project_id(self, workflow, workflow_path: Path) -> str:
+        """Return project ID for activity instances.
+
+        Uses self._cached_project_id (set once by generate_all_artifacts) to
+        avoid per-workflow filesystem walks on slow mounts (e.g. WSL2 /mnt/d/).
+        Falls back to a filesystem walk only when called outside that context.
+        """
+        # Fast path: cache set by generate_all_artifacts()
+        if hasattr(self, "_cached_project_id") and self._cached_project_id:
+            return self._cached_project_id
+
+        # Fallback: workflow object carries project_id
+        project_id = getattr(workflow, "project_id", None)
         if project_id:
-            return project_id[:20]  # Limit length
-        
-        # Generate project slug from directory structure
+            return project_id[:20]
+
+        # Last resort: walk up to project.json (slow on network/WSL2 mounts)
         project_json_path = workflow_path.parent
-        while project_json_path != project_json_path.parent:  # Not at root
+        while project_json_path != project_json_path.parent:
             if (project_json_path / "project.json").exists():
                 break
             project_json_path = project_json_path.parent
-        
-        # Create project ID from directory name
-        project_name = project_json_path.name.lower().replace(" ", "-")
-        
-        # Try to load project.json for proper ID
-        try:
-            import json
-            project_json_file = project_json_path / "project.json"
-            if project_json_file.exists():
-                with open(project_json_file, 'r', encoding='utf-8') as f:
-                    project_data = json.load(f)
-                    if 'projectId' in project_data and project_data['projectId']:
-                        return project_data['projectId'][:8]  # Use first 8 chars of UUID
-                    elif 'name' in project_data:
-                        return project_data['name'].lower().replace(" ", "-")[:20]
-        except Exception:
-            pass  # Fall back to directory name
-        
-        return project_name[:20]
+
+        return self._resolve_project_id_from_root(project_json_path)
 
     def _update_projects_index(
         self,

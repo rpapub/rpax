@@ -164,23 +164,21 @@ class EnhancedXamlAnalyzer:
         
         return results
     
-    def _generate_stable_node_id(self, elem: ET.Element, parent_path: str, tag: str, 
+    def _generate_stable_node_id(self, elem: ET.Element, parent_path: str, tag: str,
                                 parent_elem: ET.Element | None = None) -> str:
-        """Generate stable indexed node ID like /Sequence[0]/If[1]/Then/Click[0]."""        
+        """Generate stable indexed node ID like /Sequence[0]/If[1]/Then/Click[0].
+
+        Uses self.sibling_counters as an O(1) cache keyed by (parent_elem id, tag).
+        Called only for visual activities so the counter tracks visual siblings only.
+        """
         if parent_elem is None:
-            # Root element
             return f"/{tag}[0]"
-        
-        # Count preceding siblings of the same type that are visual
-        sibling_count = 0
-        for sibling in parent_elem:
-            if sibling is elem:
-                break
-            sibling_tag = self._get_local_tag(sibling)
-            if sibling_tag == tag and self._is_visual_activity(sibling, sibling_tag):
-                sibling_count += 1
-        
-        # Build indexed path
+
+        # Increment-and-read: O(1) instead of O(siblings) sibling scan
+        cache_key = (id(parent_elem), tag)
+        sibling_count = self.sibling_counters.get(cache_key, 0)
+        self.sibling_counters[cache_key] = sibling_count + 1
+
         if parent_path:
             return f"{parent_path}/{tag}[{sibling_count}]"
         else:
@@ -399,17 +397,24 @@ class EnhancedXamlAnalyzer:
         
         return metrics
 
-    def generate_activity_tree_json(self, visual_activities: list[EnhancedActivityNode], 
+    def generate_activity_tree_json(self, visual_activities: list[EnhancedActivityNode],
                                    metadata: dict) -> dict:
         """Generate activities.tree JSON structure."""
-        
-        # Find root activities (those with no parent)
-        root_activities = [act for act in visual_activities if act.parent_id is None]
-        
+        from collections import defaultdict
+
+        # Build parent→children index once: O(N) instead of O(N²) per-node scan
+        children_by_parent: dict[str, list[EnhancedActivityNode]] = defaultdict(list)
+        root_activities: list[EnhancedActivityNode] = []
+        for act in visual_activities:
+            if act.parent_id is None:
+                root_activities.append(act)
+            else:
+                children_by_parent[act.parent_id].append(act)
+
         def serialize_node(node: EnhancedActivityNode) -> dict:
-            # Find children
-            children = [act for act in visual_activities if act.parent_id == node.node_id]
-            
+            # O(1) lookup via pre-built index
+            children = children_by_parent.get(node.node_id, [])
+
             return {
                 "nodeId": node.node_id,
                 "activityType": node.tag,
