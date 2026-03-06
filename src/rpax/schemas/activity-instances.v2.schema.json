@@ -1,0 +1,164 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://rpax.dev/schemas/activity-instances.v2.schema.json",
+  "title": "rpax activity instances artifact v2",
+  "description": "Schema for activities.instances/*.json artifacts (schemaVersion 2.0). All envelope keys use camelCase. The properties{} object mirrors XAML attribute names and may contain PascalCase keys.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "workflowId",
+    "generatedAt",
+    "totalActivities",
+    "activities"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "2.0",
+      "description": "Artifact schema version"
+    },
+    "workflowId": {
+      "type": "string",
+      "description": "Workflow identifier (relative path)"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 generation timestamp"
+    },
+    "totalActivities": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total number of extracted activity instances"
+    },
+    "activities": {
+      "type": "array",
+      "description": "Activity instance records",
+      "items": {
+        "$ref": "#/$defs/activityInstance"
+      }
+    }
+  },
+  "$defs": {
+    "activityInstance": {
+      "type": "object",
+      "required": ["activityId", "workflowId", "activityType", "nodeId", "depth", "isVisible"],
+      "properties": {
+        "activityId": {
+          "type": "string",
+          "description": "Stable unique activity identifier: projectId#workflowId#nodeId#contentHash"
+        },
+        "workflowId": {
+          "type": "string",
+          "description": "Parent workflow identifier"
+        },
+        "activityType": {
+          "type": "string",
+          "description": "Activity type (local XML tag name)"
+        },
+        "activityTypeShort": {
+          "type": "string",
+          "description": "Short type name (local part only)"
+        },
+        "activityNamespace": {
+          "type": ["string", "null"],
+          "description": "XML namespace URI"
+        },
+        "activityPrefix": {
+          "type": ["string", "null"],
+          "description": "XML namespace prefix"
+        },
+        "displayName": {
+          "type": ["string", "null"],
+          "description": "User-visible activity name from DisplayName attribute"
+        },
+        "nodeId": {
+          "type": "string",
+          "description": "Hierarchical path identifier within the workflow"
+        },
+        "parentActivityId": {
+          "type": ["string", "null"],
+          "description": "Parent activity identifier in the hierarchy"
+        },
+        "depth": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Nesting depth (0 = root)"
+        },
+        "arguments": {
+          "type": "object",
+          "description": "Activity arguments extracted from XML attributes"
+        },
+        "configuration": {
+          "type": "object",
+          "description": "Nested configuration objects (Target, etc.)"
+        },
+        "properties": {
+          "type": "object",
+          "description": "Visible business-logic properties (PascalCase keys mirror XAML source)"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Technical metadata (ViewState, IdRef, etc.)"
+        },
+        "expressions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "UiPath expressions found in this activity"
+        },
+        "variablesReferenced": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Variable names referenced by this activity"
+        },
+        "selectors": {
+          "type": "object",
+          "description": "UI selectors extracted from this activity"
+        },
+        "annotation": {
+          "type": ["string", "null"],
+          "description": "sap2010:Annotation.AnnotationText (decoded plain text)"
+        },
+        "annotationBlock": {
+          "description": "Structured annotation with parsed tags"
+        },
+        "isVisible": {
+          "type": "boolean",
+          "description": "True if the activity is visible in the workflow designer"
+        },
+        "containerType": {
+          "type": ["string", "null"],
+          "description": "Parent container XML tag name"
+        },
+        "visibleAttributes": {
+          "type": "object",
+          "description": "User-visible configuration attributes (legacy)"
+        },
+        "invisibleAttributes": {
+          "type": "object",
+          "description": "Technical/ViewState attributes (legacy)"
+        },
+        "childActivities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Child activity identifiers (legacy hierarchy)"
+        },
+        "xmlSpan": {
+          "type": ["string", "null"],
+          "description": "Raw XML substring for stable ID generation"
+        },
+        "annotationBlock": {
+          "description": "Structured annotation block with parsed tags"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

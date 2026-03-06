@@ -2,10 +2,9 @@
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Set
 
 from rpax.config import RpaxConfig
-from rpax.models.callgraph import CallGraphArtifact, WorkflowNode
+from rpax.models.callgraph import CallGraphArtifact
 from rpax.pseudocode.models import PseudocodeArtifact
 
 logger = logging.getLogger(__name__)
@@ -22,20 +21,20 @@ class RecursivePseudocodeGenerator:
     def generate_recursive_pseudocode(
         self,
         workflow_id: str,
-        pseudocode_artifacts: Dict[str, PseudocodeArtifact],
-        visited: Set[str] = None,
+        pseudocode_artifacts: dict[str, PseudocodeArtifact],
+        visited: set[str] = None,
         current_depth: int = 0,
-        indent_level: int = 0
-    ) -> List[str]:
+        indent_level: int = 0,
+    ) -> list[str]:
         """Generate recursive pseudocode for a workflow.
-        
+
         Args:
             workflow_id: Starting workflow ID
             pseudocode_artifacts: Map of workflow_id -> PseudocodeArtifact
             visited: Set of visited workflow IDs to detect cycles
             current_depth: Current recursion depth
             indent_level: Current indentation level
-            
+
         Returns:
             List of pseudocode lines with recursive expansion
         """
@@ -69,7 +68,7 @@ class RecursivePseudocodeGenerator:
                 # Check if this is an InvokeWorkflowFile activity
                 if self._is_invoke_workflow_activity(activity):
                     invoked_workflow_id = self._extract_invoked_workflow_id(activity)
-                    
+
                     if invoked_workflow_id:
                         # Get recursive expansion — pass visited directly; finally block
                         # handles backtracking via visited.discard(workflow_id)
@@ -78,7 +77,7 @@ class RecursivePseudocodeGenerator:
                             pseudocode_artifacts,
                             visited,
                             current_depth + 1,
-                            indent_level + 1
+                            indent_level + 1,
                         )
                         expanded_lines.extend(recursive_lines)
 
@@ -88,32 +87,32 @@ class RecursivePseudocodeGenerator:
 
         return expanded_lines
 
-    def _is_invoke_workflow_activity(self, activity: Dict) -> bool:
+    def _is_invoke_workflow_activity(self, activity: dict) -> bool:
         """Check if activity is an InvokeWorkflowFile."""
         activity_type = activity.get("type", "")
         display_name = activity.get("displayName", "")
-        
+
         return (
-            "InvokeWorkflowFile" in activity_type or
-            "Invoke Workflow File" in display_name or
-            "invoke" in activity_type.lower()
+            "InvokeWorkflowFile" in activity_type
+            or "Invoke Workflow File" in display_name
+            or "invoke" in activity_type.lower()
         )
 
-    def _extract_invoked_workflow_id(self, activity: Dict) -> str | None:
+    def _extract_invoked_workflow_id(self, activity: dict) -> str | None:
         """Extract the target workflow ID from InvokeWorkflowFile activity."""
         workflow_id = activity.get("workflowId")
         if workflow_id:
             return workflow_id
 
         # Try to extract from activity path or other fields
-        activity_path = activity.get("path", "")
+        activity_path = activity.get("activityPath", "")
         if "InvokeWorkflowFile" in activity_path:
             # Look for the workflow being invoked in the call graph
             return self._find_target_from_call_graph(activity)
 
         return None
 
-    def _find_target_from_call_graph(self, activity: Dict) -> str | None:
+    def _find_target_from_call_graph(self, activity: dict) -> str | None:
         """Find target workflow using call graph dependencies."""
         # Get the workflow that contains this activity
         source_workflow_id = activity.get("sourceWorkflowId")
@@ -123,7 +122,7 @@ class RecursivePseudocodeGenerator:
         # Look in call graph for dependencies from this workflow
         if source_workflow_id in self.call_graph.workflows:
             source_node = self.call_graph.workflows[source_workflow_id]
-            
+
             # Find dependency that matches this activity
             activity_id = activity.get("activityId", "")
             for dependency in source_node.dependencies:
@@ -132,12 +131,12 @@ class RecursivePseudocodeGenerator:
 
         return None
 
-    def _format_activity_line(self, activity: Dict, indent_level: int) -> str:
+    def _format_activity_line(self, activity: dict, indent_level: int) -> str:
         """Format an activity as a pseudocode line with proper indentation."""
         indent = "  " * indent_level
         display_name = activity.get("displayName", "")
         activity_type = activity.get("type", "")
-        path = activity.get("path", "")
+        activity_path = activity.get("activityPath", "")
 
         # Create pseudocode line in gist format
         if display_name:
@@ -145,8 +144,8 @@ class RecursivePseudocodeGenerator:
         else:
             line = f"{indent}- {activity_type}"
 
-        if path:
-            line += f" (Path: {path})"
+        if activity_path:
+            line += f" (ActivityPath: {activity_path})"
 
         return line
 
@@ -155,15 +154,17 @@ class RecursivePseudocodeGenerator:
         indent = "  " * indent_level
         return f"{indent}[DEPTH LIMIT REACHED: {workflow_id}] (max depth: {self.pseudocode_config.max_expansion_depth})"
 
-    def _create_missing_workflow_message(self, workflow_id: str, indent_level: int) -> str:
+    def _create_missing_workflow_message(
+        self, workflow_id: str, indent_level: int
+    ) -> str:
         """Create message for missing workflow."""
         indent = "  " * indent_level
         return f"{indent}[MISSING WORKFLOW: {workflow_id}] (pseudocode not found)"
 
-    def _handle_cycle(self, workflow_id: str, indent_level: int) -> List[str]:
+    def _handle_cycle(self, workflow_id: str, indent_level: int) -> list[str]:
         """Handle cycle detection based on configuration."""
         indent = "  " * indent_level
-        
+
         if self.pseudocode_config.cycle_handling == "detect_and_mark":
             return [f"{indent}[CYCLE DETECTED: {workflow_id}] (already expanded above)"]
         elif self.pseudocode_config.cycle_handling == "detect_and_stop":
@@ -173,16 +174,18 @@ class RecursivePseudocodeGenerator:
             logger.warning(f"Cycle detected for {workflow_id}, ignoring cycle handling")
             return []
         else:
-            return [f"{indent}[CYCLE DETECTED: {workflow_id}] (unknown handling: {self.pseudocode_config.cycle_handling})"]
+            return [
+                f"{indent}[CYCLE DETECTED: {workflow_id}] (unknown handling: {self.pseudocode_config.cycle_handling})"
+            ]
 
     def generate_expanded_artifact(
         self,
         workflow_id: str,
         base_artifact: PseudocodeArtifact,
-        pseudocode_artifacts: Dict[str, PseudocodeArtifact]
+        pseudocode_artifacts: dict[str, PseudocodeArtifact],
     ) -> PseudocodeArtifact:
         """Generate expanded pseudocode artifact with recursive content."""
-        
+
         # Generate recursive pseudocode
         expanded_lines = self.generate_recursive_pseudocode(
             workflow_id, pseudocode_artifacts
@@ -193,6 +196,7 @@ class RecursivePseudocodeGenerator:
             workflow_id=base_artifact.workflow_id,
             project_id=base_artifact.project_id,
             project_slug=base_artifact.project_slug,
+            relative_path=base_artifact.relative_path,
             schema_version="1.1.0",  # Increment for expanded format
             generated_at=base_artifact.generated_at,
             rpax_version=base_artifact.rpax_version,
@@ -202,10 +206,10 @@ class RecursivePseudocodeGenerator:
             # Add expanded content
             expanded_pseudocode=expanded_lines,
             expansion_config={
-                "max_depth": self.pseudocode_config.max_expansion_depth,
-                "cycle_handling": self.pseudocode_config.cycle_handling,
-                "generated_recursive": True
-            }
+                "maxDepth": self.pseudocode_config.max_expansion_depth,
+                "cycleHandling": self.pseudocode_config.cycle_handling,
+                "generatedRecursive": True,
+            },
         )
 
         return expanded_artifact
@@ -214,30 +218,31 @@ class RecursivePseudocodeGenerator:
 def load_call_graph_artifact(call_graph_file: Path) -> CallGraphArtifact:
     """Load call graph artifact from file."""
     import json
-    
+
     with open(call_graph_file, encoding="utf-8") as f:
         call_graph_data = json.load(f)
-    
+
     return CallGraphArtifact(**call_graph_data)
 
 
-def load_pseudocode_artifacts(pseudocode_dir: Path) -> Dict[str, PseudocodeArtifact]:
+def load_pseudocode_artifacts(pseudocode_dir: Path) -> dict[str, PseudocodeArtifact]:
     """Load all pseudocode artifacts from directory."""
     artifacts = {}
-    
+
     for pseudocode_file in pseudocode_dir.rglob("*.json"):
         if pseudocode_file.name == "index.json":
             continue  # Skip index file
-            
+
         try:
             import json
+
             with open(pseudocode_file, encoding="utf-8") as f:
                 artifact_data = json.load(f)
-            
+
             artifact = PseudocodeArtifact(**artifact_data)
             artifacts[artifact.workflow_id] = artifact
-            
+
         except Exception as e:
             logger.warning(f"Failed to load pseudocode artifact {pseudocode_file}: {e}")
-    
+
     return artifacts

@@ -8,17 +8,30 @@ from typing import Any
 
 from rpax import __version__
 from rpax.config import RpaxConfig
-from rpax.models.activity import (
-    ActivityTree,
-)
 from rpax.models.manifest import ProjectManifest
+from rpax.models.packages import analyze_package_usage
 from rpax.models.project import UiPathProject
 from rpax.models.workflow import WorkflowIndex
-from rpax.models.packages import ProjectPackageAnalysis, analyze_package_usage
-from rpax.parser.xaml_analyzer import XamlAnalyzer
 from rpax.parser.enhanced_xaml_analyzer import EnhancedXamlAnalyzer
+from rpax.parser.xaml_analyzer import XamlAnalyzer
 
 logger = logging.getLogger(__name__)
+
+
+def _snake_to_camel(name: str) -> str:
+    """Convert a single snake_case identifier to camelCase."""
+    parts = name.split("_")
+    return parts[0] + "".join(p.title() for p in parts[1:])
+
+
+def _activity_dict_to_camel(data: dict) -> dict:
+    """Rename top-level snake_case keys of an activity dict to camelCase.
+
+    Only the envelope/metadata keys are renamed; nested dicts (properties,
+    arguments, configuration, metadata) keep their original keys because they
+    mirror XAML source attribute names.
+    """
+    return {_snake_to_camel(k): v for k, v in data.items()}
 
 
 class ArtifactGenerator:
@@ -26,7 +39,7 @@ class ArtifactGenerator:
 
     def __init__(self, config: RpaxConfig, output_dir: Path | None = None):
         """Initialize artifact generator.
-        
+
         Args:
             config: rpax configuration
             output_dir: Optional override for output directory
@@ -79,63 +92,89 @@ class ArtifactGenerator:
                 result = fn(*args, **kwargs)
             else:
                 from rpax.utils.diagnostics import PhaseTimer
+
                 with PhaseTimer() as t:
                     result = fn(*args, **kwargs)
-                count = len(result) if isinstance(result, dict) else (1 if result else 0)
+                count = (
+                    len(result) if isinstance(result, dict) else (1 if result else 0)
+                )
                 collect_phases.append(t.result(name, count))
             return result
 
         # Generate manifest.json
-        manifest_file = _phase("manifest", self._generate_manifest, project, workflow_index, project_root)
+        manifest_file = _phase(
+            "manifest", self._generate_manifest, project, workflow_index, project_root
+        )
         artifacts["manifest"] = manifest_file
 
         # Generate workflows.index.json
-        index_file = _phase("workflow_index", self._generate_workflow_index, workflow_index)
+        index_file = _phase(
+            "workflow_index", self._generate_workflow_index, workflow_index
+        )
         artifacts["workflow_index"] = index_file
 
         # Generate invocations.jsonl with actual XAML analysis
-        invocations_file = _phase("invocations", self._generate_invocations_placeholder, workflow_index)
+        invocations_file = _phase(
+            "invocations", self._generate_invocations_placeholder, workflow_index
+        )
         artifacts["invocations"] = invocations_file
 
         # Generate call graph artifact (ISSUE-038 - first-class call graph)
         manifest_data = self._load_manifest_for_callgraph(manifest_file)
         call_graph_file = _phase(
-            "call_graph", self._generate_call_graph_artifact,
-            manifest_data, workflow_index, invocations_file
+            "call_graph",
+            self._generate_call_graph_artifact,
+            manifest_data,
+            workflow_index,
+            invocations_file,
         )
         artifacts["call_graph"] = call_graph_file
 
         # Generate activities artifacts (according to ADR-009)
         if self.config.output.generate_activities:
             activities_artifacts = _phase(
-                "activities", self._generate_activities_artifacts, workflow_index, project_root
+                "activities",
+                self._generate_activities_artifacts,
+                workflow_index,
+                project_root,
             )
             artifacts.update(activities_artifacts)
 
         # Generate pseudocode artifacts (ISSUE-027)
         pseudocode_artifacts = _phase(
-            "pseudocode", self._generate_pseudocode_artifacts, workflow_index, project, project_root
+            "pseudocode",
+            self._generate_pseudocode_artifacts,
+            workflow_index,
+            project,
+            project_root,
         )
         artifacts.update(pseudocode_artifacts)
 
         # Generate expanded pseudocode artifacts (ISSUE-036, ISSUE-040)
         if self.config.pseudocode.generate_expanded:
             expanded_artifacts = _phase(
-                "expanded_pseudocode", self._generate_expanded_pseudocode_artifacts,
-                call_graph_file, pseudocode_artifacts.get("pseudocode_index")
+                "expanded_pseudocode",
+                self._generate_expanded_pseudocode_artifacts,
+                call_graph_file,
+                pseudocode_artifacts.get("pseudocode_index"),
             )
             artifacts.update(expanded_artifacts)
 
         # Generate Object Repository artifacts for Library projects
         if project.project_type.lower() == "library":
             object_repository_artifacts = _phase(
-                "object_repository", self._generate_object_repository_artifacts, project_root
+                "object_repository",
+                self._generate_object_repository_artifacts,
+                project_root,
             )
             artifacts.update(object_repository_artifacts)
 
         # Generate package analysis artifacts
         package_artifacts = _phase(
-            "package_analysis", self._generate_package_analysis_artifacts, project, workflow_index
+            "package_analysis",
+            self._generate_package_analysis_artifacts,
+            project,
+            workflow_index,
         )
         artifacts.update(package_artifacts)
 
@@ -148,10 +187,7 @@ class ArtifactGenerator:
         return artifacts
 
     def _generate_manifest(
-        self,
-        project: UiPathProject,
-        workflow_index: WorkflowIndex,
-        project_root: Path
+        self, project: UiPathProject, workflow_index: WorkflowIndex, project_root: Path
     ) -> Path:
         """Generate project manifest.json."""
         manifest = ProjectManifest(
@@ -176,12 +212,14 @@ class ArtifactGenerator:
             total_invocations=0,  # TODO: Calculate from invocation analysis
             parse_errors=workflow_index.failed_parses,
             scan_config=self._serialize_scan_config(),
-            validation_config=self._serialize_validation_config()
+            validation_config=self._serialize_validation_config(),
         )
 
         manifest_file = self.output_dir / "manifest.json"
         with open(manifest_file, "w", encoding="utf-8") as f:
-            json.dump(manifest.model_dump(by_alias=True), f, indent=2, ensure_ascii=False)
+            json.dump(
+                manifest.model_dump(by_alias=True), f, indent=2, ensure_ascii=False
+            )
 
         return manifest_file
 
@@ -194,7 +232,7 @@ class ArtifactGenerator:
                 workflow_index.model_dump(by_alias=True),
                 f,
                 indent=2,
-                ensure_ascii=False
+                ensure_ascii=False,
             )
 
         return index_file
@@ -206,6 +244,7 @@ class ArtifactGenerator:
         try:
             # Import XAML analyzer
             from rpax.parser.xaml_analyzer import XamlAnalyzer
+
             analyzer = XamlAnalyzer()
 
             # Determine project root from workflow index
@@ -220,33 +259,45 @@ class ArtifactGenerator:
 
                 # Use the passed workflow index to iterate over workflows
                 for workflow in workflow_index.workflows:
-                        workflow_path = Path(workflow.file_path)
-                        if workflow_path.exists():
-                            try:
-                                invocations, arguments = analyzer.analyze_workflow(workflow_path)
+                    workflow_path = Path(workflow.file_path)
+                    if workflow_path.exists():
+                        try:
+                            invocations, arguments = analyzer.analyze_workflow(
+                                workflow_path
+                            )
 
-                                # Write invocations as JSONL
-                                for invocation in invocations:
-                                    # Convert invocation to manifest ID format
-                                    from_id = workflow.id
+                            # Write invocations as JSONL
+                            for invocation in invocations:
+                                # Convert invocation to manifest ID format
+                                from_id = workflow.id
 
-                                    # Try to resolve target workflow ID
-                                    to_id = self._resolve_target_workflow_id(invocation.target_path, workflow_path, project_root, workflow_index)
+                                # Try to resolve target workflow ID
+                                to_id = self._resolve_target_workflow_id(
+                                    invocation.target_path,
+                                    workflow_path,
+                                    project_root,
+                                    workflow_index,
+                                )
 
-                                    invocation_record = {
-                                        "kind": invocation.kind,
-                                        "from": from_id,
-                                        "to": to_id,
-                                        "arguments": invocation.arguments,
-                                        "activityName": invocation.activity_name,
-                                        "targetPath": invocation.target_path
-                                    }
+                                invocation_record = {
+                                    "kind": invocation.kind,
+                                    "from": from_id,
+                                    "to": to_id,
+                                    "arguments": invocation.arguments,
+                                    "activityName": invocation.activity_name,
+                                    "targetPath": invocation.target_path,
+                                }
 
-                                    f.write(json.dumps(invocation_record, ensure_ascii=False) + "\n")
-                                    invocation_count += 1
+                                f.write(
+                                    json.dumps(invocation_record, ensure_ascii=False)
+                                    + "\n"
+                                )
+                                invocation_count += 1
 
-                            except Exception as e:
-                                logger.warning(f"Failed to analyze workflow {workflow_path}: {e}")
+                        except Exception as e:
+                            logger.warning(
+                                f"Failed to analyze workflow {workflow_path}: {e}"
+                            )
 
                 logger.debug(f"Generated {invocation_count} invocation records")
 
@@ -255,21 +306,26 @@ class ArtifactGenerator:
             with open(invocations_file, "w", encoding="utf-8") as f:
                 f.write(f"# Invocations JSONL file - generated {self.timestamp}\n")
                 f.write("# Placeholder: XAML analyzer not available\n")
-                f.write("# Each line will contain a JSON object representing a workflow invocation\n")
+                f.write(
+                    "# Each line will contain a JSON object representing a workflow invocation\n"
+                )
 
         return invocations_file
 
     def _resolve_target_workflow_id(
-        self, 
-        target_path: str, 
-        current_workflow_path: Path, 
-        project_root: Path, 
-        workflow_index: WorkflowIndex
+        self,
+        target_path: str,
+        current_workflow_path: Path,
+        project_root: Path,
+        workflow_index: WorkflowIndex,
     ) -> str:
         """Resolve target workflow path to workflow ID using proper workflow lookup."""
         try:
             # For dynamic invocations, return the expression as-is
-            if any(indicator in target_path for indicator in ["{", "}", "[", "]", "Path.Combine", "+"]):
+            if any(
+                indicator in target_path
+                for indicator in ["{", "}", "[", "]", "Path.Combine", "+"]
+            ):
                 return f"dynamic:{target_path}"
 
             # Normalize the target path to forward slashes for consistent comparison
@@ -278,20 +334,24 @@ class ArtifactGenerator:
             # First, try direct lookup in workflow index by relative path
             for workflow in workflow_index.workflows:
                 workflow_relative_path = workflow.relative_path
-                
+
                 # Check exact match
                 if workflow_relative_path == target_path_normalized:
                     return workflow.id
-                
+
                 # Check if workflow file name matches (for project root workflows)
-                if workflow_relative_path.endswith(f"/{target_path_normalized}") or workflow_relative_path == target_path_normalized:
+                if (
+                    workflow_relative_path.endswith(f"/{target_path_normalized}")
+                    or workflow_relative_path == target_path_normalized
+                ):
                     return workflow.id
 
             # If direct lookup failed, try filesystem-based resolution
             current_dir = current_workflow_path.parent
             possible_paths = [
-                project_root / target_path,  # From project root (most common for test workflows)
-                current_dir / target_path,   # Relative to current workflow
+                project_root
+                / target_path,  # From project root (most common for test workflows)
+                current_dir / target_path,  # Relative to current workflow
                 current_dir.parent / target_path,  # Relative to parent directory
             ]
 
@@ -302,7 +362,7 @@ class ArtifactGenerator:
                         # Calculate relative path from project root
                         relative_path = possible_path.relative_to(project_root)
                         relative_path_str = str(relative_path).replace("\\", "/")
-                        
+
                         # Find the matching workflow in the index
                         for workflow in workflow_index.workflows:
                             if workflow.relative_path == relative_path_str:
@@ -323,7 +383,7 @@ class ArtifactGenerator:
         return {
             "exclude": self.config.scan.exclude,
             "followDynamic": self.config.scan.follow_dynamic,
-            "maxDepth": self.config.scan.max_depth
+            "maxDepth": self.config.scan.max_depth,
         }
 
     def _serialize_validation_config(self) -> dict[str, Any]:
@@ -331,7 +391,7 @@ class ArtifactGenerator:
         return {
             "failOnMissing": self.config.validation.fail_on_missing,
             "failOnCycles": self.config.validation.fail_on_cycles,
-            "warnOnDynamic": self.config.validation.warn_on_dynamic
+            "warnOnDynamic": self.config.validation.warn_on_dynamic,
         }
 
     def generate_summary_report(self, artifacts: dict[str, Path]) -> Path:
@@ -356,7 +416,9 @@ class ArtifactGenerator:
 
         return summary_file
 
-    def _build_summary_markdown(self, manifest: dict[str, Any], index: dict[str, Any]) -> str:
+    def _build_summary_markdown(
+        self, manifest: dict[str, Any], index: dict[str, Any]
+    ) -> str:
         """Build summary markdown content."""
         lines = [
             "# rpax Analysis Summary",
@@ -390,11 +452,13 @@ class ArtifactGenerator:
         else:
             lines.append("- No dependencies found")
 
-        lines.extend([
-            "",
-            "## Entry Points",
-            "",
-        ])
+        lines.extend(
+            [
+                "",
+                "## Entry Points",
+                "",
+            ]
+        )
 
         entry_points = manifest.get("entryPoints", [])
         if entry_points:
@@ -407,41 +471,49 @@ class ArtifactGenerator:
         else:
             lines.append("- No entry points defined")
 
-        lines.extend([
-            "",
-            "## Generated Artifacts",
-            "",
-            "- `manifest.json` - Project metadata and analysis summary",
-            "- `workflows.index.json` - Complete workflow inventory",
-            "- `invocations.jsonl` - Workflow invocation data (placeholder in v0.0.1)",
-            "",
-            "---",
-            f"*Generated by [rpax](https://github.com/rpapub/rpax) v{manifest.get('rpaxVersion', 'Unknown')}*"
-        ])
+        lines.extend(
+            [
+                "",
+                "## Generated Artifacts",
+                "",
+                "- `manifest.json` - Project metadata and analysis summary",
+                "- `workflows.index.json` - Complete workflow inventory",
+                "- `invocations.jsonl` - Workflow invocation data (placeholder in v0.0.1)",
+                "",
+                "---",
+                f"*Generated by [rpax](https://github.com/rpapub/rpax) v{manifest.get('rpaxVersion', 'Unknown')}*",
+            ]
+        )
 
         return "\n".join(lines)
 
-    def _generate_activities_artifacts(self, workflow_index: WorkflowIndex, project_root: Path) -> dict[str, Path]:
+    def _generate_activities_artifacts(
+        self, workflow_index: WorkflowIndex, project_root: Path
+    ) -> dict[str, Path]:
         """Generate activities artifacts according to ADR-009.
-        
+
         Args:
             workflow_index: Discovered workflows
             project_root: Root directory of project
-            
+
         Returns:
             Dict mapping artifact names to file paths
         """
         activities_artifacts = {}
 
         # Create activities directories
-        activities_instances_dir = self.output_dir / "activities.instances"  # NEW: Activity instances directory
+        activities_instances_dir = (
+            self.output_dir / "activities.instances"
+        )  # NEW: Activity instances directory
         activities_tree_dir = self.output_dir / "activities.tree"
         activities_cfg_dir = self.output_dir / "activities.cfg"
         activities_refs_dir = self.output_dir / "activities.refs"
         metrics_dir = self.output_dir / "metrics"
         paths_dir = self.output_dir / "paths"
 
-        activities_instances_dir.mkdir(parents=True, exist_ok=True)  # NEW: Create instances directory
+        activities_instances_dir.mkdir(
+            parents=True, exist_ok=True
+        )  # NEW: Create instances directory
         activities_tree_dir.mkdir(parents=True, exist_ok=True)
         activities_cfg_dir.mkdir(parents=True, exist_ok=True)
         activities_refs_dir.mkdir(parents=True, exist_ok=True)
@@ -453,35 +525,50 @@ class ArtifactGenerator:
             analyzer = EnhancedXamlAnalyzer(
                 expression_language=getattr(self, "_expression_language", "VisualBasic")
             )
-            logger.debug(f"Using enhanced XAML parser for {workflow_index.total_workflows} workflows")
+            logger.debug(
+                f"Using enhanced XAML parser for {workflow_index.total_workflows} workflows"
+            )
         else:
             analyzer = XamlAnalyzer()
-            logger.debug(f"Using legacy XAML parser for {workflow_index.total_workflows} workflows")
+            logger.debug(
+                f"Using legacy XAML parser for {workflow_index.total_workflows} workflows"
+            )
 
         for workflow in workflow_index.workflows:
             try:
                 workflow_path = project_root / workflow.relative_path
-                workflow_id = workflow.relative_path.replace("\\", "/").replace(".xaml", "")
+                workflow_id = workflow.relative_path.replace("\\", "/").replace(
+                    ".xaml", ""
+                )
 
                 logger.debug(f"Processing activities for {workflow_id}")
 
                 # Parse ONCE — share the root element across all analyzers and activity instances
-                from defusedxml.ElementTree import fromstring as defused_fromstring
                 import time as _time
+
+                from defusedxml.ElementTree import fromstring as defused_fromstring
+
                 _t0 = _time.perf_counter_ns()
                 xml_bytes = workflow_path.read_bytes()
                 xml_str = xml_bytes.decode("utf-8-sig", errors="replace")
                 xml_root = defused_fromstring(xml_str)
                 _parse_ms = (_time.perf_counter_ns() - _t0) / 1e6
                 logger.trace(  # type: ignore[attr-defined]
-                    "[%s] parsed %.1f KB in %.1fms", workflow_id, len(xml_bytes) / 1024, _parse_ms
+                    "[%s] parsed %.1f KB in %.1fms",
+                    workflow_id,
+                    len(xml_bytes) / 1024,
+                    _parse_ms,
                 )
 
                 # Extract activity tree
                 _t1 = _time.perf_counter_ns()
-                activity_tree = analyzer.extract_activity_tree(workflow_path, root=xml_root)
+                activity_tree = analyzer.extract_activity_tree(
+                    workflow_path, root=xml_root
+                )
                 logger.trace(  # type: ignore[attr-defined]
-                    "[%s] extract_activity_tree %.1fms", workflow_id, (_time.perf_counter_ns() - _t1) / 1e6
+                    "[%s] extract_activity_tree %.1fms",
+                    workflow_id,
+                    (_time.perf_counter_ns() - _t1) / 1e6,
                 )
                 if activity_tree:
                     # Generate activities.tree/<wfId>.json
@@ -496,15 +583,23 @@ class ArtifactGenerator:
                     activities_artifacts[f"activities_tree_{workflow_id}"] = tree_file
 
                 # NEW: Generate activities.instances/<wfId>.json (ADR-009 ActivityInstance)
-                instances_artifact = self._generate_activity_instances(workflow, xml_str, xml_root, workflow_id)
+                instances_artifact = self._generate_activity_instances(
+                    workflow, xml_str, xml_root, workflow_id
+                )
                 if instances_artifact:
-                    activities_artifacts[f"activities_instances_{workflow_id}"] = instances_artifact
+                    activities_artifacts[f"activities_instances_{workflow_id}"] = (
+                        instances_artifact
+                    )
 
                 # Extract control flow
                 _t2 = _time.perf_counter_ns()
-                control_flow = analyzer.extract_control_flow(workflow_path, root=xml_root)
+                control_flow = analyzer.extract_control_flow(
+                    workflow_path, root=xml_root
+                )
                 logger.trace(  # type: ignore[attr-defined]
-                    "[%s] extract_control_flow %.1fms", workflow_id, (_time.perf_counter_ns() - _t2) / 1e6
+                    "[%s] extract_control_flow %.1fms",
+                    workflow_id,
+                    (_time.perf_counter_ns() - _t2) / 1e6,
                 )
                 if control_flow:
                     # Generate activities.cfg/<wfId>.jsonl
@@ -517,7 +612,7 @@ class ArtifactGenerator:
                                 "from": edge.from_node_id,
                                 "to": edge.to_node_id,
                                 "type": edge.edge_type,
-                                "condition": edge.condition
+                                "condition": edge.condition,
                             }
                             f.write(json.dumps(edge_data) + "\n")
 
@@ -527,7 +622,9 @@ class ArtifactGenerator:
                 _t3 = _time.perf_counter_ns()
                 resources = analyzer.extract_resources(workflow_path, root=xml_root)
                 logger.trace(  # type: ignore[attr-defined]
-                    "[%s] extract_resources %.1fms", workflow_id, (_time.perf_counter_ns() - _t3) / 1e6
+                    "[%s] extract_resources %.1fms",
+                    workflow_id,
+                    (_time.perf_counter_ns() - _t3) / 1e6,
                 )
                 if resources:
                     # Generate activities.refs/<wfId>.json
@@ -543,9 +640,10 @@ class ArtifactGenerator:
                                 "nodeId": ref.node_id,
                                 "property": ref.property_name,
                                 "isDynamic": ref.is_dynamic,
-                                "rawValue": ref.raw_value
-                            } for ref in resources.references
-                        ]
+                                "rawValue": ref.raw_value,
+                            }
+                            for ref in resources.references
+                        ],
                     }
 
                     with open(refs_file, "w", encoding="utf-8") as f:
@@ -567,7 +665,8 @@ class ArtifactGenerator:
                         "logCount": metrics.log_count,
                         "tryCatchCount": metrics.try_catch_count,
                         "selectorCount": metrics.selector_count,
-                        "activityTypes": metrics.activity_types
+                        "annotatedActivityCount": metrics.annotated_activity_count,
+                        "activityTypes": metrics.activity_types,
                     }
 
                     with open(metrics_file, "w", encoding="utf-8") as f:
@@ -576,21 +675,23 @@ class ArtifactGenerator:
                     activities_artifacts[f"metrics_{workflow_id}"] = metrics_file
 
             except Exception as e:
-                logger.warning(f"Failed to generate activities for {workflow.relative_path}: {e}")
+                logger.warning(
+                    f"Failed to generate activities for {workflow.relative_path}: {e}"
+                )
 
         logger.debug(f"Generated {len(activities_artifacts)} activities artifacts")
         return activities_artifacts
 
     def _serialize_activity_tree(self, activity_tree) -> dict[str, Any]:
         """Serialize activity tree to JSON-compatible format.
-        
+
         Handles both legacy ActivityTree and enhanced activity tree formats.
         """
         # Check if this is an enhanced activity tree (has .data attribute)
-        if hasattr(activity_tree, 'data'):
+        if hasattr(activity_tree, "data"):
             # Enhanced activity tree - return the pre-serialized JSON data
             return activity_tree.data
-        
+
         # Legacy ActivityTree - use original serialization logic
         def serialize_node(node):
             return {
@@ -603,7 +704,7 @@ class ArtifactGenerator:
                 "continueOnError": node.continue_on_error,
                 "timeout": node.timeout,
                 "viewStateId": node.view_state_id,
-                "children": [serialize_node(child) for child in node.children]
+                "children": [serialize_node(child) for child in node.children],
             }
 
         return {
@@ -614,10 +715,12 @@ class ArtifactGenerator:
             "variables": activity_tree.variables,
             "arguments": activity_tree.arguments,
             "imports": activity_tree.imports,
-            "rootNode": serialize_node(activity_tree.root_node)
+            "rootNode": serialize_node(activity_tree.root_node),
         }
 
-    def _generate_activity_instances(self, workflow, xml_str: str, xml_root: "ET.Element", workflow_id: str) -> Path | None:
+    def _generate_activity_instances(
+        self, workflow, xml_str: str, xml_root: "ET.Element", workflow_id: str
+    ) -> Path | None:
         """Generate activities.instances/{wfId}.json artifact as specified in ADR-009.
 
         Enhanced with performance monitoring, error handling, and configuration support.
@@ -632,18 +735,22 @@ class ArtifactGenerator:
             Path to generated instances file or None if failed
         """
         import time
+
         start_time = time.time()
 
         try:
             import time as _inst_time
+            from dataclasses import asdict
+
             # Import and use the standalone XAML parser
             from cpmf_uips_xaml import XamlParser
             from cpmf_uips_xaml.stages.parsing.extractors import ActivityExtractor
-            from dataclasses import asdict
 
             # Check if activity instances generation is enabled
-            if not getattr(self.config.output, 'generate_activity_instances', True):
-                logger.debug(f"Activity instances generation disabled for {workflow_id}")
+            if not getattr(self.config.output, "generate_activity_instances", True):
+                logger.debug(
+                    f"Activity instances generation disabled for {workflow_id}"
+                )
                 return None
 
             # Parse using pre-decoded string — no second file read
@@ -651,15 +758,20 @@ class ArtifactGenerator:
             parser = XamlParser()
             parse_result = parser.parse_content(xml_str, str(workflow.file_path))
             logger.trace(  # type: ignore[attr-defined]
-                "[%s] cpmf parse_content %.1fms", workflow_id,
-                (_inst_time.perf_counter_ns() - _t_pc0) / 1e6
+                "[%s] cpmf parse_content %.1fms",
+                workflow_id,
+                (_inst_time.perf_counter_ns() - _t_pc0) / 1e6,
             )
 
             if not parse_result.success or not parse_result.content:
-                logger.warning(f"Failed to parse XAML for activity instances: {workflow.file_path} - Errors: {parse_result.errors}")
+                logger.warning(
+                    f"Failed to parse XAML for activity instances: {workflow.file_path} - Errors: {parse_result.errors}"
+                )
                 return None
 
-            logger.debug(f"Successfully parsed XAML: {len(parse_result.content.activities)} activities found")
+            logger.debug(
+                f"Successfully parsed XAML: {len(parse_result.content.activities)} activities found"
+            )
 
             # Extract project ID from workflow object or generate from path
             workflow_path = Path(str(workflow.file_path))
@@ -670,8 +782,8 @@ class ArtifactGenerator:
 
             dialect = create_uipath_dialect()
             extractor_config = {
-                'extract_expressions': True,
-                'expression_language': parse_result.content.expression_language
+                "extract_expressions": True,
+                "expression_language": parse_result.content.expression_language,
             }
             extractor = ActivityExtractor(dialect, extractor_config)
 
@@ -680,60 +792,68 @@ class ArtifactGenerator:
             # Extract activity instances with complete business logic
             _t_ext0 = _inst_time.perf_counter_ns()
             activities = extractor.extract_activity_instances(
-                xml_root,
-                parse_result.content.namespaces,
-                workflow_id,
-                project_id
+                xml_root, parse_result.content.namespaces, workflow_id, project_id
             )
             logger.trace(  # type: ignore[attr-defined]
-                "[%s] extract_activity_instances %.1fms → %d activities", workflow_id,
-                (_inst_time.perf_counter_ns() - _t_ext0) / 1e6, len(activities)
+                "[%s] extract_activity_instances %.1fms → %d activities",
+                workflow_id,
+                (_inst_time.perf_counter_ns() - _t_ext0) / 1e6,
+                len(activities),
             )
-            
+
             # Generate artifact according to implementation plan schema
             artifact = {
-                "schemaVersion": "1.0.0",
+                "schemaVersion": "2.0",
                 "workflowId": workflow_id,
                 "generatedAt": datetime.now(UTC).isoformat(),
                 "totalActivities": len(activities),
-                "activities": [asdict(activity) for activity in activities]
+                "activities": [
+                    _activity_dict_to_camel(asdict(activity)) for activity in activities
+                ],
             }
-            
+
             # Write to activities.instances/{wfId}.json
             instances_dir = self.output_dir / "activities.instances"
             instances_dir.mkdir(exist_ok=True)
-            
+
             # Sanitize workflow ID for filename (replace path separators)
             safe_workflow_id = workflow_id.replace("/", "_").replace("\\", "_")
             instances_file = instances_dir / f"{safe_workflow_id}.json"
-            
+
             # Ensure parent directory exists for nested workflows
             instances_file.parent.mkdir(parents=True, exist_ok=True)
-            
+
             with open(instances_file, "w", encoding="utf-8") as f:
                 json.dump(artifact, f, indent=2, ensure_ascii=False)
-            
+
             # Performance monitoring
             elapsed_time = time.time() - start_time
-            activities_per_second = len(activities) / elapsed_time if elapsed_time > 0 else 0
-            
+            activities_per_second = (
+                len(activities) / elapsed_time if elapsed_time > 0 else 0
+            )
+
             logger.debug(f"Generated activity instances artifact: {instances_file}")
             logger.debug(f"  - Activities extracted: {len(activities)}")
             logger.debug(f"  - Processing time: {elapsed_time:.2f}s")
             logger.debug(f"  - Activities/second: {activities_per_second:.1f}")
-            
+
             # Warn if processing is slow (potential performance issue)
             if elapsed_time > 5.0:  # More than 5 seconds
-                logger.warning(f"Slow activity extraction for {workflow_id}: {elapsed_time:.2f}s for {len(activities)} activities")
-            
+                logger.warning(
+                    f"Slow activity extraction for {workflow_id}: {elapsed_time:.2f}s for {len(activities)} activities"
+                )
+
             return instances_file
-            
+
         except Exception as e:
-            logger.error(f"Failed to generate activity instances for {workflow_id}: {e}")
+            logger.error(
+                f"Failed to generate activity instances for {workflow_id}: {e}"
+            )
             import traceback
+
             logger.debug(f"Full traceback: {traceback.format_exc()}")
             return None
-    
+
     def _resolve_project_id_from_root(self, project_root: Path) -> str:
         """Read project.json once and return a stable project ID string.
 
@@ -744,7 +864,7 @@ class ArtifactGenerator:
         try:
             project_json_file = project_root / "project.json"
             if project_json_file.exists():
-                with open(project_json_file, "r", encoding="utf-8") as f:
+                with open(project_json_file, encoding="utf-8") as f:
                     project_data = json.load(f)
                 if "projectId" in project_data and project_data["projectId"]:
                     return project_data["projectId"][:8]
@@ -784,10 +904,10 @@ class ArtifactGenerator:
         project: UiPathProject,
         project_slug: str,
         project_root: Path,
-        project_dir: Path
+        project_dir: Path,
     ) -> None:
         """Update projects.json index with current project information.
-        
+
         Args:
             project: Parsed UiPath project
             project_slug: Generated project slug
@@ -802,7 +922,9 @@ class ArtifactGenerator:
                 with open(projects_index_file, encoding="utf-8") as f:
                     index_data = json.load(f)
             except (OSError, json.JSONDecodeError) as e:
-                logger.warning(f"Failed to read existing projects.json, creating new one: {e}")
+                logger.warning(
+                    f"Failed to read existing projects.json, creating new one: {e}"
+                )
                 index_data = {"rpaxSchemaVersion": "1.0", "projects": []}
         else:
             index_data = {"rpaxSchemaVersion": "1.0", "projects": []}
@@ -819,14 +941,16 @@ class ArtifactGenerator:
             index_data["projects"].append(project_entry)
 
         # Update project entry
-        project_entry.update({
-            "name": project.name,
-            "projectId": project.project_id,
-            "projectType": project.project_type,
-            "path": str(project_root),
-            "lastParsed": self.timestamp,
-            "artifactsPath": str(project_dir)
-        })
+        project_entry.update(
+            {
+                "name": project.name,
+                "projectId": project.project_id,
+                "projectType": project.project_type,
+                "path": str(project_root),
+                "lastParsed": self.timestamp,
+                "artifactsPath": str(project_dir),
+            }
+        )
 
         # Sort projects by slug for consistency
         index_data["projects"].sort(key=lambda p: p["slug"])
@@ -835,35 +959,36 @@ class ArtifactGenerator:
         with open(projects_index_file, "w", encoding="utf-8") as f:
             json.dump(index_data, f, indent=2, ensure_ascii=False)
 
-        logger.debug(f"Updated projects index with {len(index_data['projects'])} projects")
-    
+        logger.debug(
+            f"Updated projects index with {len(index_data['projects'])} projects"
+        )
+
     def _generate_pseudocode_artifacts(
-        self,
-        workflow_index: WorkflowIndex,
-        project: UiPathProject,
-        project_root: Path
+        self, workflow_index: WorkflowIndex, project: UiPathProject, project_root: Path
     ) -> dict[str, Path]:
         """Generate pseudocode artifacts for all workflows.
-        
+
         Args:
             workflow_index: Discovered workflows
             project: Project metadata
             project_root: Root directory of project
-            
+
         Returns:
             Dict mapping artifact names to file paths
         """
         from rpax.pseudocode import PseudocodeGenerator
-        
+
         artifacts = {}
         pseudocode_dir = self.output_dir / "pseudocode"
         pseudocode_dir.mkdir(exist_ok=True)
-        
+
         generator = PseudocodeGenerator()
         # Lightweight summaries — full artifacts released after writing to disk
         pseudocode_summaries: list[dict] = []
 
-        logger.debug(f"Generating pseudocode for {len(workflow_index.workflows)} workflows")
+        logger.debug(
+            f"Generating pseudocode for {len(workflow_index.workflows)} workflows"
+        )
 
         # Generate pseudocode for each workflow
         for workflow in workflow_index.workflows:
@@ -871,37 +996,56 @@ class ArtifactGenerator:
             # Strip .xaml extension: workflow.workflow_id is the raw relative path per ADR-014
             # (e.g. "Framework/CheckExists.xaml"). Pseudocode IDs use extension-free paths
             # (e.g. "Framework/CheckExists") to avoid double-extension filenames and clashes.
-            workflow_id = workflow.workflow_id.replace("\\", "/").removesuffix(".xaml").removesuffix(".XAML")
+            workflow_id = (
+                workflow.workflow_id.replace("\\", "/")
+                .removesuffix(".xaml")
+                .removesuffix(".XAML")
+            )
 
             try:
-                artifact = generator.generate_workflow_pseudocode(xaml_path, workflow_id=workflow_id)
+                artifact = generator.generate_workflow_pseudocode(
+                    xaml_path,
+                    workflow_id=workflow_id,
+                    relative_path=str(workflow.relative_path).replace("\\", "/"),
+                )
 
                 # Write individual pseudocode file immediately
                 output_file = pseudocode_dir / f"{workflow_id}.json"
                 # Ensure parent directory exists for nested workflows (e.g., Framework/, Tests/)
                 output_file.parent.mkdir(parents=True, exist_ok=True)
                 with open(output_file, "w", encoding="utf-8") as f:
-                    json.dump(artifact.model_dump(by_alias=True), f, indent=2, ensure_ascii=False)
+                    json.dump(
+                        artifact.model_dump(by_alias=True),
+                        f,
+                        indent=2,
+                        ensure_ascii=False,
+                    )
 
                 artifacts[f"pseudocode_{workflow_id}"] = output_file
-                logger.debug(f"Generated pseudocode for {workflow_id}: {artifact.total_lines} lines")
+                logger.debug(
+                    f"Generated pseudocode for {workflow_id}: {artifact.total_lines} lines"
+                )
 
                 # Keep only lightweight summary — release full artifact
-                pseudocode_summaries.append({
-                    "workflowId": artifact.workflow_id,
-                    "totalLines": artifact.total_lines,
-                    "totalActivities": artifact.total_activities,
-                    "hasError": "error" in artifact.metadata,
-                })
+                pseudocode_summaries.append(
+                    {
+                        "workflowId": artifact.workflow_id,
+                        "totalLines": artifact.total_lines,
+                        "totalActivities": artifact.total_activities,
+                        "hasError": "error" in artifact.metadata,
+                    }
+                )
 
             except Exception as e:
                 logger.error(f"Failed to generate pseudocode for {workflow_id}: {e}")
-                pseudocode_summaries.append({
-                    "workflowId": workflow_id,
-                    "totalLines": 0,
-                    "totalActivities": 0,
-                    "hasError": True,
-                })
+                pseudocode_summaries.append(
+                    {
+                        "workflowId": workflow_id,
+                        "totalLines": 0,
+                        "totalActivities": 0,
+                        "hasError": True,
+                    }
+                )
 
         # Generate pseudocode index from lightweight summaries (no full artifacts in RAM)
         project_slug = project.generate_project_slug(project_root / "project.json")
@@ -910,52 +1054,56 @@ class ArtifactGenerator:
         index = generator.generate_project_pseudocode_index(
             project_slug, effective_project_id, pseudocode_summaries
         )
-        
+
         # Write pseudocode index
         index_file = pseudocode_dir / "index.json"
         with open(index_file, "w", encoding="utf-8") as f:
             json.dump(index.model_dump(by_alias=True), f, indent=2, ensure_ascii=False)
-        
+
         artifacts["pseudocode_index"] = index_file
-        
-        logger.debug(f"Generated pseudocode artifacts: {len(pseudocode_summaries)} workflows, index file")
+
+        logger.debug(
+            f"Generated pseudocode artifacts: {len(pseudocode_summaries)} workflows, index file"
+        )
         return artifacts
 
     def _load_manifest_for_callgraph(self, manifest_file: Path) -> "ProjectManifest":
         """Load manifest data for call graph generation."""
         from rpax.models.manifest import ProjectManifest
-        
+
         with open(manifest_file, encoding="utf-8") as f:
             manifest_data = json.load(f)
-        
+
         return ProjectManifest(**manifest_data)
 
     def _generate_call_graph_artifact(
         self,
-        manifest: "ProjectManifest", 
+        manifest: "ProjectManifest",
         workflow_index: WorkflowIndex,
-        invocations_file: Path
+        invocations_file: Path,
     ) -> Path:
         """Generate call graph artifact (ISSUE-038)."""
         from rpax.graph.callgraph_generator import CallGraphGenerator
-        
+
         logger.debug("Generating call graph artifact")
-        
+
         generator = CallGraphGenerator(self.config)
-        call_graph = generator.generate_call_graph(manifest, workflow_index, invocations_file)
-        
+        call_graph = generator.generate_call_graph(
+            manifest, workflow_index, invocations_file
+        )
+
         # Write call graph artifact
         call_graph_file = self.output_dir / "call-graph.json"
         with open(call_graph_file, "w", encoding="utf-8") as f:
-            json.dump(call_graph.model_dump(by_alias=True), f, indent=2, ensure_ascii=False)
-        
+            json.dump(
+                call_graph.model_dump(by_alias=True), f, indent=2, ensure_ascii=False
+            )
+
         logger.debug(f"Call graph artifact generated: {call_graph_file}")
         return call_graph_file
 
     def _generate_expanded_pseudocode_artifacts(
-        self,
-        call_graph_file: Path,
-        pseudocode_index_file: Path
+        self, call_graph_file: Path, pseudocode_index_file: Path
     ) -> dict[str, Path]:
         """Generate expanded pseudocode artifacts using recursive expansion (ISSUE-036, ISSUE-040)."""
         from rpax.pseudocode.recursive_generator import (
@@ -963,24 +1111,24 @@ class ArtifactGenerator:
             load_call_graph_artifact,
             load_pseudocode_artifacts,
         )
-        
+
         logger.debug("Generating expanded pseudocode artifacts")
-        
+
         # Load call graph and pseudocode artifacts
         call_graph = load_call_graph_artifact(call_graph_file)
         pseudocode_dir = self.output_dir / "pseudocode"
         pseudocode_artifacts = load_pseudocode_artifacts(pseudocode_dir)
-        
+
         # Create recursive generator
         generator = RecursivePseudocodeGenerator(self.config, call_graph)
-        
+
         # Create expanded pseudocode directory
         expanded_dir = self.output_dir / "expanded-pseudocode"
         expanded_dir.mkdir(exist_ok=True)
-        
+
         artifacts = {}
         expanded_count = 0
-        
+
         # Generate expanded pseudocode for each workflow
         for workflow_id, base_artifact in pseudocode_artifacts.items():
             try:
@@ -988,33 +1136,46 @@ class ArtifactGenerator:
                 expanded_artifact = generator.generate_expanded_artifact(
                     workflow_id, base_artifact, pseudocode_artifacts
                 )
-                
+
                 # Write expanded artifact to file
                 safe_workflow_name = workflow_id.replace("/", "_").replace("\\", "_")
                 expanded_file = expanded_dir / f"{safe_workflow_name}.expanded.json"
-                
+
                 with open(expanded_file, "w", encoding="utf-8") as f:
-                    json.dump(expanded_artifact.model_dump(by_alias=True), f, indent=2, ensure_ascii=False)
-                
+                    json.dump(
+                        expanded_artifact.model_dump(by_alias=True),
+                        f,
+                        indent=2,
+                        ensure_ascii=False,
+                    )
+
                 artifacts[f"expanded_pseudocode_{safe_workflow_name}"] = expanded_file
                 expanded_count += 1
-                
+
             except Exception as e:
-                logger.warning(f"Failed to generate expanded pseudocode for {workflow_id}: {e}")
-        
+                logger.warning(
+                    f"Failed to generate expanded pseudocode for {workflow_id}: {e}"
+                )
+
         # Generate expanded pseudocode index
-        expanded_index = self._generate_expanded_pseudocode_index(expanded_count, call_graph)
+        expanded_index = self._generate_expanded_pseudocode_index(
+            expanded_count, call_graph
+        )
         expanded_index_file = expanded_dir / "index.json"
-        
+
         with open(expanded_index_file, "w", encoding="utf-8") as f:
             json.dump(expanded_index, f, indent=2, ensure_ascii=False)
-        
+
         artifacts["expanded_pseudocode_index"] = expanded_index_file
-        
-        logger.debug(f"Generated expanded pseudocode artifacts: {expanded_count} workflows")
+
+        logger.debug(
+            f"Generated expanded pseudocode artifacts: {expanded_count} workflows"
+        )
         return artifacts
 
-    def _generate_expanded_pseudocode_index(self, workflow_count: int, call_graph) -> dict:
+    def _generate_expanded_pseudocode_index(
+        self, workflow_count: int, call_graph
+    ) -> dict:
         """Generate index for expanded pseudocode artifacts."""
         return {
             "schemaVersion": "1.0.0",
@@ -1026,41 +1187,43 @@ class ArtifactGenerator:
             "expansionConfig": {
                 "maxDepth": self.config.pseudocode.max_expansion_depth,
                 "cycleHandling": self.config.pseudocode.cycle_handling,
-                "generateExpanded": self.config.pseudocode.generate_expanded
-            }
+                "generateExpanded": self.config.pseudocode.generate_expanded,
+            },
         }
 
-    def _generate_object_repository_artifacts(self, project_root: Path) -> dict[str, Path]:
+    def _generate_object_repository_artifacts(
+        self, project_root: Path
+    ) -> dict[str, Path]:
         """Generate Object Repository artifacts for Library projects.
-        
+
         Args:
             project_root: Root directory of project
-            
+
         Returns:
             Dict mapping artifact names to file paths
         """
         artifacts = {}
-        
+
         # Look for .objects directory
         objects_path = project_root / ".objects"
         if not objects_path.exists():
             logger.debug(f"No Object Repository found in {project_root}")
             return artifacts
-            
+
         try:
             from rpax.parser.object_repository import ObjectRepositoryParser
-            
+
             parser = ObjectRepositoryParser()
             repository = parser.parse_repository(objects_path)
-            
+
             if not repository:
                 logger.warning(f"Failed to parse Object Repository in {objects_path}")
                 return artifacts
-                
+
             # Create object-repository directory
             object_repo_dir = self.output_dir / "object-repository"
             object_repo_dir.mkdir(exist_ok=True)
-            
+
             # Generate repository summary
             repository_summary = {
                 "schemaVersion": "1.0.0",
@@ -1078,23 +1241,23 @@ class ArtifactGenerator:
                         "description": app.description,
                         "targetsCount": len(app.targets),
                         "created": app.created,
-                        "updated": app.updated
+                        "updated": app.updated,
                     }
                     for app in repository.apps
-                ]
+                ],
             }
-            
+
             # Write repository summary
             summary_file = object_repo_dir / "repository-summary.json"
             with open(summary_file, "w", encoding="utf-8") as f:
                 json.dump(repository_summary, f, indent=2, ensure_ascii=False)
-                
+
             artifacts["object_repository_summary"] = summary_file
-            
+
             # Generate detailed app artifacts
             apps_dir = object_repo_dir / "apps"
             apps_dir.mkdir(exist_ok=True)
-            
+
             for app in repository.apps:
                 app_data = {
                     "appId": app.app_id,
@@ -1116,83 +1279,91 @@ class ArtifactGenerator:
                                 {
                                     "type": selector.selector_type,
                                     "value": selector.selector_value,
-                                    "properties": selector.properties
+                                    "properties": selector.properties,
                                 }
                                 for selector in target.selectors
                             ],
-                            "designProperties": target.design_properties
+                            "designProperties": target.design_properties,
                         }
                         for target in app.targets
-                    ]
+                    ],
                 }
-                
+
                 # Sanitize app name for filename
-                safe_app_name = "".join(c if c.isalnum() or c in ".-_" else "_" for c in app.name)
+                safe_app_name = "".join(
+                    c if c.isalnum() or c in ".-_" else "_" for c in app.name
+                )
                 app_file = apps_dir / f"{safe_app_name}.json"
-                
+
                 with open(app_file, "w", encoding="utf-8") as f:
                     json.dump(app_data, f, indent=2, ensure_ascii=False)
-                    
+
                 artifacts[f"object_repository_app_{safe_app_name}"] = app_file
-            
+
             # Generate MCP resources file
-            project_id = getattr(self, 'project_id', 'unknown')
+            project_id = getattr(self, "project_id", "unknown")
             mcp_resources = parser.generate_mcp_resources(repository, project_id)
-            
+
             mcp_resources_file = object_repo_dir / "mcp-resources.json"
             with open(mcp_resources_file, "w", encoding="utf-8") as f:
-                json.dump({
-                    "schemaVersion": "1.0.0",
-                    "generatedAt": self.timestamp,
-                    "resources": mcp_resources
-                }, f, indent=2, ensure_ascii=False)
-                
+                json.dump(
+                    {
+                        "schemaVersion": "1.0.0",
+                        "generatedAt": self.timestamp,
+                        "resources": mcp_resources,
+                    },
+                    f,
+                    indent=2,
+                    ensure_ascii=False,
+                )
+
             artifacts["object_repository_mcp_resources"] = mcp_resources_file
-            
-            logger.debug(f"Generated Object Repository artifacts: {len(repository.apps)} apps, "
-                       f"{sum(len(app.targets) for app in repository.apps)} targets")
-            
+
+            logger.debug(
+                f"Generated Object Repository artifacts: {len(repository.apps)} apps, "
+                f"{sum(len(app.targets) for app in repository.apps)} targets"
+            )
+
         except ImportError:
             logger.warning("Object Repository parser not available")
         except Exception as e:
             logger.error(f"Failed to generate Object Repository artifacts: {e}")
-            
+
         return artifacts
 
     def _generate_package_analysis_artifacts(
-        self,
-        project: UiPathProject,
-        workflow_index: WorkflowIndex
+        self, project: UiPathProject, workflow_index: WorkflowIndex
     ) -> dict[str, Path]:
         """Generate package analysis artifacts showing dependency usage.
-        
+
         Args:
             project: Parsed UiPath project
             workflow_index: Discovered workflows with namespace information
-            
+
         Returns:
             Dict mapping artifact names to file paths
         """
         artifacts = {}
-        
+
         try:
             # Collect package usage from all workflows
             workflow_packages = {}
             for workflow in workflow_index.workflows:
                 if workflow.packages_used:
                     workflow_packages[workflow.workflow_id] = workflow.packages_used
-            
+
             # Analyze package usage patterns
             package_analysis = analyze_package_usage(
-                project.dependencies,
-                workflow_packages
+                project.dependencies, workflow_packages
             )
-            
+
             # Set project context - we need to pass project_root from the caller
             # For now, use a fallback method to generate slug
-            package_analysis.project_slug = project.project_id or project.name.lower().replace(" ", "-")
+            package_analysis.project_slug = (
+                project.project_id or project.name.lower().replace(" ", "-")
+            )
             package_analysis.project_name = project.name
-            
+
             # Generate package analysis artifact
             packages_file = self.output_dir / "packages-analysis.json"
             with open(packages_file, "w", encoding="utf-8") as f:
@@ -1200,47 +1371,61 @@ class ArtifactGenerator:
                     package_analysis.model_dump(by_alias=True),
                     f,
                     indent=2,
-                    ensure_ascii=False
+                    ensure_ascii=False,
                 )
-            
+
             artifacts["packages_analysis"] = packages_file
-            
+
             # Generate package usage summary for each workflow
             workflow_packages_dir = self.output_dir / "workflow-packages"
             workflow_packages_dir.mkdir(exist_ok=True)
-            
+
             for workflow in workflow_index.workflows:
                 if workflow.namespaces or workflow.packages_used:
                     # Sanitize workflow ID for filename
-                    safe_workflow_id = workflow.workflow_id.replace("/", "_").replace("\\", "_")
-                    workflow_packages_file = workflow_packages_dir / f"{safe_workflow_id}.json"
-                    
+                    safe_workflow_id = workflow.workflow_id.replace("/", "_").replace(
+                        "\\", "_"
+                    )
+                    workflow_packages_file = (
+                        workflow_packages_dir / f"{safe_workflow_id}.json"
+                    )
+
                     workflow_package_data = {
                         "workflowId": workflow.workflow_id,
                         "workflowPath": workflow.relative_path,
                         "namespaces": workflow.namespaces,
                         "packagesUsed": workflow.packages_used,
                         "totalNamespaces": len(workflow.namespaces),
-                        "totalPackages": len(workflow.packages_used)
+                        "totalPackages": len(workflow.packages_used),
                     }
-                    
+
                     # Ensure parent directory exists for nested workflows
                     workflow_packages_file.parent.mkdir(parents=True, exist_ok=True)
-                    
+
                     with open(workflow_packages_file, "w", encoding="utf-8") as f:
-                        json.dump(workflow_package_data, f, indent=2, ensure_ascii=False)
-                    
-                    artifacts[f"workflow_packages_{safe_workflow_id}"] = workflow_packages_file
-            
-            logger.debug(f"Generated package analysis artifacts: {len(package_analysis.packages)} packages analyzed")
-            
+                        json.dump(
+                            workflow_package_data, f, indent=2, ensure_ascii=False
+                        )
+
+                    artifacts[f"workflow_packages_{safe_workflow_id}"] = (
+                        workflow_packages_file
+                    )
+
+            logger.debug(
+                f"Generated package analysis artifacts: {len(package_analysis.packages)} packages analyzed"
+            )
+
             if package_analysis.has_unused_packages:
-                logger.warning(f"Found {len(package_analysis.unused_packages)} unused packages: {', '.join(package_analysis.unused_packages)}")
-            
+                logger.warning(
+                    f"Found {len(package_analysis.unused_packages)} unused packages: {', '.join(package_analysis.unused_packages)}"
+                )
+
             if package_analysis.has_undeclared_packages:
-                logger.warning(f"Found {len(package_analysis.undeclared_packages)} undeclared packages: {', '.join(package_analysis.undeclared_packages)}")
-                
+                logger.warning(
+                    f"Found {len(package_analysis.undeclared_packages)} undeclared packages: {', '.join(package_analysis.undeclared_packages)}"
+                )
+
         except Exception as e:
             logger.error(f"Failed to generate package analysis artifacts: {e}")
-            
+
         return artifacts
