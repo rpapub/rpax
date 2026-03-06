@@ -291,7 +291,7 @@ class EnhancedXamlAnalyzer:
         """
         import logging
         logger = logging.getLogger(__name__)
-        logger.info(f"DEBUG: Starting analyze_workflow for {xaml_path}")
+        logger.debug("Starting analyze_workflow for %s", xaml_path)
 
         if root is not None:
             self.current_workflow_id = xaml_path.stem
@@ -300,15 +300,15 @@ class EnhancedXamlAnalyzer:
             visual_activities = self._extract_visual_activities(root)
         else:
             visual_activities, metadata = self.analyze_workflow(xaml_path)
-        logger.info(f"DEBUG: analyze_workflow returned {len(visual_activities) if visual_activities else 0} activities")
-        
+        logger.debug("analyze_workflow returned %d activities", len(visual_activities) if visual_activities else 0)
+
         if not visual_activities:
             return None
-            
+
         # Convert to legacy format for compatibility
-        logger.info(f"DEBUG: Starting generate_activity_tree_json")
+        logger.debug("Starting generate_activity_tree_json")
         tree_json = self.generate_activity_tree_json(visual_activities, metadata)
-        logger.info(f"DEBUG: generate_activity_tree_json completed")
+        logger.debug("generate_activity_tree_json completed")
         
         # Create a simple object with the expected interface
         class EnhancedActivityTree:
