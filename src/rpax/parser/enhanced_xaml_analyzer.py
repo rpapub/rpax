@@ -282,16 +282,26 @@ class EnhancedXamlAnalyzer:
         # For now, assume literal paths are valid
         return "invoke"
     
-    def extract_activity_tree(self, xaml_path: Path):
+    def extract_activity_tree(self, xaml_path: Path, root: ET.Element | None = None):
         """Bridge method to provide compatibility with legacy analyzer interface.
-        
+
+        Args:
+            xaml_path: Path to XAML workflow file
+            root: Optional pre-parsed XML root element (skips file read when provided)
+
         Returns ActivityTree-like structure compatible with existing artifact generation.
         """
         import logging
         logger = logging.getLogger(__name__)
         logger.info(f"DEBUG: Starting analyze_workflow for {xaml_path}")
-        
-        visual_activities, metadata = self.analyze_workflow(xaml_path)
+
+        if root is not None:
+            self.current_workflow_id = xaml_path.stem
+            self.sibling_counters = {}
+            metadata = self._extract_workflow_metadata(root)
+            visual_activities = self._extract_visual_activities(root)
+        else:
+            visual_activities, metadata = self.analyze_workflow(xaml_path)
         logger.info(f"DEBUG: analyze_workflow returned {len(visual_activities) if visual_activities else 0} activities")
         
         if not visual_activities:
@@ -311,13 +321,13 @@ class EnhancedXamlAnalyzer:
         
         return EnhancedActivityTree(tree_json)
         
-    def extract_control_flow(self, xaml_path: Path):
+    def extract_control_flow(self, xaml_path: Path, root: ET.Element | None = None):
         """Bridge method for control flow extraction (placeholder for now)."""
         # For now, return None - would implement CFG extraction later
         return None
-        
-    def extract_resources(self, xaml_path: Path):
-        """Bridge method for resource extraction (placeholder for now).""" 
+
+    def extract_resources(self, xaml_path: Path, root: ET.Element | None = None):
+        """Bridge method for resource extraction (placeholder for now)."""
         # For now, return None - would implement resource extraction later
         return None
         

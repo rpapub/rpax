@@ -115,10 +115,11 @@ class XamlDiscovery:
         Returns:
             Workflow: Workflow model instance with complete metadata
         """
-        # Read file for content hash
+        # Read file for content hash — bytes reused for parse, no second file read
+        content_bytes: bytes | None = None
         try:
-            content = xaml_file.read_bytes()
-            content_hash = Workflow.generate_content_hash(content)
+            content_bytes = xaml_file.read_bytes()
+            content_hash = Workflow.generate_content_hash(content_bytes)
         except Exception:
             content_hash = "error"
 
@@ -145,7 +146,11 @@ class XamlDiscovery:
         
         if parse_error is None:
             try:
-                parse_result = self.xaml_parser.parse_file(xaml_file)
+                if content_bytes is not None:
+                    xml_str = content_bytes.decode("utf-8-sig", errors="replace")
+                    parse_result = self.xaml_parser.parse_content(xml_str, str(xaml_file))
+                else:
+                    parse_result = self.xaml_parser.parse_file(xaml_file)
                 if parse_result.success and parse_result.content:
                     xaml_content = parse_result.content
                 else:

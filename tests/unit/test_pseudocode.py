@@ -322,36 +322,23 @@ class TestPseudocodeGenerator:
     
     def test_generate_project_pseudocode_index(self):
         """Test generating project pseudocode index."""
-        artifacts = [
-            PseudocodeArtifact(
-                workflow_id="Main",
-                project_id="test-project-id",
-                project_slug="test-project-abcd1234",
-                generated_at="2024-01-01T00:00:00Z",
-                rpax_version="0.1.0",
-                activities=[],
-                activity_count=3,
-                total_lines=5,
-                total_activities=3,
-                entries=[]
-            ),
-            PseudocodeArtifact(
-                workflow_id="Helper",
-                project_id="test-project-id", 
-                project_slug="test-project-abcd1234",
-                generated_at="2024-01-01T00:00:00Z",
-                rpax_version="0.1.0",
-                activities=[],
-                activity_count=1,
-                total_lines=2,
-                total_activities=1,
-                entries=[],
-                metadata={"error": "Failed to parse"}
-            )
+        summaries = [
+            {
+                "workflowId": "Main",
+                "totalLines": 5,
+                "totalActivities": 3,
+                "hasError": False,
+            },
+            {
+                "workflowId": "Helper",
+                "totalLines": 2,
+                "totalActivities": 1,
+                "hasError": True,
+            },
         ]
-        
+
         result = self.generator.generate_project_pseudocode_index(
-            "test-project-abcd1234", "test-project-id", artifacts
+            "test-project-abcd1234", "test-project-id", summaries
         )
         
         assert result.project_slug == "test-project-abcd1234"

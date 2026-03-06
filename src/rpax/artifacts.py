@@ -431,8 +431,14 @@ class ArtifactGenerator:
 
                 logger.debug(f"Processing activities for {workflow_id}")
 
+                # Parse ONCE — share the root element across all analyzers and activity instances
+                from defusedxml.ElementTree import fromstring as defused_fromstring
+                xml_bytes = workflow_path.read_bytes()
+                xml_str = xml_bytes.decode("utf-8-sig", errors="replace")
+                xml_root = defused_fromstring(xml_str)
+
                 # Extract activity tree
-                activity_tree = analyzer.extract_activity_tree(workflow_path)
+                activity_tree = analyzer.extract_activity_tree(workflow_path, root=xml_root)
                 if activity_tree:
                     # Generate activities.tree/<wfId>.json
                     tree_file = activities_tree_dir / f"{workflow_id}.json"
@@ -446,12 +452,12 @@ class ArtifactGenerator:
                     activities_artifacts[f"activities_tree_{workflow_id}"] = tree_file
 
                 # NEW: Generate activities.instances/<wfId>.json (ADR-009 ActivityInstance)
-                instances_artifact = self._generate_activity_instances(workflow, workflow_path, workflow_id)
+                instances_artifact = self._generate_activity_instances(workflow, xml_str, xml_root, workflow_id)
                 if instances_artifact:
                     activities_artifacts[f"activities_instances_{workflow_id}"] = instances_artifact
 
                 # Extract control flow
-                control_flow = analyzer.extract_control_flow(workflow_path)
+                control_flow = analyzer.extract_control_flow(workflow_path, root=xml_root)
                 if control_flow:
                     # Generate activities.cfg/<wfId>.jsonl
                     cfg_file = activities_cfg_dir / f"{workflow_id}.jsonl"
@@ -470,7 +476,7 @@ class ArtifactGenerator:
                     activities_artifacts[f"activities_cfg_{workflow_id}"] = cfg_file
 
                 # Extract resource references
-                resources = analyzer.extract_resources(workflow_path)
+                resources = analyzer.extract_resources(workflow_path, root=xml_root)
                 if resources:
                     # Generate activities.refs/<wfId>.json
                     refs_file = activities_refs_dir / f"{workflow_id}.json"
@@ -559,46 +565,48 @@ class ArtifactGenerator:
             "rootNode": serialize_node(activity_tree.root_node)
         }
 
-    def _generate_activity_instances(self, workflow, workflow_path: Path, workflow_id: str) -> Path | None:
+    def _generate_activity_instances(self, workflow, xml_str: str, xml_root: "ET.Element", workflow_id: str) -> Path | None:
         """Generate activities.instances/{wfId}.json artifact as specified in ADR-009.
-        
+
         Enhanced with performance monitoring, error handling, and configuration support.
-        
+
         Args:
             workflow: Workflow object from workflow index
-            workflow_path: Path to XAML workflow file
+            xml_str: Pre-decoded XAML content string (reused from caller, no file read)
+            xml_root: Pre-parsed XML root element (reused from caller, no file read)
             workflow_id: Workflow identifier
-            
+
         Returns:
             Path to generated instances file or None if failed
         """
         import time
         start_time = time.time()
-        
+
         try:
             # Import and use the standalone XAML parser
             from cpmf_uips_xaml import XamlParser
             from cpmf_uips_xaml.stages.parsing.extractors import ActivityExtractor
             from dataclasses import asdict
-            
+
             # Check if activity instances generation is enabled
             if not getattr(self.config.output, 'generate_activity_instances', True):
                 logger.debug(f"Activity instances generation disabled for {workflow_id}")
                 return None
-            
-            # Parse XAML file with error handling
+
+            # Parse using pre-decoded string — no second file read
             parser = XamlParser()
-            parse_result = parser.parse_file(workflow_path)
-            
+            parse_result = parser.parse_content(xml_str, str(workflow.file_path))
+
             if not parse_result.success or not parse_result.content:
-                logger.warning(f"Failed to parse XAML for activity instances: {workflow_path} - Errors: {parse_result.errors}")
+                logger.warning(f"Failed to parse XAML for activity instances: {workflow.file_path} - Errors: {parse_result.errors}")
                 return None
-            
+
             logger.debug(f"Successfully parsed XAML: {len(parse_result.content.activities)} activities found")
-            
+
             # Extract project ID from workflow object or generate from path
+            workflow_path = Path(str(workflow.file_path))
             project_id = self._extract_project_id(workflow, workflow_path)
-            
+
             # Create activity extractor with UiPath dialect and config
             from cpmf_uips_xaml.platforms.uipath import create_uipath_dialect
 
@@ -608,16 +616,9 @@ class ArtifactGenerator:
                 'expression_language': parse_result.content.expression_language
             }
             extractor = ActivityExtractor(dialect, extractor_config)
-            
-            # Re-parse XAML to get XML root element for activity extraction
-            from xml.etree.ElementTree import parse as xml_parse
-            try:
-                tree = xml_parse(workflow_path)
-                xml_root = tree.getroot()
-            except Exception as e:
-                logger.warning(f"Failed to parse XML for activity extraction: {e}")
-                return None
-                
+
+            # xml_root already provided by caller — no additional file read needed
+
             # Extract activity instances with complete business logic
             activities = extractor.extract_activity_instances(
                 xml_root,
@@ -792,40 +793,51 @@ class ArtifactGenerator:
         pseudocode_dir.mkdir(exist_ok=True)
         
         generator = PseudocodeGenerator()
-        pseudocode_artifacts = []
-        
+        # Lightweight summaries — full artifacts released after writing to disk
+        pseudocode_summaries: list[dict] = []
+
         logger.info(f"Generating pseudocode for {len(workflow_index.workflows)} workflows")
-        
+
         # Generate pseudocode for each workflow
         for workflow in workflow_index.workflows:
             xaml_path = project_root / workflow.relative_path
-            
+
             try:
                 artifact = generator.generate_workflow_pseudocode(xaml_path)
-                pseudocode_artifacts.append(artifact)
-                
-                # Write individual pseudocode file
+
+                # Write individual pseudocode file immediately
                 output_file = pseudocode_dir / f"{workflow.workflow_id}.json"
                 # Ensure parent directory exists for nested workflows (e.g., Framework/, Tests/)
                 output_file.parent.mkdir(parents=True, exist_ok=True)
                 with open(output_file, "w", encoding="utf-8") as f:
                     json.dump(artifact.model_dump(by_alias=True), f, indent=2, ensure_ascii=False)
-                
+
                 artifacts[f"pseudocode_{workflow.workflow_id}"] = output_file
                 logger.debug(f"Generated pseudocode for {workflow.workflow_id}: {artifact.total_lines} lines")
-                
+
+                # Keep only lightweight summary — release full artifact
+                pseudocode_summaries.append({
+                    "workflowId": artifact.workflow_id,
+                    "totalLines": artifact.total_lines,
+                    "totalActivities": artifact.total_activities,
+                    "hasError": "error" in artifact.metadata,
+                })
+
             except Exception as e:
                 logger.error(f"Failed to generate pseudocode for {workflow.workflow_id}: {e}")
-                # Create empty artifact for failed workflows
-                empty_artifact = generator._create_empty_artifact(workflow.workflow_id, error=str(e))
-                pseudocode_artifacts.append(empty_artifact)
-        
-        # Generate pseudocode index
+                pseudocode_summaries.append({
+                    "workflowId": workflow.workflow_id,
+                    "totalLines": 0,
+                    "totalActivities": 0,
+                    "hasError": True,
+                })
+
+        # Generate pseudocode index from lightweight summaries (no full artifacts in RAM)
         project_slug = project.generate_project_slug(project_root / "project.json")
         # Use project_id if available, otherwise fall back to project_slug
         effective_project_id = project.project_id or project_slug
         index = generator.generate_project_pseudocode_index(
-            project_slug, effective_project_id, pseudocode_artifacts
+            project_slug, effective_project_id, pseudocode_summaries
         )
         
         # Write pseudocode index
@@ -835,7 +847,7 @@ class ArtifactGenerator:
         
         artifacts["pseudocode_index"] = index_file
         
-        logger.info(f"Generated pseudocode artifacts: {len(pseudocode_artifacts)} workflows, index file")
+        logger.info(f"Generated pseudocode artifacts: {len(pseudocode_summaries)} workflows, index file")
         return artifacts
 
     def _load_manifest_for_callgraph(self, manifest_file: Path) -> "ProjectManifest":

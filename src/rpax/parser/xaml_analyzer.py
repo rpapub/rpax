@@ -79,21 +79,23 @@ class XamlAnalyzer:
             logger.warning(f"Failed to analyze XAML {xaml_path}: {e}")
             return [], []
 
-    def extract_activity_tree(self, xaml_path: Path) -> ActivityTree | None:
+    def extract_activity_tree(self, xaml_path: Path, root: ET.Element | None = None) -> ActivityTree | None:
         """Extract complete activity tree from XAML workflow.
-        
+
         Args:
             xaml_path: Path to XAML workflow file
-            
+            root: Optional pre-parsed XML root element (skips file read when provided)
+
         Returns:
             ActivityTree with full activity structure, or None if parsing fails
         """
         logger.debug(f"Extracting activity tree from: {xaml_path}")
 
         try:
-            # Parse XAML safely using defusedxml
-            tree = defused_parse(xaml_path)
-            root = tree.getroot()
+            # Parse XAML safely using defusedxml (only if root not pre-provided)
+            if root is None:
+                tree = defused_parse(xaml_path)
+                root = tree.getroot()
 
             # Calculate content hash
             with open(xaml_path, "rb") as f:
@@ -130,21 +132,23 @@ class XamlAnalyzer:
             logger.warning(f"Failed to extract activity tree from {xaml_path}: {e}")
             return None
 
-    def extract_control_flow(self, xaml_path: Path) -> WorkflowControlFlow | None:
+    def extract_control_flow(self, xaml_path: Path, root: ET.Element | None = None) -> WorkflowControlFlow | None:
         """Extract control flow graph from XAML workflow.
-        
+
         Args:
             xaml_path: Path to XAML workflow file
-            
+            root: Optional pre-parsed XML root element (skips file read when provided)
+
         Returns:
             WorkflowControlFlow with control flow edges, or None if parsing fails
         """
         logger.debug(f"Extracting control flow from: {xaml_path}")
 
         try:
-            # Parse XAML safely using defusedxml
-            tree = defused_parse(xaml_path)
-            root = tree.getroot()
+            # Parse XAML safely using defusedxml (only if root not pre-provided)
+            if root is None:
+                tree = defused_parse(xaml_path)
+                root = tree.getroot()
 
             workflow_id = xaml_path.name
             control_flow = WorkflowControlFlow(workflow_id=workflow_id)
@@ -159,21 +163,23 @@ class XamlAnalyzer:
             logger.warning(f"Failed to extract control flow from {xaml_path}: {e}")
             return None
 
-    def extract_resources(self, xaml_path: Path) -> WorkflowResources | None:
+    def extract_resources(self, xaml_path: Path, root: ET.Element | None = None) -> WorkflowResources | None:
         """Extract resource references from XAML workflow.
-        
+
         Args:
             xaml_path: Path to XAML workflow file
-            
+            root: Optional pre-parsed XML root element (skips file read when provided)
+
         Returns:
-            WorkflowResources with resource references, or None if parsing fails  
+            WorkflowResources with resource references, or None if parsing fails
         """
         logger.debug(f"Extracting resources from: {xaml_path}")
 
         try:
-            # Parse XAML safely using defusedxml
-            tree = defused_parse(xaml_path)
-            root = tree.getroot()
+            # Parse XAML safely using defusedxml (only if root not pre-provided)
+            if root is None:
+                tree = defused_parse(xaml_path)
+                root = tree.getroot()
 
             workflow_id = xaml_path.name
             resources = WorkflowResources(workflow_id=workflow_id)

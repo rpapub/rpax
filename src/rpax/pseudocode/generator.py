@@ -64,32 +64,37 @@ class PseudocodeGenerator:
             logger.error(f"Failed to generate pseudocode for {xaml_path}: {e}")
             return self._create_empty_artifact(xaml_path.stem, error=str(e))
     
-    def generate_project_pseudocode_index(self, project_slug: str, project_id: str, 
-                                        pseudocode_artifacts: list[PseudocodeArtifact]) -> PseudocodeIndex:
+    def generate_project_pseudocode_index(
+        self,
+        project_slug: str,
+        project_id: str,
+        pseudocode_summaries: list[dict],
+    ) -> PseudocodeIndex:
         """Generate index of all pseudocode artifacts in project.
-        
+
         Args:
             project_slug: Project slug identifier
             project_id: Project ID
-            pseudocode_artifacts: List of generated pseudocode artifacts
-            
+            pseudocode_summaries: Lightweight list of dicts with keys workflowId,
+                totalLines, totalActivities, hasError — full artifacts not required.
+
         Returns:
             PseudocodeIndex with project-level metadata
         """
-        workflows = []
-        
-        for artifact in pseudocode_artifacts:
-            workflows.append({
-                "workflowId": artifact.workflow_id,
-                "totalLines": artifact.total_lines,
-                "totalActivities": artifact.total_activities,
-                "hasError": "error" in artifact.metadata
-            })
-        
+        workflows = [
+            {
+                "workflowId": s["workflowId"],
+                "totalLines": s.get("totalLines", 0),
+                "totalActivities": s.get("totalActivities", 0),
+                "hasError": s.get("hasError", False),
+            }
+            for s in pseudocode_summaries
+        ]
+
         return PseudocodeIndex(
             project_id=project_id,
             project_slug=project_slug,
-            total_workflows=len(pseudocode_artifacts),
+            total_workflows=len(pseudocode_summaries),
             workflows=workflows,
             generated_at=datetime.now(timezone.utc).isoformat()
         )

@@ -71,11 +71,12 @@ class RecursivePseudocodeGenerator:
                     invoked_workflow_id = self._extract_invoked_workflow_id(activity)
                     
                     if invoked_workflow_id:
-                        # Get recursive expansion
+                        # Get recursive expansion — pass visited directly; finally block
+                        # handles backtracking via visited.discard(workflow_id)
                         recursive_lines = self.generate_recursive_pseudocode(
                             invoked_workflow_id,
                             pseudocode_artifacts,
-                            visited.copy(),  # Copy to allow different branches
+                            visited,
                             current_depth + 1,
                             indent_level + 1
                         )
