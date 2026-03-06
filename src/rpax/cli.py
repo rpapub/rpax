@@ -2714,6 +2714,75 @@ def list_bays(
         raise typer.Exit(1)
 
 
+@api_expose(
+    path="/view",
+    methods=["GET"],
+    tags=["records"],
+    summary="Compact bay portrait — project snapshot in half a terminal screen",
+)
+@app.command()
+def view(
+    path: Annotated[
+        Path,
+        typer.Argument(help="Path to rpax warehouse or project directory (default: current)"),
+    ] = Path("."),
+    bay: Annotated[
+        Optional[str],
+        typer.Option("--bay", "-b", help="Bay ID or name prefix"),
+    ] = None,
+    width: Annotated[
+        int,
+        typer.Option("--width", "-w", help="Override terminal width (0 = auto-detect)"),
+    ] = 0,
+) -> None:
+    """Compact project portrait — fits in half a terminal screen."""
+    from rpax.explain.portrait import BayPortrait
+    from rpax.utils.warehouse import (
+        BayNotFoundError,
+        MultipleBaysFoundError,
+        find_warehouse_directory,
+        get_bay_artifacts_dir,
+        resolve_bay_id,
+    )
+
+    try:
+        resolved_path = path.resolve()
+
+        warehouse_dir = find_warehouse_directory(resolved_path)
+        if not warehouse_dir:
+            console.print(f"[red]Error:[/red] No rpax warehouse found in {resolved_path}")
+            console.print("[dim]Run 'rpax parse' first or specify warehouse with path argument[/dim]")
+            raise typer.Exit(1)
+
+        try:
+            bay_id = resolve_bay_id(warehouse_dir, bay)
+        except (MultipleBaysFoundError, BayNotFoundError):
+            raise typer.Exit(1)
+
+        artifacts_dir = get_bay_artifacts_dir(warehouse_dir, bay_id)
+
+        # Determine render width
+        import os as _os
+
+        render_width = width
+        if render_width <= 0:
+            try:
+                render_width = _os.get_terminal_size().columns
+            except OSError:
+                render_width = 80
+        render_width = max(60, min(render_width, 200))
+
+        portrait = BayPortrait(artifacts_dir)
+        portrait.load()
+        portrait.render(console, width=render_width)
+
+    except typer.Exit:
+        raise
+    except Exception as e:
+        console.print(f"[red]Error rendering view:[/red] {e}")
+        raise typer.Exit(1)
+
+
 @api_expose(enabled=False)  # CLI-only: destructive operations
 @app.command()
 def clear(
