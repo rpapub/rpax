@@ -21,7 +21,7 @@ from rpax.graph import GraphGenerator, MermaidRenderer
 # V0 schema imports - disabled due to incomplete implementation
 # from rpax.output.base import ParsedProjectData
 # from rpax.output.v0 import V0LakeGenerator
-# from rpax.output.lake_index import LakeIndexGenerator
+from rpax.output.lake_index import LakeIndexGenerator
 from rpax.parser.project import ProjectParser
 from rpax.parser.xaml import XamlDiscovery
 from rpax.parser.workflow_discovery import create_workflow_discovery

@@ -54,6 +54,7 @@ Thumbs.db
 # Generated data
 data/
 output/
+!src/**/output/
 
 # rpax generated artifacts
 .rpax-lake/

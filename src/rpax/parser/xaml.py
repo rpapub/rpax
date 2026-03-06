@@ -182,7 +182,7 @@ class XamlDiscovery:
             # Extract workflow metadata
             root_annotation = xaml_content.root_annotation
             description = xaml_content.description
-            expression_language = xaml_content.expression_language
+            expression_language = xaml_content.expression_language or "VisualBasic"
             
             # Convert dataclass objects to dictionaries for JSON serialization
             arguments = [asdict(arg) for arg in xaml_content.arguments]

@@ -400,20 +400,7 @@ class XamlAnalyzer:
                 filename_only = Path(workflow_file).name.lower()
                 static_targets.add(filename_only)
 
-        # Import visibility utilities from xaml_parser package
-        try:
-            import sys
-            from pathlib import Path as PathLib
-            xaml_parser_path = PathLib(__file__).parent.parent.parent / "xaml_parser"
-            sys.path.insert(0, str(xaml_parser_path))
-            from visibility import get_visible_text_content
-            sys.path.pop(0)
-        except ImportError:
-            # Fallback to old behavior if visibility module not available
-            text_content = ET.tostring(root, encoding="unicode", method="text")
-        else:
-            # Use visibility-filtered text content only
-            text_content = get_visible_text_content(root)
+        text_content = ET.tostring(root, encoding="unicode", method="text")
 
         # Pattern for Path.Combine expressions - actual dynamic code
         path_combine_pattern = r"Path\.Combine\([^)]+\.xaml[^)]*\)"
