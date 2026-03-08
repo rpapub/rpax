@@ -140,6 +140,9 @@ def main(
     """rpa-cli - Code-first CLI tool for UiPath project analysis."""
     # Setup signal handlers for graceful shutdown
     _setup_signal_handlers()
+    from rpax.utils.motd import show_motd  # local import to keep startup lean
+
+    show_motd(console)
 
 
 def _resolve_multiple_bay_artifacts_paths(
