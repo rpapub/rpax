@@ -29,6 +29,7 @@ from rpax.parser.xaml import XamlDiscovery
 from rpax.schemas import ArtifactValidator, SchemaGenerator
 from rpax.utils.cross_project_access import CrossProjectAccessor
 from rpax.validation import ValidationFramework
+from rpax.versioning import BumpType
 
 
 def api_expose(
@@ -3575,6 +3576,81 @@ def review(
         raise typer.Exit(1)
 
 
+@api_expose(
+    path="/api/bump",
+    methods=["POST"],
+    tags=["project"],
+    summary="Bump semantic version in project.json",
+    enabled=False,  # CLI-only — mutates source file, not idempotent/safe for HTTP
+)
+@app.command("bump")
+def bump_cmd(
+    bump_type: Annotated[
+        BumpType,
+        typer.Argument(help="Version component to bump (major/minor/patch/pre*/release)"),
+    ] = BumpType.PATCH,
+    path: Annotated[
+        Path,
+        typer.Option("--path", help="Path to project.json or project directory"),
+    ] = Path("."),
+    pre_tag: Annotated[
+        str,
+        typer.Option("--pre-tag", help="Pre-release tag identifier for pre* bump types"),
+    ] = "rc",
+    dry_run: Annotated[
+        bool,
+        typer.Option("--dry-run", help="Show new version without writing project.json"),
+    ] = False,
+    quiet: Annotated[
+        bool,
+        typer.Option("--quiet", help="Print only the new version string (for scripting)"),
+    ] = False,
+) -> None:
+    """Bump the projectVersion in project.json using semantic versioning.
+
+    \b
+    BUMP_TYPE choices: major | minor | patch | premajor | preminor | prepatch | prerelease | release
+
+    \b
+    Examples:
+      rpax bump                             # 1.2.3 → 1.2.4
+      rpax bump minor                       # 1.2.3 → 1.3.0
+      rpax bump premajor --pre-tag alpha    # 1.2.3 → 2.0.0-alpha
+      rpax bump --dry-run                   # preview only
+      rpax bump --quiet                     # prints version string only
+    """
+    from rpax.versioning import (
+        bump,
+        find_project_json,
+        read_project_version,
+        write_project_version,
+    )
+
+    try:
+        project_json = find_project_json(path.resolve())
+        old_version = read_project_version(project_json)
+    except FileNotFoundError as exc:
+        console.print(f"[red]Error:[/red] {exc}")
+        raise typer.Exit(1)
+    except KeyError:
+        console.print(f"[red]Error:[/red] 'projectVersion' field not found in {project_json}")
+        raise typer.Exit(1)
+
+    new_version = bump(old_version, bump_type, pre_tag)
+
+    if quiet:
+        typer.echo(new_version)
+        return
+
+    project_name = jsonlib.loads(project_json.read_text(encoding="utf-8")).get("name", project_json.parent.name)
+    typer.echo(f"  Project: {project_name}")
+    suffix = "  [dry run — not written]" if dry_run else ""
+    typer.echo(f"  Version: {old_version} → {new_version}{suffix}")
+
+    if not dry_run:
+        write_project_version(project_json, new_version)
+
+
 @api_expose(enabled=False)  # CLI-only: dev/admin server management
 @app.command()
 def api(
@@ -3722,7 +3798,7 @@ def health() -> None:
 def object_repository(
     action: Annotated[
         str,
-        typer.Argument(help="Action to perform: summary, apps, targets, mcp-resources"),
+        typer.Argument(help="Action to perform: summary, apps, elements, audit, mcp-resources"),
     ],
     app_name: Annotated[
         str | None, typer.Argument(help="App name for app-specific actions (optional)")
@@ -3766,8 +3842,9 @@ def object_repository(
 
     Actions:
     - summary: Show Object Repository library overview
-    - apps: List applications in the Object Repository
-    - targets: Show UI targets for an app (requires app name)
+    - apps: List applications with versions and screens
+    - elements: Show elements for an app (requires app name)
+    - audit: Show parameterization audit results
     - mcp-resources: Show MCP resources for external integration
     """
     try:
@@ -3802,17 +3879,17 @@ def object_repository(
             )
             raise typer.Exit(1)
 
-        valid_actions = ["summary", "apps", "targets", "mcp-resources"]
+        valid_actions = ["summary", "apps", "elements", "audit", "mcp-resources"]
         if action not in valid_actions:
             console.print(
                 f"[red]Error:[/red] Invalid action '{action}'. Must be one of: {', '.join(valid_actions)}"
             )
             raise typer.Exit(1)
 
-        if action == "targets" and not app_name:
+        if action == "elements" and not app_name:
             console.print(f"[red]Error:[/red] App name required for '{action}' action")
             console.print(
-                "[dim]Example: rpax object-repository targets Calculator --path .rpax-warehouse[/dim]"
+                "[dim]Example: rpax object-repository elements Calculator --path .rpax-warehouse[/dim]"
             )
             raise typer.Exit(1)
 
@@ -3820,10 +3897,12 @@ def object_repository(
             _show_object_repository_summary(object_repo_dir, format, verbose)
         elif action == "apps":
             _show_object_repository_apps(object_repo_dir, format, verbose, limit)
-        elif action == "targets":
-            _show_object_repository_targets(
+        elif action == "elements":
+            _show_object_repository_elements(
                 object_repo_dir, app_name, format, verbose, limit
             )
+        elif action == "audit":
+            _show_object_repository_audit(object_repo_dir, format, verbose)
         elif action == "mcp-resources":
             _show_object_repository_mcp_resources(object_repo_dir, format, verbose)
 
@@ -3853,14 +3932,16 @@ def _show_object_repository_summary(
         console.print(f"Library ID: {summary_data.get('libraryId', 'Unknown')}")
         console.print(f"Library Type: {summary_data.get('libraryType', 'Unknown')}")
         console.print(f"Total Apps: {summary_data.get('totalApps', 0)}")
-        console.print(f"Total Targets: {summary_data.get('totalTargets', 0)}")
+        console.print(f"Total Screens: {summary_data.get('totalScreens', 0)}")
+        console.print(f"Total Elements: {summary_data.get('totalElements', 0)}")
         console.print(f"Generated: {summary_data.get('generatedAt', 'Unknown')}")
 
         if verbose and summary_data.get("apps"):
             console.print("\nApplications:")
             for app in summary_data["apps"]:
                 console.print(
-                    f"  - {app.get('name', 'Unknown')} ({app.get('targetsCount', 0)} targets)"
+                    f"  - {app.get('appName', app.get('name', 'Unknown'))} "
+                    f"({app.get('totalScreens', app.get('targetsCount', 0))} screens)"
                 )
     else:
         console.print(
@@ -3887,29 +3968,32 @@ def _show_object_repository_apps(
         apps_data = []
         for app_file in app_files:
             with open(app_file, encoding="utf-8") as f:
-                app_data = jsonlib.load(f)
-                apps_data.append(app_data)
+                apps_data.append(jsonlib.load(f))
         print(jsonlib.dumps({"apps": apps_data, "total": len(apps_data)}, indent=2))
     elif format == "table":
         table = Table(title="Object Repository Applications")
         table.add_column("Name", style="cyan")
-        table.add_column("App ID", style="yellow", no_wrap=True)
-        table.add_column("Targets", style="green")
-        table.add_column("Description", style="dim")
+        table.add_column("Versions", style="yellow")
+        table.add_column("Screens", style="green")
+        table.add_column("Elements", style="magenta")
 
         for app_file in app_files:
             with open(app_file, encoding="utf-8") as f:
                 app_data = jsonlib.load(f)
 
-            name = app_data.get("name", "Unknown")
-            app_id = app_data.get("appId", "Unknown")[:12] + "..."
-            targets_count = str(app_data.get("totalTargets", 0))
-            description = app_data.get("description", "")
+            name = app_data.get("appName", app_data.get("name", "Unknown"))
+            versions = app_data.get("versions", [])
+            versions_count = str(len(versions))
+            screens_count = str(sum(len(v.get("screens", [])) for v in versions))
+            elements_count = str(
+                sum(
+                    len(s.get("elements", []))
+                    for v in versions
+                    for s in v.get("screens", [])
+                )
+            )
 
-            if not verbose and len(description) > 50:
-                description = description[:47] + "..."
-
-            table.add_row(name, app_id, targets_count, description)
+            table.add_row(name, versions_count, screens_count, elements_count)
 
         console.print(table)
     else:
@@ -3919,10 +4003,10 @@ def _show_object_repository_apps(
         raise typer.Exit(1)
 
 
-def _show_object_repository_targets(
-    object_repo_dir: Path, app_name: str, format: str, verbose: bool, limit: int | None
+def _show_object_repository_elements(
+    object_repo_dir: Path, app_name: str | None, format: str, verbose: bool, limit: int | None
 ) -> None:
-    """Show Object Repository targets for an app."""
+    """Show Object Repository elements for an app."""
     apps_dir = object_repo_dir / "apps"
     app_file = apps_dir / f"{app_name}.json"
 
@@ -3938,49 +4022,96 @@ def _show_object_repository_targets(
     with open(app_file, encoding="utf-8") as f:
         app_data = jsonlib.load(f)
 
-    targets = app_data.get("targets", [])
+    # Collect all elements across versions and screens
+    all_elements = []
+    for version in app_data.get("versions", []):
+        for screen in version.get("screens", []):
+            for element in screen.get("elements", []):
+                all_elements.append(
+                    {**element, "_screen": screen["screenName"], "_version": version["versionName"]}
+                )
+
     if limit:
-        targets = targets[:limit]
+        all_elements = all_elements[:limit]
+
+    app_display_name = app_data.get("appName", app_data.get("name", app_name))
 
     if format == "json":
         print(
             jsonlib.dumps(
-                {"app": app_data["name"], "targets": targets, "total": len(targets)},
+                {"app": app_display_name, "elements": all_elements, "total": len(all_elements)},
                 indent=2,
             )
         )
     elif format == "table":
-        table = Table(title=f"UI Targets: {app_data['name']} ({len(targets)} targets)")
-        table.add_column("Friendly Name", style="cyan")
-        table.add_column("Element Type", style="yellow")
-        table.add_column("Target ID", style="green", no_wrap=True)
-        table.add_column("Selectors", style="magenta")
+        table = Table(title=f"Elements: {app_display_name} ({len(all_elements)} elements)")
+        table.add_column("Element Name", style="cyan")
+        table.add_column("Type", style="yellow")
+        table.add_column("Screen", style="green")
+        table.add_column("Parameterized", style="magenta")
 
-        if verbose:
-            table.add_column("Design Props", style="dim")
+        for element in all_elements:
+            element_name = element.get("elementName", "Unknown")
+            element_type = element.get("elementType", "Unknown")
+            screen_name = element.get("_screen", "Unknown")
+            is_param = "Yes" if element.get("isParameterized") else "No"
 
-        for target in targets:
-            friendly_name = target.get("friendlyName", "Unknown")
-            element_type = target.get("elementType", "Unknown")
-            target_id = target.get("targetId", "Unknown")[:12] + "..."
-            selectors = target.get("selectors", [])
-            selectors_summary = f"{len(selectors)} selectors"
-
-            row = [friendly_name, element_type, target_id, selectors_summary]
-
-            if verbose:
-                design_props = target.get("designProperties", {})
-                props_summary = (
-                    f"{len(design_props)} props" if design_props else "no props"
-                )
-                row.append(props_summary)
-
-            table.add_row(*row)
+            table.add_row(element_name, element_type, screen_name, is_param)
 
         console.print(table)
     else:
         console.print(
-            f"[red]Error:[/red] Unsupported format '{format}' for Object Repository targets"
+            f"[red]Error:[/red] Unsupported format '{format}' for Object Repository elements"
+        )
+        raise typer.Exit(1)
+
+
+def _show_object_repository_audit(
+    object_repo_dir: Path, format: str, verbose: bool
+) -> None:
+    """Show Object Repository audit results."""
+    audit_file = object_repo_dir / "audit.json"
+
+    if not audit_file.exists():
+        console.print("[red]Error:[/red] Object Repository audit not found")
+        console.print(f"[dim]Expected: {audit_file}[/dim]")
+        raise typer.Exit(1)
+
+    with open(audit_file, encoding="utf-8") as f:
+        audit_data = jsonlib.load(f)
+
+    if format == "json":
+        print(jsonlib.dumps(audit_data, indent=2))
+    elif format == "table":
+        total = audit_data.get("totalObjects", 0)
+        hardcoded = audit_data.get("hardcodedCount", 0)
+        parameterized = audit_data.get("parameterizedCount", 0)
+        has_issues = audit_data.get("hasIssues", False)
+
+        status = "[red]ISSUES FOUND[/red]" if has_issues else "[green]OK[/green]"
+        console.print(f"[bold]Object Repository Audit[/bold] — {status}")
+        console.print(f"Total Objects:  {total}")
+        console.print(f"Parameterized:  {parameterized}")
+        console.print(f"Hardcoded:      {hardcoded}")
+
+        variables = audit_data.get("variablesInUse", [])
+        if variables:
+            console.print(f"Variables in use: {', '.join(variables)}")
+
+        version_counts = audit_data.get("versionCounts", {})
+        if version_counts:
+            console.print(f"Descriptor versions: {version_counts}")
+
+        issues = audit_data.get("issues", [])
+        if issues and verbose:
+            console.print("\n[yellow]Issues:[/yellow]")
+            for issue in issues:
+                console.print(f"  [yellow]•[/yellow] {issue}")
+        elif issues:
+            console.print(f"\n[yellow]{len(issues)} issue(s) found — use --verbose to list[/yellow]")
+    else:
+        console.print(
+            f"[red]Error:[/red] Unsupported format '{format}' for Object Repository audit"
         )
         raise typer.Exit(1)
 
