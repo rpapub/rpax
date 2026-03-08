@@ -26,11 +26,11 @@ All notable changes to rpax will be documented in this file.
 - Visual workflow relationship mapping
 
 **CLI Interface**
-- `rpax parse` - Parse projects into structured JSON
-- `rpax validate` - Run validation rules with CI-friendly exit codes
-- `rpax graph` - Generate visual diagrams 
-- `rpax list` - Browse workflows, roots, orphans with filtering
-- `rpax explain` - Detailed workflow information
+- `rpa-cli parse` - Parse projects into structured JSON
+- `rpa-cli validate` - Run validation rules with CI-friendly exit codes
+- `rpa-cli graph` - Generate visual diagrams
+- `rpa-cli list` - Browse workflows, roots, orphans with filtering
+- `rpa-cli explain` - Detailed workflow information
 - Professional packaging: single-source versioning, complete dependencies
 
 **Architecture & Design Decisions**

@@ -3,7 +3,7 @@
 CLI tool for parsing UiPath projects into call graphs, dependency maps,
 and structured JSON artifacts for documentation, validation, and CI impact analysis.
 
-> **Alpha** — distributed via [test PyPI](https://test.pypi.org/project/rpax/).
+> **Alpha** — distributed via [test PyPI](https://test.pypi.org/project/rpa-cli/).
 > Expect breaking changes between versions.
 
 ## Install
@@ -11,7 +11,7 @@ and structured JSON artifacts for documentation, validation, and CI impact analy
 Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-uvx --from rpax \
+uvx --from rpa-cli \
     --index-url https://test.pypi.org/simple/ \
     --extra-index-url https://pypi.org/simple/ \
     rpa-cli --help
@@ -21,16 +21,16 @@ uvx --from rpax \
 
 ```bash
 # Parse a project — artifacts land in .rpax-warehouse/ relative to CWD
-uvx rpax parse /path/to/uipath/project
+rpa-cli parse /path/to/uipath/project
 
 # Validate the parsed output (referential integrity, cycles, etc.)
-uvx rpax validate
+rpa-cli validate
 
 # Run code quality checks (naming, size, annotations, error handling)
-uvx rpax review
+rpa-cli review
 
 # Show call graph as Mermaid diagram
-uvx rpax graph calls
+rpa-cli graph calls
 ```
 
 ## Commands
@@ -65,10 +65,10 @@ Surfaces static issues from parsed artifacts without re-running Studio:
 | `orphan_workflows` | Workflows unreachable from any declared entry point |
 
 ```bash
-rpax review                        # table output, defaults
-rpax review --format summary       # rule → issue count overview
-rpax review --max-activities 30    # stricter size threshold
-rpax review --bay my-project       # target a specific bay in a multi-bay warehouse
+rpa-cli review                        # table output, defaults
+rpa-cli review --format summary       # rule → issue count overview
+rpa-cli review --max-activities 30    # stricter size threshold
+rpa-cli review --bay my-project       # target a specific bay in a multi-bay warehouse
 ```
 
 ## Output artifacts
