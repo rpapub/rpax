@@ -4,7 +4,7 @@
 **Status**: v0.0.3 released - now validating advanced features through real-world consumption  
 **Previous Phase**: v0.0.3 Advanced Implementation 🟢 **RELEASED**
 **Synchronized with**: 4-layer architecture (ADR-002) + Activity Resource Model + Error Collection  
-**Last Updated**: 2025-09-08
+**Last Updated**: 2026-03-08
 
 ## ✅ **v0.0.2 RELEASE STATUS**
 
@@ -140,6 +140,15 @@
 
 ## 📚 **Completed Work**
 
+### 🚀 **Major Recent Completions (2026-03-08)**
+
+**CLI Package Refactoring & Maturity Taxonomy**:
+- ✅ **Split `cli.py` monolith (~4,500 lines) into `cli/` package** — additive vendor/domain splits now free
+- ✅ **`cli/uipath/` vendor namespace** — `rpa-cli uipath <command>` surface; future `cli/aa/` adds zero interference
+- ✅ **Command maturity factories** — `prod` / `experimental` / `plumbing` / `beta` via `make_command_factories()`
+- ✅ **Root help = classified commands only** — `bump` (prod), `parse`/`explain` (experimental compat aliases)
+- ✅ **ADR-034** — documents package structure and maturity taxonomy decisions
+
 ### 🚀 **Major Recent Completions (2025-09-08)**
 
 **Enhanced XAML Analysis & Validation**:
@@ -193,18 +202,20 @@
 
 **Key ADRs for Current Work:**
 - ADR-033: Multi-Project Lake Access Patterns ✅
-- **NEXT PHASE NEEDS**: ADR-034: Activity Resource Model Architecture (documenting implemented system)
-- **NEXT PHASE NEEDS**: ADR-035: Lake-Level Error Collection System (documenting implemented system)
-- **NEXT PHASE NEEDS**: ADR-036: Integrated CLI Pipeline Architecture (documenting implemented system)
+- ADR-034: CLI Package Structure and Command Maturity Taxonomy ✅ (2026-03-08)
+- **NEXT PHASE NEEDS**: ADR-035: Activity Resource Model Architecture (documenting implemented system)
+- **NEXT PHASE NEEDS**: ADR-036: Lake-Level Error Collection System (documenting implemented system)
+- **NEXT PHASE NEEDS**: ADR-037: Integrated CLI Pipeline Architecture (documenting implemented system)
 
 ## 🚀 **Next Phase: v0.0.4 - Architecture Documentation & API Layer**
 
 **Current Status**: Implementation is ahead of documentation. All major features are working but need proper ADRs.
 
 **Priority 1: Document Implemented Architecture**
-- [ ] ADR-034: Activity Resource Model Architecture - Document the comprehensive activity-centric resource system
-- [ ] ADR-035: Lake-Level Error Collection System - Document run-scoped error diagnostics with filesystem flush  
-- [ ] ADR-036: Integrated CLI Pipeline Architecture - Document unified pipeline combining all components
+- [x] ADR-034: CLI Package Structure and Command Maturity Taxonomy ✅ (2026-03-08) — `cli.py` monolith → `cli/` package; prod/experimental/plumbing/beta taxonomy; root help = classified commands only
+- [ ] ADR-035: Activity Resource Model Architecture - Document the comprehensive activity-centric resource system
+- [ ] ADR-036: Lake-Level Error Collection System - Document run-scoped error diagnostics with filesystem flush
+- [ ] ADR-037: Integrated CLI Pipeline Architecture - Document unified pipeline combining all components
 
 **Priority 2: Layer 3 (Access API) Implementation**
 - [ ] Generate FastAPI service from CLI decorator metadata (foundation exists)
