@@ -14,7 +14,7 @@ Use **IssueSaniBundle** as the canonical, user-facing name for the redacted diag
 
 ## Scope
 - **Docs wording:** `Please attach the rpax IssueSaniBundle generated with rpax diag package.`
-- **CLI:** `rpax diag package` (produces redacted bundle by default).
+- **CLI:** `rpa-cli diag package` (produces redacted bundle by default).
 - **Filename:** `rpax-IssueSaniBundle-<UTC-timestamp>.zip`
 - **Manifest inside ZIP:** `IssueSaniBundle.manifest.json` (list files + hashes).
 

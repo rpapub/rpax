@@ -74,7 +74,7 @@ rpax API started at http://127.0.0.1:8623 (3 projects, 1 lake)
 **Format specification**:
 - Always single line for easy parsing
 - Includes essential operational info
-- Machine-readable structure: `rpax API started at {url} ({projectCount} projects, {lakeCount} lake{s})`
+- Machine-readable structure: `rpa-cli API started at {url} ({projectCount} projects, {lakeCount} lake{s})`
 
 ## Minimal Endpoint Specification
 

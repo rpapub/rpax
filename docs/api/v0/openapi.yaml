@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: rpax API
+  title: rpa-cli API
   description: UiPath project analysis API - generated from CLI blueprint
   version: 0.1.0
   contact:

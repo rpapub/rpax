@@ -73,7 +73,7 @@ All commands follow consistent parameter patterns:
     - Multiple options: `--projects proj1 --projects proj2`
   - **Mutual Exclusion**: Cannot be used with `--project`
   - Help format: "Multiple project slugs for cross-project listing (comma-separated or multiple uses)"
-- **Cross-Project Discovery**: Use `rpax projects` for overview and slug discovery
+- **Cross-Project Discovery**: Use `rpa-cli projects` for overview and slug discovery
 - **Note**: Parse operations use filesystem paths, not project slugs
 
 ### Filtering and Search Parameters
@@ -99,7 +99,7 @@ All commands follow consistent parameter patterns:
 
 ## Command Specifications
 
-### `rpax parse [PATH]`
+### `rpa-cli parse [PATH]`
 
 **Purpose:** Parse UiPath project(s) into structured JSON artifacts (supports batch parsing)
 
@@ -114,16 +114,16 @@ All commands follow consistent parameter patterns:
 **Batch Parsing:**
 ```bash
 # Single project (traditional)
-rpax parse /path/to/project
+rpa-cli parse /path/to/project
 
 # Multiple projects (batch)
-rpax parse /path/to/project1 --path /path/to/project2 --path /path/to/project3
+rpa-cli parse /path/to/project1 --path /path/to/project2 --path /path/to/project3
 ```
 
 **Output:** Creates artifacts in multi-project lake structure
 **Exit Codes:** 0 (success), 1 (error)
 
-### `rpax list [ITEM_TYPE]`
+### `rpa-cli list [ITEM_TYPE]`
 
 **Purpose:** Enumerate project elements with filtering and sorting
 
@@ -145,19 +145,19 @@ rpax parse /path/to/project1 --path /path/to/project2 --path /path/to/project3
 **Multi-Project Examples:**
 ```bash
 # Single project
-rpax list workflows --project my-calc-abcd1234
+rpa-cli list workflows --project my-calc-abcd1234
 
 # Multiple projects (comma-separated)
-rpax list workflows --projects "proj1,proj2,proj3"
+rpa-cli list workflows --projects "proj1,proj2,proj3"
 
 # Multiple projects (multiple options)
-rpax list workflows --projects proj1 --projects proj2
+rpa-cli list workflows --projects proj1 --projects proj2
 ```
 
 **Output:** Formatted list of project elements
 **Exit Codes:** 0 (success), 1 (error)
 
-### `rpax projects [PATH]`
+### `rpa-cli projects [PATH]`
 
 **Purpose:** List and discover projects in multi-project lakes
 
@@ -172,22 +172,22 @@ rpax list workflows --projects proj1 --projects proj2
 **Example Usage:**
 ```bash
 # List all projects in table format
-rpax projects
+rpa-cli projects
 
 # List projects with JSON output
-rpax projects --format json
+rpa-cli projects --format json
 
 # Search for specific projects
-rpax projects --search calculator
+rpa-cli projects --search calculator
 
 # Discover projects in specific lake
-rpax projects /path/to/shared-lake
+rpa-cli projects /path/to/shared-lake
 ```
 
 **Output:** Formatted list of projects with metadata (name, slug, type, workflow count, last updated)
 **Exit Codes:** 0 (success), 1 (error)
 
-### `rpax validate [PATH]`
+### `rpa-cli validate [PATH]`
 
 **Purpose:** Run validation rules on parsed artifacts
 
@@ -202,7 +202,7 @@ rpax projects /path/to/shared-lake
 **Output:** Validation results with issues and recommendations
 **Exit Codes:** 0 (no issues), 1 (validation failures)
 
-### `rpax graph [GRAPH_TYPE]`
+### `rpa-cli graph [GRAPH_TYPE]`
 
 **Purpose:** Generate workflow call graphs and diagrams
 
@@ -218,7 +218,7 @@ rpax projects /path/to/shared-lake
 **Output:** Graph definition in specified format
 **Exit Codes:** 0 (success), 1 (error)
 
-### `rpax explain WORKFLOW`
+### `rpa-cli explain WORKFLOW`
 
 **Purpose:** Show detailed information about specific workflow
 
@@ -232,7 +232,7 @@ rpax projects /path/to/shared-lake
 **Output:** Comprehensive workflow analysis
 **Exit Codes:** 0 (success), 1 (workflow not found)
 
-### `rpax schema ACTION`
+### `rpa-cli schema ACTION`
 
 **Purpose:** Generate JSON schemas or validate artifacts
 
@@ -246,7 +246,7 @@ rpax projects /path/to/shared-lake
 **Output:** Schema files or validation results  
 **Exit Codes:** 0 (success), 1 (error)
 
-### `rpax activities ACTION [WORKFLOW]`
+### `rpa-cli activities ACTION [WORKFLOW]`
 
 **Purpose:** Access workflow activity trees, control flow, and resources
 
@@ -264,7 +264,7 @@ rpax projects /path/to/shared-lake
 **Output:** Activity information in specified format
 **Exit Codes:** 0 (success), 1 (error)
 
-### `rpax clear [SCOPE]`
+### `rpa-cli clear [SCOPE]`
 
 **Purpose:** Clear lake data with safety guardrails (CLI-only)
 
@@ -286,7 +286,7 @@ rpax projects /path/to/shared-lake
 **Output:** Deletion summary and confirmation prompts
 **Exit Codes:** 0 (success), 1 (error or cancellation)
 
-### `rpax help`
+### `rpa-cli help`
 
 **Purpose:** Show comprehensive help information
 
@@ -342,30 +342,30 @@ rpax projects /path/to/shared-lake
 
 **Parse Operations (Ingestion):**
 - Use filesystem paths to project directories/project.json files
-- Examples: `rpax parse /path/to/project`, `rpax parse . --path ../other-project`
+- Examples: `rpa-cli parse /path/to/project`, `rpa-cli parse . --path ../other-project`
 - Parameters: `PATH` argument and `--path` options for batch parsing
 
 **Query Operations (Consumption):**
 - Use single project slug from lake (`--project my-project-abcd1234`)
-- Examples: `rpax list workflows --project my-project-abcd1234`
+- Examples: `rpa-cli list workflows --project my-project-abcd1234`
 - Auto-detection when only one project exists in lake
-- Discovery via `rpax projects` to list all available project slugs
+- Discovery via `rpa-cli projects` to list all available project slugs
 
 **Multi-Project Query Workflow:**
 ```bash
 # 1. Discover available projects
-rpax projects
+rpa-cli projects
 
 # 2. Query single project
-rpax list workflows --project my-calc-abcd1234
+rpa-cli list workflows --project my-calc-abcd1234
 
 # 3. Query multiple projects (cross-project)
-rpax list workflows --projects "proj1,proj2,proj3"
+rpa-cli list workflows --projects "proj1,proj2,proj3"
 # OR
-rpax list workflows --projects proj1 --projects proj2
+rpa-cli list workflows --projects proj1 --projects proj2
 
 # ❌ INVALID: Cannot mix --project and --projects
-# rpax list --project proj1 --projects proj2  # Error: conflicting options
+# rpa-cli list --project proj1 --projects proj2  # Error: conflicting options
 ```
 
 **Error Handling:**
@@ -394,9 +394,9 @@ rpax list workflows --projects proj1 --projects proj2
 ## Future Extensions
 
 ### Planned Commands (v0.2+)
-- `rpax diff` - Compare scans for PR impact analysis
-- `rpax summarize` - Generate LLM-friendly project outlines
-- `rpax mcp-export` - Export MCP resources (API layer)
+- `rpa-cli diff` - Compare scans for PR impact analysis
+- `rpa-cli summarize` - Generate LLM-friendly project outlines
+- `rpa-cli mcp-export` - Export MCP resources (API layer)
 
 ### Parameter Evolution
 - **Deprecation Policy** - 2-version deprecation cycle for breaking changes

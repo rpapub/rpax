@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "rpax"
+name = "rpa-cli"
 dynamic = ["version"]
 description = "Proof-of-concept CLI tool for parsing UiPath projects into structured JSON artifacts"
 readme = "README.md"
@@ -36,6 +36,7 @@ dependencies = [
     "pyyaml>=6.0.2",
     "python-slugify>=8.0.4",
     "cpmf-uips-xaml~=0.1.0",
+    "cpmf-uips-or>=0.1.2",
 ]
 
 [project.optional-dependencies]
@@ -48,7 +49,7 @@ mcp = [
 ]
 
 [project.scripts]
-rpax = "rpax.cli:app"
+rpa-cli = "rpax.cli:app"
 
 [project.urls]
 Homepage = "https://github.com/rpapub/rpax"
@@ -205,7 +206,7 @@ per_rule_ignores = { DEP002 = ["fastapi", "uvicorn", "mcp"] }
 [tool.rpax.api_generation]
 version = "v0"
 base_path = "/api"
-title = "rpax API"
+title = "rpa-cli API"
 description = "UiPath project analysis API - generated from CLI blueprint"
 
 [dependency-groups]
@@ -222,6 +223,7 @@ dev = [
 
 [tool.uv.sources]
 cpmf-uips-xaml = { index = "test-pypi" }
+cpmf-uips-or = { path = "../cpmf-uips-or", editable = true }
 
 [[tool.uv.index]]
 name = "test-pypi"

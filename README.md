@@ -14,7 +14,7 @@ Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
 uvx --from rpax \
     --index-url https://test.pypi.org/simple/ \
     --extra-index-url https://pypi.org/simple/ \
-    rpax --help
+    rpa-cli --help
 ```
 
 ## Quick start
@@ -50,9 +50,9 @@ uvx rpax graph calls
 | `activities` | Inspect activity trees and resource references |
 | `view` | Compact portrait summary of a bay |
 
-Run `rpax <command> --help` for full options.
+Run `rpa-cli <command> --help` for full options.
 
-## `rpax review` — code quality checks
+## `rpa-cli review` — code quality checks
 
 Surfaces static issues from parsed artifacts without re-running Studio:
 

@@ -18,7 +18,7 @@ Constraints:
 
 ## Decision
 
-Introduce a **read-only dashboard**, served via `rpax dash`, as an **opt-in** feature.
+Introduce a **read-only dashboard**, served via `rpa-cli dash`, as an **opt-in** feature.
 It will embed static UI assets in the package and surface them under `/ui` when Access API is running.
 
 ## Defaults
@@ -26,7 +26,7 @@ It will embed static UI assets in the package and surface them under `/ui` when 
 ### Enablement
 
 * Disabled by default (`dash.enabled = false`).
-* Start manually: `uv run rpax dash` or `rpax api --dash`.
+* Start manually: `uv run rpax dash` or `rpa-cli api --dash`.
 
 ### Bind & Port
 
@@ -56,7 +56,7 @@ It will embed static UI assets in the package and surface them under `/ui` when 
 * **Workflows** (inventory).
 * **Errors** (counts and redacted details).
 * **Pseudocode** (per-workflow).
-* **IssueSaniBundle** (button: invokes `rpax diag package`, shows file path).
+* **IssueSaniBundle** (button: invokes `rpa-cli diag package`, shows file path).
 
 ## Consequences
 

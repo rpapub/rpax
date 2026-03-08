@@ -14,7 +14,7 @@ Code-first CLI tool for UiPath project analysis +- Options ---------------------
 
 ### `rpax`
 
-**Usage**: `rpax [OPTIONS] COMMAND [ARGS]...`
+**Usage**: `rpa-cli [OPTIONS] COMMAND [ARGS]...`
 
 Code-first CLI tool for UiPath project analysis +- Options -------------------------------------------------------------------+ | --version  -v        Show version and exit                                  | | --help               Show this message and exit.                            | +-----------------------------------------------------------------------------+ +- Commands ------------------------------------------------------------------+ | parse        Parse UiPath project(s) and generate artifacts.                | | list         List project elements with enhanced filtering, sorting, and    | |              output formats.                                                | | validate     Run validation rules on parser artifacts.                      | | graph        Generate workflow call graphs and diagrams.                    | | explain      Show detailed information about a specific workflow.           | | schema       Generate JSON schemas or validate artifacts against schemas.   | | help         Show detailed help information.                                | | activities   Access workflow activity trees, control flow, and resource     | |              references.                                                    | | projects     List all projects in the rpax lake.                            | | clear        Clear rpax lake data with strong safety guardrails.            | | pseudocode   Show pseudocode representation of workflow activities.         | +-----------------------------------------------------------------------------+
 
@@ -30,22 +30,22 @@ Code-first CLI tool for UiPath project analysis +- Options ---------------------
 
 ### Basic Project Parsing
 ```bash
-rpax parse /path/to/uipath/project
+rpa-cli parse /path/to/uipath/project
 ```
 
 ### View Available Projects
 ```bash  
-rpax list --lake-path /path/to/.rpax-lake
+rpa-cli list --lake-path /path/to/.rpax-lake
 ```
 
 ### Generate Pseudocode
 ```bash
-rpax pseudocode --project my-project-slug WorkflowName.xaml
+rpa-cli pseudocode --project my-project-slug WorkflowName.xaml
 ```
 
 ### Show All Workflows  
 ```bash
-rpax pseudocode --project my-project-slug --all
+rpa-cli pseudocode --project my-project-slug --all
 ```
 
 For more detailed examples and advanced usage, see the main rpax documentation.

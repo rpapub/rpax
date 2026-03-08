@@ -159,7 +159,7 @@
 
 **Cross-Project Access & Discovery**:
 - ✅ **Multi-project lake management** 
-  - ✅ `rpax list-projects` command with fuzzy search and JSON output
+  - ✅ `rpa-cli list-projects` command with fuzzy search and JSON output
   - ✅ Lake index generation (`projects.json`) with project discovery
   - ✅ Multi-project parsing workflow (`--path` multiple times)
   - ✅ ADR-033: Multi-project lake access architecture
@@ -167,7 +167,7 @@
 **Documentation & Architecture**:
 - ✅ **Updated README.md and CONTRIBUTING.md** with current command set
 - ✅ **ADR-033**: Comprehensive multi-project access patterns documentation
-- ✅ **CLI command name updates** (`rpax projects` → `rpax list-projects`)
+- ✅ **CLI command name updates** (`rpa-cli projects` → `rpa-cli list-projects`)
 
 **Completed phases and detailed histories:**
 - `docs/roadmap/completed/v0.0.1-foundation-mvp.md`

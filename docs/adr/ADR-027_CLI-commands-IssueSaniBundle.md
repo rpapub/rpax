@@ -11,7 +11,7 @@ The CLI should expose simple, memorable commands with predictable output, while 
 ## Decision
 Introduce a `diag` command group with the following subcommands:  
 
-- `rpax diag package`  
+- `rpa-cli diag package`  
   - Default: generates a redacted `IssueSaniBundle` in ZIP form.  
   - Output filename: `rpax-IssueSaniBundle-<UTC-timestamp>.zip`  
   - Default contents: config snapshot, environment report, parser errors, parser behavior, lake index, manifest.  

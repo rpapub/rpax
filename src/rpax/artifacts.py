@@ -1230,7 +1230,7 @@ class ArtifactGenerator:
         Returns:
             Dict mapping artifact names to file paths
         """
-        artifacts = {}
+        artifacts: dict[str, Path] = {}
 
         # Look for .objects directory
         objects_path = project_root / ".objects"
@@ -1239,104 +1239,202 @@ class ArtifactGenerator:
             return artifacts
 
         try:
-            from rpax.parser.object_repository import ObjectRepositoryParser
+            from cpmf_uips_or import audit_all, discover_inventory
 
-            parser = ObjectRepositoryParser()
-            repository = parser.parse_repository(objects_path)
+            inventory = discover_inventory(objects_path)
 
-            if not repository:
-                logger.warning(f"Failed to parse Object Repository in {objects_path}")
+            if not inventory.apps and not inventory.screens and not inventory.elements:
+                logger.debug(f"Empty Object Repository in {objects_path}")
                 return artifacts
 
             # Create object-repository directory
             object_repo_dir = self.output_dir / "object-repository"
             object_repo_dir.mkdir(exist_ok=True)
 
-            # Generate repository summary
-            repository_summary = {
-                "schemaVersion": "1.0.0",
+            # --- repository-summary.json ---
+            library_id = inventory.library.id if inventory.library else ""
+            library_created = inventory.library.created if inventory.library else None
+            repository_summary: dict[str, object] = {
+                "schemaVersion": "2.0.0",
                 "generatedAt": self.timestamp,
-                "libraryId": repository.library_id,
-                "libraryType": repository.library_type,
-                "created": repository.created,
-                "updated": repository.updated,
-                "totalApps": len(repository.apps),
-                "totalTargets": sum(len(app.targets) for app in repository.apps),
+                "libraryId": library_id,
+                "libraryType": "Library",
+                "created": library_created,
+                "totalApps": len(inventory.apps),
+                "totalScreens": len(inventory.screens),
+                "totalElements": len(inventory.elements),
                 "apps": [
                     {
-                        "appId": app.app_id,
-                        "name": app.name,
-                        "description": app.description,
-                        "targetsCount": len(app.targets),
-                        "created": app.created,
-                        "updated": app.updated,
+                        "appName": app_node.name,
+                        "reference": app_node.reference,
+                        "totalVersions": len(app_node.versions),
+                        "totalScreens": sum(
+                            len(v.screens) for v in app_node.versions
+                        ),
                     }
-                    for app in repository.apps
+                    for app_node in inventory.apps
                 ],
             }
 
-            # Write repository summary
             summary_file = object_repo_dir / "repository-summary.json"
             with open(summary_file, "w", encoding="utf-8") as f:
                 json.dump(repository_summary, f, indent=2, ensure_ascii=False)
 
             artifacts["object_repository_summary"] = summary_file
 
-            # Generate detailed app artifacts
+            # --- apps/{SafeAppName}.json ---
             apps_dir = object_repo_dir / "apps"
             apps_dir.mkdir(exist_ok=True)
 
-            for app in repository.apps:
-                app_data = {
-                    "appId": app.app_id,
-                    "name": app.name,
-                    "description": app.description,
-                    "reference": app.reference,
-                    "created": app.created,
-                    "updated": app.updated,
-                    "totalTargets": len(app.targets),
-                    "targets": [
+            def _serialize_element_node(en: object) -> dict[str, object]:  # type: ignore[return]
+                e = en.entry  # type: ignore[attr-defined]
+                result: dict[str, object] = {
+                    "elementName": e.element_name,
+                    "elementType": e.element_type,
+                    "activityType": e.activity_type,
+                    "searchSteps": e.search_steps,
+                    "reference": e.reference,
+                    "scopeSelector": e.scope_selector,
+                    "fullSelector": e.full_selector,
+                    "fuzzySelector": e.fuzzy_selector,
+                    "browserUrl": e.browser_url,
+                    "isParameterized": e.is_parameterized,
+                    "scopeVariables": e.scope_variables,
+                    "selectorVariables": e.selector_variables,
+                    "hasImage": e.has_image,
+                    "hasCv": e.has_cv,
+                    "created": e.created,
+                    "updated": e.updated,
+                }
+                children = en.children  # type: ignore[attr-defined]
+                if children:
+                    result["children"] = [
+                        _serialize_element_node(c) for c in children
+                    ]
+                return result
+
+            for app_node in inventory.apps:
+                safe_app_name = "".join(
+                    c if c.isalnum() or c in ".-_" else "_" for c in app_node.name
+                )
+                app_data: dict[str, object] = {
+                    "appName": app_node.name,
+                    "reference": app_node.reference,
+                    "created": app_node.created,
+                    "versions": [
                         {
-                            "targetId": target.target_id,
-                            "friendlyName": target.friendly_name,
-                            "elementType": target.element_type,
-                            "activityType": target.activity_type,
-                            "contentHash": target.content_hash,
-                            "reference": target.reference,
-                            "selectors": [
+                            "versionName": version_node.name,
+                            "reference": version_node.reference,
+                            "created": version_node.created,
+                            "screens": [
                                 {
-                                    "type": selector.selector_type,
-                                    "value": selector.selector_value,
-                                    "properties": selector.properties,
+                                    "screenName": sn.entry.screen_name,
+                                    "url": sn.entry.url,
+                                    "urlStatus": sn.entry.url_status.value,
+                                    "variableName": sn.entry.variable_name,
+                                    "selector": sn.entry.selector,
+                                    "reference": sn.entry.reference,
+                                    "created": sn.entry.created,
+                                    "updated": sn.entry.updated,
+                                    "elements": [
+                                        _serialize_element_node(en)
+                                        for en in sn.elements
+                                    ],
                                 }
-                                for selector in target.selectors
+                                for sn in version_node.screens
                             ],
-                            "designProperties": target.design_properties,
                         }
-                        for target in app.targets
+                        for version_node in app_node.versions
                     ],
                 }
 
-                # Sanitize app name for filename
-                safe_app_name = "".join(
-                    c if c.isalnum() or c in ".-_" else "_" for c in app.name
-                )
                 app_file = apps_dir / f"{safe_app_name}.json"
-
                 with open(app_file, "w", encoding="utf-8") as f:
                     json.dump(app_data, f, indent=2, ensure_ascii=False)
 
                 artifacts[f"object_repository_app_{safe_app_name}"] = app_file
 
-            # Generate MCP resources file
+            # --- audit.json ---
+            audit_result = audit_all(inventory.screens, inventory.elements)
+            audit_data: dict[str, object] = {
+                "schemaVersion": "1.0.0",
+                "generatedAt": self.timestamp,
+                "totalObjects": audit_result.total_objects,
+                "hardcodedCount": audit_result.hardcoded_count,
+                "parameterizedCount": audit_result.parameterized_count,
+                "variablesInUse": sorted(audit_result.variables_in_use),
+                "versionCounts": audit_result.version_counts,
+                "hasIssues": audit_result.has_issues,
+                "issues": audit_result.issues,
+            }
+
+            audit_file = object_repo_dir / "audit.json"
+            with open(audit_file, "w", encoding="utf-8") as f:
+                json.dump(audit_data, f, indent=2, ensure_ascii=False)
+
+            artifacts["object_repository_audit"] = audit_file
+
+            # --- mcp-resources.json ---
             project_id = getattr(self, "project_id", "unknown")
-            mcp_resources = parser.generate_mcp_resources(repository, project_id)
+            mcp_resources = []
+            mcp_resources.append(
+                {
+                    "uri": f"rpax://{project_id}/object-repository",
+                    "name": f"Object Repository Library ({project_id})",
+                    "description": (
+                        f"UiPath Object Repository with {len(inventory.apps)} apps, "
+                        f"{len(inventory.screens)} screens, "
+                        f"{len(inventory.elements)} elements"
+                    ),
+                    "mimeType": "application/json",
+                    "content": {
+                        "type": "object_repository_library",
+                        "totalApps": len(inventory.apps),
+                        "totalScreens": len(inventory.screens),
+                        "totalElements": len(inventory.elements),
+                        "apps": [
+                            {
+                                "appName": app.name,
+                                "reference": app.reference,
+                                "screensCount": sum(
+                                    len(v.screens) for v in app.versions
+                                ),
+                            }
+                            for app in inventory.apps
+                        ],
+                    },
+                }
+            )
+            for app in inventory.apps:
+                safe_name = "".join(
+                    c if c.isalnum() or c in ".-_" else "_" for c in app.name
+                )
+                mcp_resources.append(
+                    {
+                        "uri": f"rpax://{project_id}/object-repository/apps/{safe_name}",
+                        "name": f"Object Repository App: {app.name}",
+                        "description": (
+                            f"UI automation targets for {app.name} "
+                            f"({sum(len(v.screens) for v in app.versions)} screens)"
+                        ),
+                        "mimeType": "application/json",
+                        "content": {
+                            "type": "object_repository_app",
+                            "appName": app.name,
+                            "reference": app.reference,
+                            "versionsCount": len(app.versions),
+                            "screensCount": sum(
+                                len(v.screens) for v in app.versions
+                            ),
+                        },
+                    }
+                )
 
             mcp_resources_file = object_repo_dir / "mcp-resources.json"
             with open(mcp_resources_file, "w", encoding="utf-8") as f:
                 json.dump(
                     {
-                        "schemaVersion": "1.0.0",
+                        "schemaVersion": "2.0.0",
                         "generatedAt": self.timestamp,
                         "resources": mcp_resources,
                     },
@@ -1348,12 +1446,12 @@ class ArtifactGenerator:
             artifacts["object_repository_mcp_resources"] = mcp_resources_file
 
             logger.debug(
-                f"Generated Object Repository artifacts: {len(repository.apps)} apps, "
-                f"{sum(len(app.targets) for app in repository.apps)} targets"
+                f"Generated Object Repository artifacts: {len(inventory.apps)} apps, "
+                f"{len(inventory.screens)} screens, {len(inventory.elements)} elements"
             )
 
         except ImportError:
-            logger.warning("Object Repository parser not available")
+            logger.warning("cpmf-uips-or not available; skipping Object Repository artifacts")
         except Exception as e:
             logger.error(f"Failed to generate Object Repository artifacts: {e}")
 

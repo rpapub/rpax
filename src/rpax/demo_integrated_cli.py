@@ -126,7 +126,7 @@ def integrated_parse_command(
         error_file = pipeline.finalize_run()
         if error_file and pipeline.has_errors():
             console.print(f"\n[blue]Error diagnostics saved to:[/blue] {error_file}")
-            console.print("[dim]Use `rpax errors show` to view detailed error information[/dim]")
+            console.print("[dim]Use `rpa-cli errors show` to view detailed error information[/dim]")
         
         # Exit with error code if critical errors occurred
         if pipeline.has_critical_errors():

@@ -9,14 +9,14 @@ rpax v0.0.2 is published on TestPyPI for testing before production release.
 ```bash
 pip install --index-url https://test.pypi.org/simple/ \
             --extra-index-url https://pypi.org/simple/ \
-            rpax
+            rpa-cli
 ```
 
 Then use normally:
 
 ```bash
-rpax parse /path/to/project.json
-rpax --version
+rpa-cli parse /path/to/project.json
+rpa-cli --version
 ```
 
 > **Note**: While `uvx` (no-install usage) is supported, there's a known issue with certain package metadata. Installing with pip is more reliable.
@@ -28,7 +28,7 @@ rpax --version
 ```bash
 uvx --index-url https://test.pypi.org/simple/ \
     --extra-index-url https://pypi.org/simple/ \
-    rpax parse /path/to/project.json
+    rpa-cli parse /path/to/project.json
 ```
 
 ### Show Help
@@ -36,7 +36,7 @@ uvx --index-url https://test.pypi.org/simple/ \
 ```bash
 uvx --index-url https://test.pypi.org/simple/ \
     --extra-index-url https://pypi.org/simple/ \
-    rpax --help
+    rpa-cli --help
 ```
 
 ## Why Two Index URLs?
@@ -53,14 +53,14 @@ If you prefer to install rpax permanently:
 ```bash
 pip install --index-url https://test.pypi.org/simple/ \
             --extra-index-url https://pypi.org/simple/ \
-            rpax
+            rpa-cli
 ```
 
 Then use normally:
 
 ```bash
-rpax parse /path/to/project.json
-rpax --help
+rpa-cli parse /path/to/project.json
+rpa-cli --help
 ```
 
 ## Corporate Environment Setup
@@ -69,7 +69,7 @@ For easier use in corporate environments, create a shell alias:
 
 ```bash
 # Add to ~/.bashrc or ~/.zshrc
-alias rpax-test='uvx --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ rpax'
+alias rpax-test='uvx --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ rpa-cli'
 
 # Then use simply as:
 rpax-test parse /path/to/project.json
@@ -94,7 +94,7 @@ uvx --index-url https://test.pypi.org/simple/ \
     --trusted-host test.pypi.org \
     --trusted-host pypi.org \
     --trusted-host files.pythonhosted.org \
-    rpax --version
+    rpa-cli --version
 ```
 
 ### Proxy Configuration
@@ -104,7 +104,7 @@ If behind a corporate proxy:
 ```bash
 export HTTP_PROXY=http://proxy.company.com:8080
 export HTTPS_PROXY=http://proxy.company.com:8080
-uvx --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ rpax --version
+uvx --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ rpa-cli --version
 ```
 
 ## Next Steps
@@ -113,5 +113,5 @@ After testing on TestPyPI, rpax will be published to production PyPI for simpler
 
 ```bash
 # Future production usage (simpler!)
-uvx rpax --version
+uvx rpa-cli --version
 ```

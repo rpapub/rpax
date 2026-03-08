@@ -42,20 +42,20 @@ Layer 4: MCP Resources (independent code)
 **Role**: Blueprint source + dev/admin tooling
 
 **Layer 1 (Parser) Operations:**
-- `rpax parse` — discover `.xaml`, normalize IDs, emit canonical artifacts
-- `rpax schema` — generate JSON schemas for artifacts  
+- `rpa-cli parse` — discover `.xaml`, normalize IDs, emit canonical artifacts
+- `rpa-cli schema` — generate JSON schemas for artifacts  
 
 **Layer 2 (Transformation/Enhancement) Operations:**
-- `rpax pseudocode` — generate pseudocode artifacts with recursive expansion
+- `rpa-cli pseudocode` — generate pseudocode artifacts with recursive expansion
 - Activity resource generation with package relationships and container hierarchies
 - Enhanced XAML analysis with visual vs structural activity detection
 - V0 schema generation with progressive disclosure (low/medium/high detail levels)
 - Lake-level error collection with run-scoped diagnostics
-- `rpax validate` — apply configurable gates (missing/dynamic invokes, cycles, orphans)
+- `rpa-cli validate` — apply configurable gates (missing/dynamic invokes, cycles, orphans)
 
 **Dev/Admin Operations (CLI-only):**
-- `rpax list`, `rpax explain`, `rpax graph`, `rpax activities` — read artifacts for testing
-- `rpax clear`, `rpax projects` — lake management operations
+- `rpa-cli list`, `rpa-cli explain`, `rpa-cli graph`, `rpa-cli activities` — read artifacts for testing
+- `rpa-cli clear`, `rpa-cli projects` — lake management operations
 
 ### **Layer 3: Access API (Independent Service)**
 **Implementation**: FastAPI service generated from OpenAPI spec

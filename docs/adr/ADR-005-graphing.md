@@ -37,7 +37,7 @@ Visualization needed for workflow invocation graphs in docs and CI.
 ## Implementation Status (Updated 2025-09-08)
 
 * **v0.0.2:** ✅ Mermaid support implemented and operational
-* **v0.0.3:** ✅ Graph generation via `rpax graph` command working
+* **v0.0.3:** ✅ Graph generation via `rpa-cli graph` command working
 * **Future:** Graphviz support for large/CI diagrams (architecture ready)
 
 ## Consequences

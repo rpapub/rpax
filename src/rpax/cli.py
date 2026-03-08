@@ -78,7 +78,7 @@ def api_expose(
 
 
 app = typer.Typer(
-    name="rpax", help=__description__, add_completion=False, rich_markup_mode="rich"
+    name="rpa-cli", help=__description__, add_completion=False, rich_markup_mode="rich"
 )
 
 console = Console()
@@ -124,7 +124,7 @@ def _setup_signal_handlers():
 def version_callback(value: bool) -> None:
     """Show version information and exit."""
     if value:
-        console.print(f"rpax version {__version__}")
+        console.print(f"rpa-cli version {__version__}")
         raise typer.Exit()
 
 
@@ -137,7 +137,7 @@ def main(
         ),
     ] = False,
 ) -> None:
-    """rpax - Code-first CLI tool for UiPath project analysis."""
+    """rpa-cli - Code-first CLI tool for UiPath project analysis."""
     # Setup signal handlers for graceful shutdown
     _setup_signal_handlers()
 
@@ -299,7 +299,7 @@ def _resolve_bay_artifacts_path(
                 records[0].get("recordId", "f4aa3834") if records else "f4aa3834"
             )
             console.print(
-                f"Example: [cyan]rpax list {command_context} --record {sample_record}[/cyan]"
+                f"Example: [cyan]rpa-cli list {command_context} --record {sample_record}[/cyan]"
             )
             raise typer.Exit(1)
 
@@ -538,7 +538,7 @@ def parse(
             )
 
         console.print(f"\n[blue]Multi-bay warehouse:[/blue] {base_config.output.dir}")
-        console.print("[dim]Use 'rpax list-bays' to list all bays in the warehouse[/dim]")
+        console.print("[dim]Use 'rpa-cli list-bays' to list all bays in the warehouse[/dim]")
 
     except FileNotFoundError as e:
         console.print(f"[red]Error:[/red] {e}")
@@ -1185,7 +1185,7 @@ def list_items(
                     "[yellow]WARN[/yellow] Orphan detection now available with validation framework!"
                 )
                 console.print(
-                    "[dim]Use 'rpax validate orphans' to identify workflows not reachable from entry points[/dim]"
+                    "[dim]Use 'rpa-cli validate orphans' to identify workflows not reachable from entry points[/dim]"
                 )
             elif format == "json":
                 print(
@@ -1193,7 +1193,7 @@ def list_items(
                         {
                             "orphans": [],
                             "total": 0,
-                            "message": "Use 'rpax validate orphans' for orphan detection",
+                            "message": "Use 'rpa-cli validate orphans' for orphan detection",
                         }
                     )
                 )
@@ -1203,7 +1203,7 @@ def list_items(
                 writer = csv.DictWriter(sys.stdout, fieldnames=["message"])
                 writer.writeheader()
                 writer.writerow(
-                    {"message": "Use 'rpax validate orphans' for orphan detection"}
+                    {"message": "Use 'rpa-cli validate orphans' for orphan detection"}
                 )
 
         elif item_type == "activities":
@@ -1217,7 +1217,7 @@ def list_items(
                 if not activities_dir.exists():
                     if format == "table":
                         console.print(
-                            "[yellow]No activities found[/yellow] - run 'rpax parse' first"
+                            "[yellow]No activities found[/yellow] - run 'rpa-cli parse' first"
                         )
                     elif format == "json":
                         print(jsonlib.dumps({"activities": [], "total": 0}))
@@ -1521,7 +1521,7 @@ def validate(
             if not artifacts_dir:
                 console.print(f"[red]Error:[/red] No artifacts found in {path}")
                 console.print(
-                    "[dim]Run 'rpax parse' first or specify artifacts directory[/dim]"
+                    "[dim]Run 'rpa-cli parse' first or specify artifacts directory[/dim]"
                 )
                 raise typer.Exit(1)
 
@@ -1711,7 +1711,7 @@ def graph(
             if not artifacts_dir:
                 console.print(f"[red]Error:[/red] No artifacts found in {path}")
                 console.print(
-                    "[dim]Run 'rpax parse' first or specify artifacts directory[/dim]"
+                    "[dim]Run 'rpa-cli parse' first or specify artifacts directory[/dim]"
                 )
                 raise typer.Exit(1)
 
@@ -1776,7 +1776,7 @@ def _print_entry_points(console: Console, artifacts_dir: Path) -> None:
     """Print a table of project entry points from manifest.json."""
     manifest_file = artifacts_dir / "manifest.json"
     if not manifest_file.exists():
-        console.print("[red]Error:[/red] manifest.json not found. Run 'rpax parse' first.")
+        console.print("[red]Error:[/red] manifest.json not found. Run 'rpa-cli parse' first.")
         return
 
     with open(manifest_file, encoding="utf-8") as f:
@@ -1787,7 +1787,7 @@ def _print_entry_points(console: Console, artifacts_dir: Path) -> None:
 
     if not entry_points:
         console.print("[yellow]No entry points found in manifest.[/yellow]")
-        console.print("[dim]Tip: rpax explain <workflow> to inspect any workflow.[/dim]")
+        console.print("[dim]Tip: rpa-cli explain <workflow> to inspect any workflow.[/dim]")
         return
 
     # Load argument counts from workflows.index.json (graceful fallback if absent)
@@ -1823,7 +1823,7 @@ def _print_entry_points(console: Console, artifacts_dir: Path) -> None:
 
     console.print(table)
     console.print()
-    console.print("[dim]Run: rpax explain <workflow> to inspect a specific entry point.[/dim]")
+    console.print("[dim]Run: rpa-cli explain <workflow> to inspect a specific entry point.[/dim]")
     console.print("[dim]★ = main workflow[/dim]")
 
 
@@ -1884,9 +1884,9 @@ def explain(
         # Find archive directory
         warehouse_dir = find_warehouse_directory(path)
         if not warehouse_dir:
-            console.print(f"[red]Error:[/red] No rpax warehouse found in {path}")
+            console.print(f"[red]Error:[/red] No rpa-cli warehouse found in {path}")
             console.print(
-                "[dim]Run 'rpax parse' first or specify archive directory with --path[/dim]"
+                "[dim]Run 'rpa-cli parse' first or specify archive directory with --path[/dim]"
             )
             raise typer.Exit(1)
 
@@ -2058,7 +2058,7 @@ def schema(
             if not artifacts_dir:
                 console.print(f"[red]Error:[/red] No artifacts found in {path}")
                 console.print(
-                    "[dim]Run 'rpax parse' first or specify artifacts directory[/dim]"
+                    "[dim]Run 'rpa-cli parse' first or specify artifacts directory[/dim]"
                 )
                 raise typer.Exit(1)
 
@@ -2208,7 +2208,7 @@ def activities(
                 f"[red]Error:[/red] No manifest.json or bays.json found in {project_path}"
             )
             console.print(
-                "[dim]Run 'rpax parse' first or specify correct artifacts directory[/dim]"
+                "[dim]Run 'rpa-cli parse' first or specify correct artifacts directory[/dim]"
             )
             raise typer.Exit(1)
 
@@ -2224,7 +2224,7 @@ def activities(
                 f"[red]Error:[/red] Workflow name required for '{action}' action"
             )
             console.print(
-                "[dim]Example: rpax activities tree PathKeeper --path .rpax-warehouse[/dim]"
+                "[dim]Example: rpa-cli activities tree PathKeeper --path .rpax-warehouse[/dim]"
             )
             raise typer.Exit(1)
 
@@ -2751,8 +2751,8 @@ def view(
 
         warehouse_dir = find_warehouse_directory(resolved_path)
         if not warehouse_dir:
-            console.print(f"[red]Error:[/red] No rpax warehouse found in {resolved_path}")
-            console.print("[dim]Run 'rpax parse' first or specify warehouse with path argument[/dim]")
+            console.print(f"[red]Error:[/red] No rpa-cli warehouse found in {resolved_path}")
+            console.print("[dim]Run 'rpa-cli parse' first or specify warehouse with path argument[/dim]")
             raise typer.Exit(1)
 
         try:
@@ -3047,11 +3047,11 @@ def pseudocode(
     - [DisplayName] Tag (Path: Activity/Sequence/...)
 
     Examples:
-        rpax pseudocode Main.xaml
-        rpax pseudocode Calculator --project my-calc-abcd1234
-        rpax pseudocode VerifyConnection --format json
-        rpax pseudocode --all                 # Show all workflows
-        rpax pseudocode Main.xaml --recursive # Show complete call tree
+        rpa-cli pseudocode Main.xaml
+        rpa-cli pseudocode Calculator --project my-calc-abcd1234
+        rpa-cli pseudocode VerifyConnection --format json
+        rpa-cli pseudocode --all                 # Show all workflows
+        rpa-cli pseudocode Main.xaml --recursive # Show complete call tree
     """
     try:
         # Import here to avoid circular imports
@@ -3082,7 +3082,7 @@ def pseudocode(
                 f"[red]Error:[/red] No pseudocode artifacts found in {pseudocode_dir}"
             )
             console.print(
-                "[dim]Run 'rpax parse' to generate pseudocode artifacts[/dim]"
+                "[dim]Run 'rpa-cli parse' to generate pseudocode artifacts[/dim]"
             )
             raise typer.Exit(1)
 
@@ -3410,7 +3410,7 @@ def _review_resolve_artifacts_dir(path: Path, bay: str | None) -> Path:
         warehouse_dir = find_warehouse_directory(path)
     except FileNotFoundError:
         console.print(f"[red]Error:[/red] No warehouse found under {path}")
-        console.print("[dim]Run 'rpax parse' first.[/dim]")
+        console.print("[dim]Run 'rpa-cli parse' first.[/dim]")
         raise typer.Exit(1)
 
     try:
@@ -3613,11 +3613,11 @@ def bump_cmd(
 
     \b
     Examples:
-      rpax bump                             # 1.2.3 → 1.2.4
-      rpax bump minor                       # 1.2.3 → 1.3.0
-      rpax bump premajor --pre-tag alpha    # 1.2.3 → 2.0.0-alpha
-      rpax bump --dry-run                   # preview only
-      rpax bump --quiet                     # prints version string only
+      rpa-cli bump                             # 1.2.3 → 1.2.4
+      rpa-cli bump minor                       # 1.2.3 → 1.3.0
+      rpa-cli bump premajor --pre-tag alpha    # 1.2.3 → 2.0.0-alpha
+      rpa-cli bump --dry-run                   # preview only
+      rpa-cli bump --quiet                     # prints version string only
     """
     from rpax.versioning import (
         bump,
@@ -3719,7 +3719,7 @@ def api(
         lake_path = Path(rpax_config.output.dir)
         if not lake_path.exists():
             console.print(f"[red]Error:[/red] Warehouse directory not found: {lake_path}")
-            console.print("[dim]Run 'rpax parse' first to create artifacts[/dim]")
+            console.print("[dim]Run 'rpa-cli parse' first to create artifacts[/dim]")
             raise typer.Exit(1)
 
         # Start server
@@ -3758,7 +3758,7 @@ def health() -> None:
     from datetime import datetime
 
     try:
-        console.print("[green]rpax Health Check[/green]")
+        console.print("[green]rpa-cli Health Check[/green]")
         console.print("Status: [green]OK[/green]")
         console.print(f"Timestamp: {datetime.now(UTC).isoformat()}")
         console.print(f"Version: {__version__}")
@@ -3864,7 +3864,7 @@ def object_repository(
                 f"[red]Error:[/red] No manifest.json or bays.json found in {project_path}"
             )
             console.print(
-                "[dim]Run 'rpax parse' first or specify correct artifacts directory[/dim]"
+                "[dim]Run 'rpa-cli parse' first or specify correct artifacts directory[/dim]"
             )
             raise typer.Exit(1)
 
@@ -3889,7 +3889,7 @@ def object_repository(
         if action == "elements" and not app_name:
             console.print(f"[red]Error:[/red] App name required for '{action}' action")
             console.print(
-                "[dim]Example: rpax object-repository elements Calculator --path .rpax-warehouse[/dim]"
+                "[dim]Example: rpa-cli object-repository elements Calculator --path .rpax-warehouse[/dim]"
             )
             raise typer.Exit(1)
 
@@ -4189,9 +4189,9 @@ def projects(
     """Cross-project access with fuzzy project resolution and MCP-optimized patterns.
 
     Examples:
-        rpax projects froz                    # Find projects matching "froz"
-        rpax projects frozenchlorine --action entry-points  # Get entry points for specific project
-        rpax projects --action summary        # Cross-project governance summary
+        rpa-cli projects froz                    # Find projects matching "froz"
+        rpa-cli projects frozenchlorine --action entry-points  # Get entry points for specific project
+        rpa-cli projects --action summary        # Cross-project governance summary
     """
     console.print(f"[blue]Cross-Project Access[/blue] - {path}")
 
@@ -4201,7 +4201,7 @@ def projects(
         if action == "resolve":
             if not query:
                 console.print("[red]Error:[/red] Query required for resolve action")
-                console.print("[dim]Example: rpax projects froz[/dim]")
+                console.print("[dim]Example: rpa-cli projects froz[/dim]")
                 raise typer.Exit(1)
 
             matches = accessor.resolve_project(query)

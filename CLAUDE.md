@@ -45,15 +45,15 @@ docs/
 The rpax CLI provides these core commands:
 
 ```bash
-rpax parse [path] [--out dir]        # Parse project → JSON artifacts
-rpax graph calls [--out file]        # Generate call graphs  
-rpax list {roots,workflows,orphans}  # Enumerate project elements
-rpax explain <workflow>              # Show workflow details
-rpax validate {all,missing,cycles}   # Run validation rules
-rpax diff <scanA> <scanB>            # Compare scans for PR impact
-rpax config {show,init,set}          # Manage configuration
-rpax summarize {workflow,project}    # Generate LLM-friendly summaries
-rpax mcp-export [--out dir]          # Export MCP resources
+rpa-cli parse [path] [--out dir]        # Parse project → JSON artifacts
+rpa-cli graph calls [--out file]        # Generate call graphs  
+rpa-cli list {roots,workflows,orphans}  # Enumerate project elements
+rpa-cli explain <workflow>              # Show workflow details
+rpa-cli validate {all,missing,cycles}   # Run validation rules
+rpa-cli diff <scanA> <scanB>            # Compare scans for PR impact
+rpa-cli config {show,init,set}          # Manage configuration
+rpa-cli summarize {workflow,project}    # Generate LLM-friendly summaries
+rpa-cli mcp-export [--out dir]          # Export MCP resources
 ```
 
 ### Python Development

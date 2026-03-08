@@ -23,9 +23,9 @@ The implementation follows the 4-layer architecture (ADR-002) with incremental d
   - Basic workflow discovery and invocation detection
   
 - **CLI Basics** (ADR-003, ADR-015)
-  - `rpax parse` command for artifact generation
-  - `rpax list workflows` for project enumeration
-  - `rpax help` with command documentation
+  - `rpa-cli parse` command for artifact generation
+  - `rpa-cli list workflows` for project enumeration
+  - `rpa-cli help` with command documentation
   - Configuration via `.rpax.json` (ADR-004)
 
 - **Identity System** (ADR-014)
@@ -55,18 +55,18 @@ The implementation follows the 4-layer architecture (ADR-002) with incremental d
 
 ### New Features
 - **Validation Layer** (ADR-010)
-  - `rpax validate` command with configurable rules
+  - `rpa-cli validate` command with configurable rules
   - Pipeline readiness checks (missing invokes, cycles, orphans)
   - CI-friendly exit codes and reporting
   
 - **Graph Visualization** (ADR-005, ADR-013)
-  - `rpax graph` command with Mermaid output
+  - `rpa-cli graph` command with Mermaid output
   - Standardized diagram elements (nodes, edges, clusters)
   - Per-root call graphs and project overviews
   
 - **Enhanced CLI** (ADR-003)
-  - `rpax explain <workflow>` for detailed workflow info
-  - Enhanced `rpax list` with filtering options
+  - `rpa-cli explain <workflow>` for detailed workflow info
+  - Enhanced `rpa-cli list` with filtering options
   - Better error messages and help text
 
 - **Strict Artifacts** (ADR-007, ADR-009)
@@ -99,8 +99,8 @@ The implementation follows the 4-layer architecture (ADR-002) with incremental d
   - Stable URLs for CI integration
 
 - **Advanced CLI** (ADR-003)
-  - `rpax diff` for PR impact analysis
-  - `rpax summarize` for LLM-friendly project outlines
+  - `rpa-cli diff` for PR impact analysis
+  - `rpa-cli summarize` for LLM-friendly project outlines
   - Graphviz support for large diagram rendering
   
 - **Performance Optimization**
@@ -133,7 +133,7 @@ The implementation follows the 4-layer architecture (ADR-002) with incremental d
   - Compatible migration from Access API
   
 - **Extensibility**
-  - `rpax mcp-export` for resource template generation
+  - `rpa-cli mcp-export` for resource template generation
   - Plugin architecture for custom analyzers
   - Webhook support for CI integrations
 

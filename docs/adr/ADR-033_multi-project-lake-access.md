@@ -22,7 +22,7 @@ As rpax lake usage grows, users need to manage multiple projects within a single
 
 ## Decision
 
-Implement **multi-project lake access patterns** centered around a `rpax list-projects` command and supporting infrastructure for lake-level project discovery and navigation.
+Implement **multi-project lake access patterns** centered around a `rpa-cli list-projects` command and supporting infrastructure for lake-level project discovery and navigation.
 
 ## Architecture
 
@@ -67,29 +67,29 @@ Implement **multi-project lake access patterns** centered around a `rpax list-pr
 
 ### Command Interface
 
-#### `rpax list-projects` Command
+#### `rpa-cli list-projects` Command
 ```bash
 # Basic usage
-rpax list-projects                                    # List all projects in default lake
-rpax list-projects --path /custom/lake                # List projects in specific lake
+rpa-cli list-projects                                    # List all projects in default lake
+rpa-cli list-projects --path /custom/lake                # List projects in specific lake
 
 # Filtering and search
-rpax list-projects --search "calc"                    # Case-insensitive name search
-rpax list-projects --type process                     # Filter by project type
+rpa-cli list-projects --search "calc"                    # Case-insensitive name search
+rpa-cli list-projects --type process                     # Filter by project type
 
 # Output formatting  
-rpax list-projects --format table                     # Human-readable table (default)
-rpax list-projects --format json                      # JSON for tooling/MCP
-rpax list-projects --format csv --out projects.csv    # CSV export
+rpa-cli list-projects --format table                     # Human-readable table (default)
+rpa-cli list-projects --format json                      # JSON for tooling/MCP
+rpa-cli list-projects --format csv --out projects.csv    # CSV export
 ```
 
 #### Integration with Existing Commands
 ```bash
 # Enhanced parse command for multi-project scenarios
-rpax parse --path project1/ --path project2/ --out shared-lake/
+rpa-cli parse --path project1/ --path project2/ --out shared-lake/
 
 # Cross-project validation
-rpax validate shared-lake/ --cross-project-missing     # Find missing cross-project refs
+rpa-cli validate shared-lake/ --cross-project-missing     # Find missing cross-project refs
 ```
 
 ## Implementation Details
@@ -97,7 +97,7 @@ rpax validate shared-lake/ --cross-project-missing     # Find missing cross-proj
 ### 1. Lake Index Management
 
 **Automatic Maintenance**:
-- `projects.json` updated during `rpax parse` operations
+- `projects.json` updated during `rpa-cli parse` operations
 - Incremental updates when individual projects are re-parsed
 - Hash-based change detection to avoid unnecessary updates
 
@@ -118,7 +118,7 @@ class LakeIndexManager:
 
 **Batch Processing**:
 ```bash
-rpax parse --path project1/ --path project2/ --path project3/ --out unified-lake/
+rpa-cli parse --path project1/ --path project2/ --path project3/ --out unified-lake/
 ```
 
 **Incremental Updates**:
@@ -155,7 +155,7 @@ rpax://{lake_name}/projects/{slug}/manifest    # Project parsing results
 
 ## Command Specification
 
-### `rpax list-projects`
+### `rpa-cli list-projects`
 
 **Purpose**: Discover and list projects within a lake with search and filtering capabilities.
 
@@ -209,7 +209,7 @@ Data Processor       process   15         2025-01-09 11:45:00    ⚠ (3 missing)
 - **Breaking Change Risk**: Future schema changes may require migration
 
 ### Implementation Requirements
-- Update `rpax parse` to maintain `projects.json` index
+- Update `rpa-cli parse` to maintain `projects.json` index
 - Add `LakeIndexManager` class for index operations
 - Implement fuzzy search for project name matching
 - Add comprehensive error handling for corrupted/missing indices
@@ -233,7 +233,7 @@ Data Processor       process   15         2025-01-09 11:45:00    ⚠ (3 missing)
 ## Success Metrics
 
 ### v0.0.3 Targets
-- `rpax list-projects` command functional with table and JSON output
+- `rpa-cli list-projects` command functional with table and JSON output
 - `projects.json` index generated and maintained during parse operations
 - Search filtering works with substring matching
 - Multi-project parsing workflow (`--path` multiple times) operational

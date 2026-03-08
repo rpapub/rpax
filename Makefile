@@ -168,8 +168,8 @@ test-install:
 		Write-Host "Installing $$($wheelFile.Name)..."; \
 		pip install --force-reinstall "$$($wheelFile.FullName)"; \
 		Write-Host "Testing installed package..."; \
-		rpax --version; \
-		rpax --help; \
+		rpa-cli --version; \
+		rpa-cli --help; \
 		Write-Host "Package installation test completed successfully!"; \
 	} else { \
 		Write-Error "No wheel files found in dist/. Run 'make build' first."; \

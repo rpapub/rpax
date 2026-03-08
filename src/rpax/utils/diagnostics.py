@@ -185,7 +185,7 @@ def format_phase_table(phases: list[PhaseResult], project_name: str = "") -> str
     except ImportError:
         return _format_plain(phases, project_name)
 
-    title = f"rpax bench — {project_name}" if project_name else "rpax bench"
+    title = f"rpa-cli bench — {project_name}" if project_name else "rpa-cli bench"
     table = Table(title=title, box=box.SIMPLE_HEAVY, show_footer=True)
 
     table.add_column("Phase", style="bold")
@@ -235,7 +235,7 @@ def format_phase_table(phases: list[PhaseResult], project_name: str = "") -> str
 
 def _format_plain(phases: list[PhaseResult], project_name: str = "") -> str:
     """Fallback plain-text table (no Rich dependency)."""
-    lines = [f"rpax bench — {project_name}" if project_name else "rpax bench", ""]
+    lines = [f"rpa-cli bench — {project_name}" if project_name else "rpa-cli bench", ""]
     header = f"{'Phase':<22} {'Wall':>8} {'CPU(ms)':>9} {'PyΔ':>9} {'RSSΔ':>9} {'I/O r/w':>10} {'Art':>5}"
     lines.append(header)
     lines.append("-" * len(header))

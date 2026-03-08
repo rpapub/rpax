@@ -224,16 +224,16 @@ class RecursivePseudocodeGenerator:
 #### Enhanced CLI Commands
 ```bash
 # Default behavior - show expanded if available
-rpax pseudocode --project my-calc-1234 StandardCalculator.xaml
+rpa-cli pseudocode --project my-calc-1234 StandardCalculator.xaml
 
 # Explicit basic pseudocode
-rpax pseudocode --project my-calc-1234 StandardCalculator.xaml --basic
+rpa-cli pseudocode --project my-calc-1234 StandardCalculator.xaml --basic
 
 # Explicit expanded pseudocode  
-rpax pseudocode --project my-calc-1234 StandardCalculator.xaml --expanded
+rpa-cli pseudocode --project my-calc-1234 StandardCalculator.xaml --expanded
 
 # Control expansion depth
-rpax pseudocode --project my-calc-1234 StandardCalculator.xaml --max-depth 2
+rpa-cli pseudocode --project my-calc-1234 StandardCalculator.xaml --max-depth 2
 ```
 
 #### Backward Compatibility

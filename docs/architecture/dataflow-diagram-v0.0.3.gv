@@ -29,7 +29,7 @@ digraph rpax_flow {
   }
 
   // ===== Producer (left) =====
-  Parser [label="Layer 1: Parser\n(CLI: rpax parse)\n• discover • normalize • extract", shape=box, style="rounded"];
+  Parser [label="Layer 1: Parser\n(CLI: rpa-cli parse)\n• discover • normalize • extract", shape=box, style="rounded"];
   Transform [label="Layer 2: Transformation\n• activity resources • V0 schema\n• error collection", shape=box, style="rounded"];
   { rank=same; Parser; Transform; Lake; }
 
@@ -56,13 +56,13 @@ digraph rpax_flow {
   Lake -> MCP        [label="read v0+resources"];
 
   // ===== Clients (top) =====
-  Dev [label="RPA Dev (PowerShell)\nuses rpax CLI", shape=box, style="rounded,filled", fillcolor="#eef7ff"];
+  Dev [label="RPA Dev (PowerShell)\nuses rpa-cli CLI", shape=box, style="rounded,filled", fillcolor="#eef7ff"];
   LLM [label="LLM / Tools\n(MCP client)", shape=box, style="rounded,filled", fillcolor="#eef7ff"];
   { rank=source; Dev; LLM; }
 
   edge [color="black", style=solid, penwidth=1];
-  Dev -> Transform [label="rpax parse"];
-  Dev -> Validation [label="rpax validate"];
+  Dev -> Transform [label="rpa-cli parse"];
+  Dev -> Validation [label="rpa-cli validate"];
   LLM -> MCP        [label="list/read"];
 
   // ===== Legend =====

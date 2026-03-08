@@ -31,7 +31,7 @@ digraph rpax_flow {
   }
 
   // ===== Producer (left) =====
-  Parser [label="Layer 1: Parser\n(CLI: rpax parse)\n• discover • normalize • extract", shape=box, style="rounded"];
+  Parser [label="Layer 1: Parser\n(CLI: rpa-cli parse)\n• discover • normalize • extract", shape=box, style="rounded"];
   { rank=same; Parser; Lake; }
 
   // Write path (left -> center)
@@ -56,13 +56,13 @@ digraph rpax_flow {
   Lake -> MCP        [label="read"];
 
   // ===== Clients (top) =====
-  Dev [label="RPA Dev (PowerShell)\nuses rpax CLI", shape=box, style="rounded,filled", fillcolor="#eef7ff"];
+  Dev [label="RPA Dev (PowerShell)\nuses rpa-cli CLI", shape=box, style="rounded,filled", fillcolor="#eef7ff"];
   CI  [label="CI / PR bots", shape=box, style="rounded,filled", fillcolor="#eef7ff"];
   LLM [label="LLM / Tools\n(MCP client)", shape=box, style="rounded,filled", fillcolor="#eef7ff"];
   { rank=source; Dev; CI; LLM; }
 
   edge [color="black", style=solid, penwidth=1];
-  Dev -> Parser [label="rpax parse"];
+  Dev -> Parser [label="rpa-cli parse"];
   CI  -> Validation [label="run gates"];
   CI  -> API        [label="HTTP GET"];
   LLM -> MCP        [label="list/read"];

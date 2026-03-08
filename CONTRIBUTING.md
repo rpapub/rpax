@@ -59,8 +59,8 @@ cd path\to\your\rpax
 uv sync --all-extras
 
 # Verify installation works
-uv run rpax --version
-uv run rpax --help
+uv run rpa-cli --version
+uv run rpa-cli --help
 
 # Test that all tools are available
 uv run pytest --version
@@ -206,7 +206,7 @@ make parse-frozenchlorine  # Test specific corpus project
 
 #### Cross-Project Development Testing
 
-The `rpax list-projects` command enables testing and development of cross-project discovery patterns, which are optimized for lake-level project management and MCP (Model Context Protocol) integration. This command supports project discovery scenarios where clients can:
+The `rpa-cli list-projects` command enables testing and development of cross-project discovery patterns, which are optimized for lake-level project management and MCP (Model Context Protocol) integration. This command supports project discovery scenarios where clients can:
 
 1. **List all projects** in a lake with search filtering
 2. **Get project metadata** including type, workflow count, and last updated
@@ -217,9 +217,9 @@ The `rpax list-projects` command enables testing and development of cross-projec
 make test-projects
 
 # Manual testing examples:
-uv run rpax list-projects --path .rpax-test-lake
-uv run rpax list-projects --path .rpax-test-lake --search "CORE"
-uv run rpax list-projects --path .rpax-test-lake --format json
+uv run rpa-cli list-projects --path .rpax-test-lake
+uv run rpa-cli list-projects --path .rpax-test-lake --search "CORE"
+uv run rpa-cli list-projects --path .rpax-test-lake --format json
 ```
 
 **Command Options:**
@@ -323,7 +323,7 @@ Commands are classified using `@api_expose()` decorators:
 1. **Modify CLI command** with appropriate `@api_expose()` decorator
 2. **Regenerate spec**: `uv run python tools/generate_openapi.py`
 3. **Review changes**: Check `docs/api/v0/openapi.yaml`
-4. **Test CLI**: `uv run rpax <command> --help` to verify decorator works
+4. **Test CLI**: `uv run rpa-cli <command> --help` to verify decorator works
 5. **Future**: Generate FastAPI service from updated spec
 
 ## Access API Development
@@ -336,22 +336,22 @@ rpax includes a minimal read-only HTTP API server for programmatic access to lak
 
 ```powershell
 # Start API server with default configuration (requires api.enabled=true in config)
-uv run rpax api
+uv run rpa-cli api
 
 # Force enable API regardless of config setting
-uv run rpax api --enable
+uv run rpa-cli api --enable
 
 # Temporarily enable API for one session (ignores config)
-uv run rpax api --enable-temp
+uv run rpa-cli api --enable-temp
 
 # Start with custom configuration
-uv run rpax api --config .rpax.json --enable
+uv run rpa-cli api --config .rpax.json --enable
 
 # Override port and bind address
-uv run rpax api --port 8624 --bind 127.0.0.1
+uv run rpa-cli api --port 8624 --bind 127.0.0.1
 
 # Start in background for testing
-uv run rpax api --enable-temp &
+uv run rpa-cli api --enable-temp &
 ```
 
 #### Temporary vs Permanent API Enabling
@@ -370,15 +370,15 @@ uv run rpax api --enable-temp &
 # Development workflow examples:
 
 # 1. Parse project, then quickly inspect via API
-uv run rpax parse "D:\MyUiPathProject"
-uv run rpax api --enable-temp
+uv run rpa-cli parse "D:\MyUiPathProject"
+uv run rpa-cli api --enable-temp
 
 # 2. Enable API despite config saying disabled
-uv run rpax api --enable --port 9000
+uv run rpa-cli api --enable --port 9000
 
 # 3. Standard workflow with config
 # (config.json has "api": {"enabled": true})
-uv run rpax api
+uv run rpa-cli api
 ```
 
 #### API Endpoints
@@ -501,7 +501,7 @@ dynamic = ["version"]
 path = "src/rpax/__init__.py"
 ```
 
-This ensures `rpax --version` always matches the package version.
+This ensures `rpa-cli --version` always matches the package version.
 
 #### Package Contents
 
@@ -550,8 +550,8 @@ uv run python -m twine check dist/*
 python -m venv test-env
 test-env\Scripts\activate
 pip install dist/rpax-*.whl
-rpax --version
-rpax --help
+rpa-cli --version
+rpa-cli --help
 deactivate
 ```
 
@@ -608,16 +608,16 @@ rpax provides a safe `clear` command for managing lake data during development. 
 
 ```powershell
 # Show what would be cleared (dry-run mode - default)
-uv run rpax clear artifacts
+uv run rpa-cli clear artifacts
 
 # Actually clear artifacts (safest option)
-uv run rpax clear artifacts --confirm
+uv run rpa-cli clear artifacts --confirm
 
 # Clear specific project data
-uv run rpax clear project --project f4aa3834 --confirm
+uv run rpa-cli clear project --project f4aa3834 --confirm
 
 # Clear entire lake (DESTRUCTIVE - use with caution)
-uv run rpax clear lake --confirm
+uv run rpa-cli clear lake --confirm
 ```
 
 #### Clear Scopes
@@ -648,17 +648,17 @@ uv run rpax clear lake --confirm
 
 ```powershell
 # Preview what artifacts would be cleared
-uv run rpax clear artifacts --path .rpax-lake
+uv run rpa-cli clear artifacts --path .rpax-lake
 
 # Clear artifacts for development cleanup
-uv run rpax clear artifacts --confirm
+uv run rpa-cli clear artifacts --confirm
 
 # Remove a specific project (get slug from rpax list first)
-uv run rpax list workflows  # Shows available projects
-uv run rpax clear project --project my-proj-1234 --confirm
+uv run rpa-cli list workflows  # Shows available projects
+uv run rpa-cli clear project --project my-proj-1234 --confirm
 
 # Complete lake reset (development only)
-uv run rpax clear lake --confirm --force  # Skip interactive prompts
+uv run rpa-cli clear lake --confirm --force  # Skip interactive prompts
 ```
 
 #### Best Practices

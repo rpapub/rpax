@@ -183,7 +183,7 @@ packages = ["src/rpax"]
 ```python
 """rpax - Code-first CLI tool for UiPath project analysis.
 
-rpax parses UiPath Process and Library projects into JSON call graphs, arguments, 
+rpa-cli parses UiPath Process and Library projects into JSON call graphs, arguments, 
 and diagrams for documentation, validation, and CI impact analysis.
 """
 
