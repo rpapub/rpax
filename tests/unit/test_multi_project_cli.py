@@ -128,10 +128,10 @@ class TestMultiProjectCLI:
         assert result.exit_code == 1
         assert "No bays.json found" in result.stdout
     
-    @patch('rpax.cli._resolve_project_path')
-    @patch('rpax.cli.ProjectParser.parse_project_from_dir')
-    @patch('rpax.cli.create_workflow_discovery')
-    @patch('rpax.cli.ArtifactGenerator')
+    @patch('rpax.cli.uipath.commands._resolve_project_path')
+    @patch('rpax.cli.uipath.commands.ProjectParser.parse_project_from_dir')
+    @patch('rpax.cli.uipath.commands.create_workflow_discovery')
+    @patch('rpax.cli.uipath.commands.ArtifactGenerator')
     def test_parse_command_multiple_projects(
         self, 
         mock_artifact_gen,
@@ -185,7 +185,7 @@ class TestMultiProjectCLI:
         ]
         mock_generator_instance.output_dir = tmp_path / "output"
         
-        with patch('rpax.cli.load_config') as mock_load_config:
+        with patch('rpax.cli.uipath.commands.load_config') as mock_load_config:
             mock_config = Mock()
             mock_config.output.dir = str(tmp_path)
             mock_config.project.name = None

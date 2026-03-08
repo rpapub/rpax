@@ -1,9 +1,8 @@
-"""CLI interface for rpax using Typer framework."""
+"""UiPath CLI commands for rpa-cli."""
 
 import csv
 import fnmatch
 import json as jsonlib
-import signal
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -15,6 +14,7 @@ from rich.table import Table
 
 from rpax import __description__, __version__
 from rpax.artifacts import ArtifactGenerator
+from rpax.cli.decorators import api_expose
 from rpax.config import load_config
 from rpax.explain import ExplanationFormatter, WorkflowAnalyzer
 from rpax.graph import GraphGenerator, MermaidRenderer
@@ -31,118 +31,9 @@ from rpax.utils.cross_project_access import CrossProjectAccessor
 from rpax.validation import ValidationFramework
 from rpax.versioning import BumpType
 
-
-def api_expose(
-    path: str | None = None,
-    methods: list[str] | None = None,
-    summary: str | None = None,
-    tags: list[str] | None = None,
-    enabled: bool = True,
-    mcp_resource_type: str | None = None,
-):
-    """Blueprint decorator for Layer 3/4 generation.
-
-    Stores metadata for OpenAPI/MCP generation - never called at runtime.
-
-    Args:
-        path: API endpoint path (default: auto-generate from command name)
-        methods: HTTP methods (default: ["GET"])
-        summary: OpenAPI summary (default: use docstring)
-        tags: OpenAPI tags for grouping
-        enabled: Whether to expose this command (default: True)
-        mcp_resource_type: Optional hint for MCP resource generation
-    """
-
-    def decorator(func):
-        # Auto-generate path from function name if not provided
-        default_path = f"/{func.__name__.replace('_command', '').replace('_', '-')}"
-
-        func._rpax_api = {
-            "enabled": enabled,
-            "path": path or default_path,
-            "methods": methods or ["GET"],
-            "summary": summary
-            or (
-                func.__doc__.split("\n")[0]
-                if func.__doc__
-                else f"{func.__name__} operation"
-            ),
-            "tags": tags or [],
-            "mcp_hints": (
-                {"resource_type": mcp_resource_type} if mcp_resource_type else {}
-            ),
-        }
-        return func
-
-    return decorator
-
-
-app = typer.Typer(
-    name="rpa-cli", help=__description__, add_completion=False, rich_markup_mode="rich"
-)
+from rpax.cli.uipath._app import beta, command, experimental, plumbing, uipath_app
 
 console = Console()
-
-# Global flag to track graceful shutdown
-_shutdown_requested = False
-
-
-def _signal_handler(signum: int, frame) -> None:
-    """Handle interrupt signals gracefully."""
-    global _shutdown_requested
-
-    signal_names = {signal.SIGINT: "SIGINT (Ctrl+C)", signal.SIGTERM: "SIGTERM"}
-
-    signal_name = signal_names.get(signum, f"signal {signum}")
-
-    if not _shutdown_requested:
-        _shutdown_requested = True
-        console.print(
-            f"\n[yellow]⚠ Received {signal_name} - shutting down gracefully...[/yellow]"
-        )
-        console.print("[dim]Press Ctrl+C again to force quit[/dim]")
-
-        # Exit gracefully
-        raise typer.Exit(1)
-    else:
-        # Second interrupt - force quit
-        console.print("[red]⚠ Force quit requested[/red]")
-        sys.exit(130)  # Standard exit code for Ctrl+C
-
-
-def _setup_signal_handlers():
-    """Setup signal handlers for graceful shutdown."""
-    try:
-        signal.signal(signal.SIGINT, _signal_handler)
-        if hasattr(signal, "SIGTERM"):  # SIGTERM not available on Windows
-            signal.signal(signal.SIGTERM, _signal_handler)
-    except (OSError, ValueError):
-        # Signal handling might not be available in all environments
-        pass
-
-
-def version_callback(value: bool) -> None:
-    """Show version information and exit."""
-    if value:
-        console.print(f"rpa-cli version {__version__}")
-        raise typer.Exit()
-
-
-@app.callback()
-def main(
-    version: Annotated[
-        bool,
-        typer.Option(
-            "--version", "-v", callback=version_callback, help="Show version and exit"
-        ),
-    ] = False,
-) -> None:
-    """rpa-cli - Code-first CLI tool for UiPath project analysis."""
-    # Setup signal handlers for graceful shutdown
-    _setup_signal_handlers()
-    from rpax.utils.motd import show_motd  # local import to keep startup lean
-
-    show_motd(console)
 
 
 def _resolve_multiple_bay_artifacts_paths(
@@ -352,7 +243,7 @@ def _resolve_project_path(path: Path) -> Path:
 
 
 @api_expose(enabled=False)  # CLI-only: writes files, parses projects
-@app.command()
+@experimental()
 def parse(
     path: Annotated[
         Path,
@@ -745,7 +636,7 @@ def _output_workflows_csv(workflows: list[Any], verbose: bool = False) -> None:
     summary="List workflows, roots, orphans, or activities in a project",
     mcp_resource_type="workflow_list",
 )
-@app.command("list")
+@uipath_app.command("list")
 def list_items(
     item_type: Annotated[
         str,
@@ -1450,7 +1341,7 @@ def _extract_all_activities(
     summary="Run validation rules on parser artifacts",
     mcp_resource_type="validation_report",
 )
-@app.command()
+@uipath_app.command()
 def validate(
     path: Annotated[
         Path, typer.Argument(help="Path to artifacts directory or project directory")
@@ -1635,7 +1526,7 @@ def validate(
     summary="Generate workflow call graphs and diagrams",
     mcp_resource_type="graph_diagram",
 )
-@app.command()
+@uipath_app.command()
 def graph(
     graph_type: Annotated[
         str, typer.Argument(help="Type of graph: calls, paths, project")
@@ -1837,7 +1728,7 @@ def _print_entry_points(console: Console, artifacts_dir: Path) -> None:
     summary="Show detailed information about a specific workflow",
     mcp_resource_type="workflow_detail",
 )
-@app.command()
+@experimental()
 def explain(
     workflow: Annotated[
         Optional[str],
@@ -1969,7 +1860,7 @@ def explain(
     summary="Generate JSON schemas or validate artifacts against schemas",
     mcp_resource_type="schema_definition",
 )
-@app.command()
+@uipath_app.command()
 def schema(
     action: Annotated[
         str, typer.Argument(help="Action to perform: generate, validate")
@@ -2099,7 +1990,7 @@ def schema(
 
 
 @api_expose(enabled=False)  # CLI-only: help documentation
-@app.command()
+@uipath_app.command()
 def help() -> None:
     """Show detailed help information."""
     console.print(f"[bold]{__description__}[/bold]")
@@ -2139,7 +2030,7 @@ def help() -> None:
     summary="Access workflow activity trees, control flow, and resource references",
     mcp_resource_type="activity_data",
 )
-@app.command()
+@uipath_app.command()
 def activities(
     action: Annotated[
         str,
@@ -2610,7 +2501,7 @@ def _display_all_metrics_table(
     summary="List all records in the rpax archive",
     mcp_resource_type="record_list",
 )
-@app.command("list-bays")
+@uipath_app.command("list-bays")
 def list_bays(
     path: Annotated[Path, typer.Argument(help="Path to rpax archive directory")] = Path(
         ".rpax-warehouse"
@@ -2724,7 +2615,7 @@ def list_bays(
     tags=["records"],
     summary="Compact bay portrait — project snapshot in half a terminal screen",
 )
-@app.command()
+@uipath_app.command()
 def view(
     path: Annotated[
         Path,
@@ -2788,7 +2679,7 @@ def view(
 
 
 @api_expose(enabled=False)  # CLI-only: destructive operations
-@app.command()
+@uipath_app.command()
 def clear(
     scope: Annotated[
         str, typer.Argument(help="Clear scope: warehouse, bay, artifacts")
@@ -3006,7 +2897,7 @@ def clear(
     summary="Show pseudocode representation of workflow activities",
     mcp_resource_type="pseudocode_text",
 )
-@app.command()
+@uipath_app.command()
 def pseudocode(
     workflow: Annotated[
         str,
@@ -3496,7 +3387,7 @@ def _review_output_table(result: Any) -> None:
         console.print("\n[green]No issues found.[/green]")
 
 
-@app.command()
+@uipath_app.command()
 def review(
     path: Annotated[
         Path,
@@ -3586,7 +3477,7 @@ def review(
     summary="Bump semantic version in project.json",
     enabled=False,  # CLI-only — mutates source file, not idempotent/safe for HTTP
 )
-@app.command("bump")
+@command("bump")
 def bump_cmd(
     bump_type: Annotated[
         BumpType,
@@ -3655,7 +3546,7 @@ def bump_cmd(
 
 
 @api_expose(enabled=False)  # CLI-only: dev/admin server management
-@app.command()
+@uipath_app.command()
 def api(
     config: Annotated[
         Path | None,
@@ -3751,7 +3642,7 @@ def api(
     summary="Check API server health status",
     mcp_resource_type="health_check",
 )
-@app.command()
+@uipath_app.command()
 def health() -> None:
     """Check API server health status.
 
@@ -3797,7 +3688,7 @@ def health() -> None:
         raise typer.Exit(1)
 
 
-@app.command("object-repository")
+@uipath_app.command("object-repository")
 def object_repository(
     action: Annotated[
         str,
@@ -4165,7 +4056,7 @@ def _show_object_repository_mcp_resources(
         raise typer.Exit(1)
 
 
-@app.command()
+@uipath_app.command()
 def projects(
     query: Annotated[
         str, typer.Argument(help="Project name or partial name to search for")
@@ -4365,7 +4256,7 @@ def _format_size(size_bytes: int) -> str:
     return f"{s} {size_names[i]}"
 
 
-@app.command(hidden=True)
+@uipath_app.command(hidden=True)
 def bench(
     path: Annotated[
         Path,
@@ -4472,5 +4363,3 @@ def bench(
         raise typer.Exit(1)
 
 
-if __name__ == "__main__":
-    app()
