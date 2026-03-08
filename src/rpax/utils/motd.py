@@ -17,7 +17,7 @@ from rich.console import Console
 from rich.panel import Panel
 
 MOTD_URL = (
-    "https://raw.githubusercontent.com/rpapub/rpax/main/motd.json"
+    "https://raw.githubusercontent.com/rpapub/rpax/motd/motd.json"
 )
 _CACHE_TTL_SECONDS = 86400  # 24 hours
 
