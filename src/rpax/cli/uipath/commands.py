@@ -1762,6 +1762,10 @@ def explain(
         int,
         typer.Option("--depth", "-d", help="Activity tree depth to show in pseudocode (default 2)"),
     ] = 2,
+    recursive: Annotated[
+        bool,
+        typer.Option("--recursive/--no-recursive", help="Expand InvokeWorkflowFile activities inline"),
+    ] = True,
 ) -> None:
     """Show detailed information about a specific workflow."""
     from rpax.utils.warehouse import (
@@ -1821,7 +1825,7 @@ def explain(
             if available:
                 # Show first 10 matches or similar workflows
                 suggestions = []
-                workflow_lower = workflow.lower()
+                workflow_lower = workflow.replace("\\", "/").lower()
 
                 # Find partial matches
                 for avail in available:
@@ -1842,7 +1846,9 @@ def explain(
             raise typer.Exit(1)
 
         # Load pseudocode (always) and format explanation
-        pseudocode_text = _load_pseudocode_for_workflow(artifacts_dir, explanation.relative_path, depth=depth)
+        pseudocode_text = _load_pseudocode_for_workflow(
+            artifacts_dir, explanation.relative_path, depth=depth, recursive=recursive
+        )
         formatter.format_explanation(explanation, pseudocode_text=pseudocode_text)
 
     except FileNotFoundError as e:
@@ -3100,13 +3106,25 @@ def pseudocode(
 
 
 def _load_pseudocode_for_workflow(
-    artifacts_dir: Path, relative_path: str, depth: int = 2
+    artifacts_dir: Path,
+    relative_path: str,
+    depth: int = 2,
+    recursive: bool = False,
+    max_expansion_depth: int = 3,
+    _visited: frozenset[str] | None = None,
 ) -> str | None:
     """Load pseudocode for a workflow from pre-rendered entries in the artifact JSON.
 
     Walks the entries tree collecting formattedLine values up to `depth` levels.
     depth=0 means show all levels.
+
+    When recursive=True, InvokeWorkflowFile entries with a targetRelativePath are
+    expanded inline. max_expansion_depth limits how many InvokeWorkflowFile levels
+    are followed. _visited tracks already-expanded paths to prevent infinite recursion.
     """
+    if _visited is None:
+        _visited = frozenset()
+
     try:
         pseudocode_dir = artifacts_dir / "pseudocode"
         if not pseudocode_dir.exists():
@@ -3124,14 +3142,35 @@ def _load_pseudocode_for_workflow(
         def walk(nodes: list[dict]) -> None:
             for node in nodes:
                 node_depth = node.get("depth", 1)
-                if depth > 0 and node_depth > depth:
+                target = node.get("targetRelativePath")
+                # InvokeWorkflowFile entries are always included (they are expansion
+                # triggers) even when they would normally be filtered by depth.
+                is_invoke = bool(target)
+                if depth > 0 and node_depth > depth and not is_invoke:
                     continue
                 line = node.get("formattedLine")
                 if line:
-                    target = node.get("targetRelativePath")
                     if target:
                         line = f"{line}  → {target}"
                     lines.append(line)
+                    if recursive and is_invoke and max_expansion_depth > 0:
+                        if target in _visited:
+                            # Derive indentation from the formatted line prefix spaces
+                            indent = " " * (len(line) - len(line.lstrip()))
+                            lines.append(f"{indent}  [RECURSIVE: {target}]")
+                        else:
+                            expanded = _load_pseudocode_for_workflow(
+                                artifacts_dir,
+                                target,
+                                depth=depth,
+                                recursive=recursive,
+                                max_expansion_depth=max_expansion_depth - 1,
+                                _visited=_visited | {relative_path},
+                            )
+                            if expanded:
+                                indent = " " * (len(line) - len(line.lstrip())) + "    "
+                                for expanded_line in expanded.splitlines():
+                                    lines.append(f"{indent}{expanded_line}")
                 walk(node.get("children", []))
 
         walk(artifact_data.get("entries", []))
