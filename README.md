@@ -14,6 +14,7 @@ Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
 uvx --from rpa-cli \
     --index-url https://test.pypi.org/simple/ \
     --extra-index-url https://pypi.org/simple/ \
+    --index-strategy unsafe-best-match \
     rpa-cli --help
 ```
 
@@ -48,6 +49,7 @@ Run `bump` directly from the project directory without a permanent install:
 uvx --from rpa-cli \
     --index-url https://test.pypi.org/simple/ \
     --extra-index-url https://pypi.org/simple/ \
+    --index-strategy unsafe-best-match \
     rpa-cli bump patch
 ```
 

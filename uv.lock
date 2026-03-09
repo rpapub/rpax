@@ -255,28 +255,16 @@ toml = [
 
 [[package]]
 name = "cpmf-uips-or"
-source = { editable = "../cpmf-uips-or" }
+version = "0.1.2"
+source = { registry = "https://test.pypi.org/simple/" }
 dependencies = [
     { name = "jinja2" },
     { name = "pillow" },
     { name = "typer" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "jinja2", specifier = ">=3.0.0" },
-    { name = "pillow", specifier = ">=10.0.0" },
-    { name = "typer", specifier = ">=0.9.0" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "black", specifier = ">=24.0.0" },
-    { name = "mypy", specifier = ">=1.5.0" },
-    { name = "pytest", specifier = ">=8.0.0" },
-    { name = "pytest-cov", specifier = ">=6.0.0" },
-    { name = "ruff", specifier = ">=0.1.0" },
-    { name = "twine", specifier = ">=6.0.0" },
+sdist = { url = "https://test-files.pythonhosted.org/packages/a7/60/be19f5f4e644359c1e2fff83e56dd13f03bdc8484156b9a0682a08b5fcfc/cpmf_uips_or-0.1.2.tar.gz", hash = "sha256:e6ec6aa9fbe0c5a4a455524b632b52545c567e5c9b1772752364d405f451ff1f", size = 57079, upload-time = "2026-03-09T09:49:44.383Z" }
+wheels = [
+    { url = "https://test-files.pythonhosted.org/packages/3e/7a/948f8dae2d7438f10f39ea8ffcd9fe36a85b05b2fbda47f4b7a17f024679/cpmf_uips_or-0.1.2-py3-none-any.whl", hash = "sha256:5bf89b4e58befdf8056534572bb2531ea56c3b5f8ce1b25566a1dde4521d21df", size = 41773, upload-time = "2026-03-09T09:49:42.642Z" },
 ]
 
 [[package]]
@@ -1359,8 +1347,8 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "cpmf-uips-or", editable = "../cpmf-uips-or" },
-    { name = "cpmf-uips-xaml", specifier = "~=0.1.0", index = "https://test.pypi.org/simple/" },
+    { name = "cpmf-uips-or", specifier = ">=0.1.2", index = "https://test.pypi.org/simple/" },
+    { name = "cpmf-uips-xaml", specifier = ">=0.1.0,<0.2", index = "https://test.pypi.org/simple/" },
     { name = "defusedxml", specifier = ">=0.7.1,<1.0.0" },
     { name = "fastapi", marker = "extra == 'api'", specifier = ">=0.104.0,<1.0.0" },
     { name = "jsonschema", specifier = ">=4.17.0,<5.0.0" },

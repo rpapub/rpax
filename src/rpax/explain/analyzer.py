@@ -163,6 +163,7 @@ class WorkflowAnalyzer:
 
     def _find_workflow(self, artifacts: ArtifactSet, identifier: str) -> dict | None:
         """Find workflow by various identifiers."""
+        identifier = identifier.replace("\\", "/")
         workflows = artifacts.workflows_index.get("workflows", [])
 
         # First try exact ID match

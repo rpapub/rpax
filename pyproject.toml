@@ -9,7 +9,7 @@ description = "Proof-of-concept CLI tool for parsing UiPath projects into struct
 readme = "README.md"
 license = {file = "LICENSE"}
 authors = [
-    {name = "rpapub", email = "contact@rpapub.dev"}
+    {name = "Christian Prior-Mamulyan", email = "cprior@gmail.com"}
 ]
 keywords = ["uipath", "rpa", "automation", "cli", "parsing", "documentation", "ci", "analysis"]
 classifiers = [
@@ -35,7 +35,7 @@ dependencies = [
     "psutil>=5.9.0,<6.0.0",
     "pyyaml>=6.0.2",
     "python-slugify>=8.0.4",
-    "cpmf-uips-xaml~=0.1.0",
+    "cpmf-uips-xaml>=0.1.0,<0.2",
     "cpmf-uips-or>=0.1.2",
 ]
 
@@ -223,7 +223,7 @@ dev = [
 
 [tool.uv.sources]
 cpmf-uips-xaml = { index = "test-pypi" }
-cpmf-uips-or = { path = "../cpmf-uips-or", editable = true }
+cpmf-uips-or = { index = "test-pypi" }
 
 [[tool.uv.index]]
 name = "test-pypi"
