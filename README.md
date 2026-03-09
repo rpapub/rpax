@@ -23,52 +23,32 @@ uvx --from rpa-cli \
 # Parse a project — artifacts land in .rpax-warehouse/ relative to CWD
 rpa-cli parse /path/to/uipath/project
 
-# Validate the parsed output (referential integrity, cycles, etc.)
-rpa-cli validate
+# Inspect a specific workflow
+rpa-cli explain MyWorkflow.xaml
 
-# Run code quality checks (naming, size, annotations, error handling)
-rpa-cli review
-
-# Show call graph as Mermaid diagram
-rpa-cli graph calls
+# Bump the project version
+rpa-cli bump patch
 ```
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `parse [PATH]` | Parse UiPath project(s); generate artifacts into `.rpax-warehouse/` |
-| `validate` | Check for missing references, cycles, orphans |
-| `review` | Code quality checks: naming, size, annotations, error handling |
-| `list workflows` | Enumerate discovered XAML workflows |
-| `list orphans` | Workflows never called by anything |
-| `list roots` | Entry-point workflows |
-| `graph calls` | Mermaid or Graphviz call graph |
-| `explain <workflow>` | Arguments, callees, callers for one workflow |
-| `pseudocode <workflow>` | Activity tree as readable pseudocode |
-| `list-bays` | List all projects (bays) in the warehouse |
-| `activities` | Inspect activity trees and resource references |
-| `view` | Compact portrait summary of a bay |
+| Command | Status | Description |
+|---------|--------|-------------|
+| `parse [PATH]` | experimental | Parse UiPath project(s); generate artifacts into `.rpax-warehouse/` |
+| `explain <workflow>` | experimental | Arguments, callees, callers for one workflow |
+| `bump {major\|minor\|patch}` | stable | Bump `projectVersion` in `project.json` |
 
 Run `rpa-cli <command> --help` for full options.
 
-## `rpa-cli review` — code quality checks
+### Bump without installing
 
-Surfaces static issues from parsed artifacts without re-running Studio:
-
-| Rule | Checks |
-|------|--------|
-| `argument_naming` | `in_` / `out_` / `io_` prefix convention violations |
-| `workflow_size` | Workflows exceeding activity count threshold (default: 50) |
-| `annotation_coverage` | Non-trivial workflows with no activity annotations |
-| `error_handling` | Non-trivial workflows with no TryCatch blocks |
-| `orphan_workflows` | Workflows unreachable from any declared entry point |
+Run `bump` directly from the project directory without a permanent install:
 
 ```bash
-rpa-cli review                        # table output, defaults
-rpa-cli review --format summary       # rule → issue count overview
-rpa-cli review --max-activities 30    # stricter size threshold
-rpa-cli review --bay my-project       # target a specific bay in a multi-bay warehouse
+uvx --from rpa-cli \
+    --index-url https://test.pypi.org/simple/ \
+    --extra-index-url https://pypi.org/simple/ \
+    rpa-cli bump patch
 ```
 
 ## Output artifacts
