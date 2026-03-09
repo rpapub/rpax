@@ -7,6 +7,7 @@ silently swallowed — MOTD must never crash the CLI.
 
 import json
 import os
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -52,16 +53,27 @@ def _is_cache_fresh(path: Path) -> bool:
 
 
 def _fetch_motd(url: str = MOTD_URL, timeout: int = 3) -> list[dict] | None:
-    """GET *url* and return parsed JSON list, or None on any error."""
-    try:
-        with urllib.request.urlopen(url, timeout=timeout) as resp:  # noqa: S310
-            raw = resp.read().decode("utf-8")
-        data = json.loads(raw)
-        if not isinstance(data, list):
-            return None
-        return data
-    except (urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError, OSError):
-        return None
+    """GET *url* and return parsed JSON list, or None on any error.
+
+    Runs inside a daemon thread so DNS resolution (which ignores socket timeout)
+    cannot block the CLI indefinitely.
+    """
+    result: list[list[dict] | None] = [None]
+
+    def _do_fetch() -> None:
+        try:
+            with urllib.request.urlopen(url, timeout=timeout) as resp:  # noqa: S310
+                raw = resp.read().decode("utf-8")
+            data = json.loads(raw)
+            if isinstance(data, list):
+                result[0] = data
+        except Exception:  # noqa: BLE001
+            pass
+
+    thread = threading.Thread(target=_do_fetch, daemon=True)
+    thread.start()
+    thread.join(timeout=timeout)
+    return result[0]
 
 
 # ---------------------------------------------------------------------------
