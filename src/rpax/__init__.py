@@ -4,7 +4,7 @@ rpax parses UiPath Process and Library projects into JSON call graphs, arguments
 and diagrams for documentation, validation, and CI impact analysis.
 """
 
-__version__ = "0.0.9"
+__version__ = "0.0.10"
 __author__ = "Christian Prior-Mamulyan"
 __email__ = "cprior@gmail.com"
 __description__ = "Code-first CLI tool for UiPath project analysis"

@@ -13,23 +13,17 @@ from rich.console import Console
 from rich.table import Table
 
 from rpax import __description__, __version__
-from rpax.artifacts import ArtifactGenerator
 from rpax.cli.decorators import api_expose
 from rpax.config import load_config
-from rpax.explain import ExplanationFormatter, WorkflowAnalyzer
-from rpax.graph import GraphGenerator, MermaidRenderer
+from rpax.parser.project import ProjectParser
+from rpax.versioning import BumpType
 
 # V0 schema imports - disabled due to incomplete implementation
 # from rpax.output.base import ParsedProjectData
 # from rpax.output.v0 import V0LakeGenerator
-from rpax.output.warehouse_index import WarehouseIndexGenerator
-from rpax.parser.project import ProjectParser
-from rpax.parser.workflow_discovery import create_workflow_discovery
-from rpax.parser.xaml import XamlDiscovery
-from rpax.schemas import ArtifactValidator, SchemaGenerator
-from rpax.utils.cross_project_access import CrossProjectAccessor
-from rpax.validation import ValidationFramework
-from rpax.versioning import BumpType
+
+# Heavy imports that chain to cpmf_uips_xaml / cpmf_uips_or are deferred to
+# inside each command function so that `rpa-cli --help` starts up fast.
 
 from rpax.cli.uipath._app import beta, command, experimental, plumbing, uipath_app
 
@@ -281,6 +275,9 @@ def parse(
     All projects are parsed into the same multi-project lake.
     """
     try:
+        from rpax.artifacts import ArtifactGenerator
+        from rpax.output.warehouse_index import WarehouseIndexGenerator
+        from rpax.parser.workflow_discovery import create_workflow_discovery
         from rpax.utils.logging_setup import configure_logging
 
         # Collect all project paths to parse
@@ -829,6 +826,7 @@ def list_items(
             else:
                 # Path is project directory, scan for workflows
                 rpax_config = load_config(project_path / ".rpax.json")
+                from rpax.parser.xaml import XamlDiscovery
                 discovery = XamlDiscovery(
                     project_path, exclude_patterns=rpax_config.scan.exclude
                 )
@@ -1425,6 +1423,7 @@ def validate(
         rpax_config = load_config(config or path / ".rpax.json")
 
         # Create validation framework
+        from rpax.validation import ValidationFramework
         framework = ValidationFramework(rpax_config)
         framework.create_default_rules()
 
@@ -1617,6 +1616,7 @@ def graph(
         rpax_config = load_config(config or path / ".rpax.json")
 
         # Create graph generator
+        from rpax.graph import GraphGenerator, MermaidRenderer
         generator = GraphGenerator(rpax_config)
         generator.add_renderer(MermaidRenderer())
 
@@ -1808,6 +1808,7 @@ def explain(
         rpax_config = load_config(config or path / ".rpax.json")
 
         # Create analyzer and formatter
+        from rpax.explain import ExplanationFormatter, WorkflowAnalyzer
         analyzer = WorkflowAnalyzer(rpax_config)
         formatter = ExplanationFormatter(console)
 
@@ -1904,6 +1905,7 @@ def schema(
             # Generate JSON schemas
             console.print("[dim]Generating JSON schemas from Pydantic models...[/dim]")
 
+            from rpax.schemas import ArtifactValidator, SchemaGenerator
             generator = SchemaGenerator()
             schemas = generator.generate_all_schemas()
 
@@ -1936,6 +1938,7 @@ def schema(
             console.print("[dim]Loading schemas and validating artifacts...[/dim]")
 
             # First generate schemas
+            from rpax.schemas import ArtifactValidator, SchemaGenerator
             generator = SchemaGenerator()
             schemas = generator.generate_all_schemas()
 
@@ -4129,6 +4132,7 @@ def projects(
     console.print(f"[blue]Cross-Project Access[/blue] - {path}")
 
     try:
+        from rpax.utils.cross_project_access import CrossProjectAccessor
         accessor = CrossProjectAccessor(path)
 
         if action == "resolve":
@@ -4328,6 +4332,8 @@ def bench(
     import json as _json
     import tempfile
 
+    from rpax.artifacts import ArtifactGenerator
+    from rpax.parser.workflow_discovery import create_workflow_discovery
     from rpax.utils.diagnostics import PhaseTimer, format_phase_table, phases_to_dict
     from rpax.utils.logging_setup import configure_logging
 
